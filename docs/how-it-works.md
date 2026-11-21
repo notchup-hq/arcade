@@ -45,9 +45,13 @@
 
 1. `games/<name>/` with `rules.js` (pure, with tests in `tests/<name>.test.js`), `main.js`, `index.html` (copy the Fuse Box page's head, bar and dialogs) and `demo.js` (`{ step(dt), draw(ctx, w, h, colours) }`).
 2. Its cabinet in `index.html` with `data-game="<name>"` (copy a ready one), its demo in `DEMOS` in `js/hall.js`, `data-game="<name>"` on its page's `<body>`, and its line next to Fuse Box's `view-transition-name` rule in `styles.css` (`tests/site.test.js` says what is missing).
-3. Its page in `sitemap.xml` and in `PAGES` in `scripts/check-layout.mjs`.
+3. The `<meta name="build" content="dev">` tag, copied from another page, and its page in `sitemap.xml` and in `PAGES` in `scripts/check-layout.mjs`.
 4. Keep the preload lists whole (`tests/preload.test.js` says what is missing) and the budget green.
 5. Pick a name of our own and check it is not another game's: add the names you checked against to `tests/originality.test.js`.
+
+## Which version is live
+
+Every page has `<meta name="build" content="dev">`. On a Cloudflare deploy, the build command in `wrangler.jsonc` runs `scripts/stamp-build.mjs`, which turns it into the short commit and the date, for example `abc1234 2026-11-21` (view the page source). The commit comes from `WORKERS_CI_COMMIT_SHA`; without it the pages keep `dev`. A new game page needs the same tag (`tests/stamp.test.js`).
 
 ## Checks
 
