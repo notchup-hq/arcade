@@ -47,7 +47,7 @@
 2. Its cabinet in `index.html` with `data-game="<name>"` (copy a ready one), its demo in `DEMOS` in `js/hall.js`, `data-game="<name>"` on its page's `<body>`, and its line next to Fuse Box's `view-transition-name` rule in `styles.css` (`tests/site.test.js` says what is missing).
 3. Its page in `sitemap.xml` and in `PAGES` in `scripts/check-layout.mjs`.
 4. Keep the preload lists whole (`tests/preload.test.js` says what is missing) and the budget green.
-5. Pick an original name and check it is not another game's: add the names you checked against to `tests/originality.test.js`.
+5. Pick a name of our own and check it is not another game's: add the names you checked against to `tests/originality.test.js`.
 
 ## Checks
 

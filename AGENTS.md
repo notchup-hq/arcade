@@ -1,10 +1,10 @@
 # arcade
 
-Notchup Arcade: a neon hall of tiny original browser games, at https://arcade.notchup.fi. MIT licensed, made by Notchup. How the hall and each game work: [docs/how-it-works.md](docs/how-it-works.md). Keep that file in step with any change in behaviour.
+Notchup Arcade: a neon hall of tiny classic arcade games, at https://arcade.notchup.fi. MIT licensed, made by Notchup. How the hall and each game work: [docs/how-it-works.md](docs/how-it-works.md). Keep that file in step with any change in behaviour.
 
 ## Rules
 
-- **Original games only.** Genres and mechanics are free to use; other games' names, characters, art, sounds, levels and look are not. Never name another game anywhere (code, docs, commits, PRs); describe the genre in plain words. `tests/originality.test.js` fails on known names.
+- **Our own games, not copies.** The games are our own takes on classic genres, and the copy never calls them "original" or "new". Genres and mechanics are free to use; other games' names, characters, art, sounds, levels and look are not. Never name another game anywhere (code, docs, commits, PRs); describe the genre in plain words. `tests/originality.test.js` fails on known names.
 - **Stack:** plain HTML, one stylesheet (`styles.css`), small ES modules. No build step, no npm dependencies, no framework, no third-party scripts, fonts, images or trackers. Sounds are made in code.
 - **Shared first:** anything two games or the hall need lives once in `js/` (loop, attract mode, logo, sound, scores, memory, initials, settings). A game folder holds only its rules (`rules.js`, pure and tested), its page (`main.js`) and its attract-mode demo (`demo.js`).
 - **Privacy:** no cookies, no requests, no forms that send. `localStorage` only in `js/memory.js` (sound setting, last initials, high scores of this browser); everything works when storage is blocked. `tests/privacy.test.js` enforces this.

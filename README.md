@@ -1,6 +1,6 @@
 # arcade
 
-Neon arcade of tiny original browser games by Notchup. Plain HTML, CSS and JS: no build, no cookies, no tracking.
+Neon arcade of tiny classic arcade games by Notchup. Plain HTML, CSS and JS: no build, no cookies, no tracking.
 
 **Play:** https://arcade.notchup.fi
 

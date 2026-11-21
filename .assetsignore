@@ -1,0 +1,15 @@
+.git
+.github
+.claude
+.local
+tests
+docs
+scripts
+dev
+dev.ps1
+wrangler.jsonc
+AGENTS.md
+CLAUDE.md
+CHANGELOG.md
+README.md
+LICENSE

@@ -11,6 +11,7 @@ All notable changes to this project are listed here, newest first. The format fo
 
 ### Changed
 
+- The hall no longer calls the games "original": the tagline, meta descriptions and README say "tiny classic arcade games".
 - The hall is calmer: the logo is a still mark that links to the Notchup home page and glows softly on hover. Cabinets no longer lift on hover; they light up gold.
 
 ## 0.1.0 – 2026-11-21
