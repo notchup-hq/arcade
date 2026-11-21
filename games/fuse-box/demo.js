@@ -3,15 +3,14 @@
 // notching up when the panel is fixed, then this browser's hall of fame, and starts over. The demo
 // cheats (it knows where the blown fuses are), so it never loses.
 
-import { drawLogo, NOTCH_STEP } from '../../js/logo.js';
 import { formatTime } from '../../js/scores.js';
+import { FONT, drawNotchUp, drawScores } from '../../js/screens.js';
 import { LEVELS, TAGGED, TESTED, UNTESTED, around, newPanel, seeded, testFuse, toggleTag } from './rules.js';
 
 const MOVE_MS = 1100;
 const FIXED_MS = 4000;
 const SCORES_MS = 5000;
 const NOTCH_MS = 600;
-const FONT = 'ui-monospace, Menlo, Consolas, monospace';
 
 /** The colour of a count, from calm cyan for 1 to hot red for 5 and up. */
 export const countColour = (c, k) => [c.ink, c.cyan, c.green, c.gold, c.magenta, c.red][Math.min(k, 5)];
@@ -88,9 +87,9 @@ export function createDemo({ scores, seed = 7 }) {
     draw(ctx, w, h, c) {
       ctx.fillStyle = c.bg;
       ctx.fillRect(0, 0, w, h);
-      if (phase === 'scores') return drawScores(ctx, w, h, c, scores());
+      if (phase === 'scores') return drawScores(ctx, w, h, c, scores(), formatTime);
       drawPanel(ctx, w, h, c, p, cursor);
-      if (phase === 'fixed') drawFixed(ctx, w, h, c, notches);
+      if (phase === 'fixed') drawNotchUp(ctx, w, h, c, notches, 'PANEL FIXED');
     },
   };
 }
@@ -134,41 +133,4 @@ function drawPanel(ctx, w, h, c, p, cursor) {
   ctx.lineWidth = Math.max(1.5, cell * 0.1);
   ctx.strokeRect(x0 + (cursor % p.cols) * cell + 1, y0 + Math.floor(cursor / p.cols) * cell + 1, cell - 2, cell - 2);
   ctx.restore();
-}
-
-function drawFixed(ctx, w, h, c, notches) {
-  ctx.fillStyle = 'rgb(5 10 20 / 0.8)';
-  ctx.fillRect(0, 0, w, h);
-  const size = Math.min(w, h) * 0.5;
-  drawLogo(ctx, { x: w / 2, y: h * 0.42, size, turn: notches * NOTCH_STEP, lift: Math.min(notches / 4, 1) });
-  ctx.fillStyle = c.gold;
-  ctx.font = `bold ${Math.round(Math.min(w, h) * 0.09)}px ${FONT}`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('PANEL FIXED', w / 2, h * 0.84);
-}
-
-function drawScores(ctx, w, h, c, table) {
-  const line = Math.min(h / 9, w / 12);
-  ctx.textBaseline = 'middle';
-  ctx.textAlign = 'center';
-  ctx.fillStyle = c.cyan;
-  ctx.font = `bold ${Math.round(line * 0.8)}px ${FONT}`;
-  ctx.fillText('HALL OF FAME', w / 2, line * 1.3);
-  ctx.font = `bold ${Math.round(line * 0.62)}px ${FONT}`;
-  if (!table.length) {
-    ctx.fillStyle = c.ink;
-    ctx.fillText('NO SCORES YET', w / 2, h / 2);
-    ctx.fillStyle = c.gold;
-    ctx.fillText('BE THE FIRST', w / 2, h / 2 + line);
-    return;
-  }
-  table.slice(0, 5).forEach((e, k) => {
-    const y = line * (3 + k * 1.15);
-    ctx.fillStyle = k === 0 ? c.gold : c.ink;
-    ctx.textAlign = 'left';
-    ctx.fillText(`${k + 1}. ${e.initials}`, w * 0.2, y);
-    ctx.textAlign = 'right';
-    ctx.fillText(formatTime(e.value), w * 0.8, y);
-  });
 }
