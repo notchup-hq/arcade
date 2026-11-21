@@ -12,7 +12,7 @@ The first alpha: the hall and one game.
 
 - The hall: a neon arcade at night, one cabinet per game. A ready game plays itself calmly on its cabinet's screen (attract mode, drawn by the game's own code), the rest say "Coming soon". Without JavaScript the cabinets are plain links. It fits a phone screen.
 - The Notchup logo moves: its gear rolls slowly and its arrow notches up now and then; on a win the gear turns and the arrow rises.
-- Fuse Box, a logic puzzle: find the blown fuses from the numbers on the good ones, then fix the panel. The whole game fits the screen with no scrolling, on a phone and a laptop; help and the hall of fame open in dialogs. Three levels, the first test is always safe, tag with a right click, a long press, the T key or Tag mode, and play it all with a keyboard.
+- Fuse Box, a logic puzzle: find the blown fuses from the numbers on the good ones, then fix the panel. The whole game fits the screen with no scrolling, on a phone and a laptop; help and the hall of fame open in dialogs. Three levels, the first test is always safe, tag with the Test / Tag switch under the panel, a long press, a right click or the T key, and play it all with a keyboard.
 - Hall of fame: the top 10 times per level with three-letter initials and dates, kept in this browser only.
 - Sound effects made in code (no audio files), with a switch in the footer.
 - Checks: unit tests, a privacy scan, a size budget, and a layout check in a real browser at 320, 360, 768 and 1280 px.
