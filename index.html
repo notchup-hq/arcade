@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#060b16">
+  <meta name="color-scheme" content="dark">
+  <title>Notchup Arcade: tiny neon browser games</title>
+  <meta name="description" content="A neon arcade of tiny original browser games by Notchup. Free, no sign-up, no ads, no cookies, no tracking.">
+  <link rel="canonical" href="https://arcade.notchup.fi/">
+  <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Notchup Arcade">
+  <meta property="og:title" content="Notchup Arcade: tiny neon browser games">
+  <meta property="og:description" content="Tiny original browser games in a neon arcade. Free, no ads, no tracking.">
+  <meta property="og:url" content="https://arcade.notchup.fi/">
+  <meta property="og:locale" content="en">
+  <link rel="stylesheet" href="styles.css">
+  <!-- Every module hall.js pulls in, fetched at once (tests/preload.test.js keeps the list whole). -->
+  <link rel="modulepreload" href="js/attract.js">
+  <link rel="modulepreload" href="js/gear.js">
+  <link rel="modulepreload" href="js/loop.js">
+  <link rel="modulepreload" href="js/memory.js">
+  <link rel="modulepreload" href="js/scores.js">
+  <link rel="modulepreload" href="js/settings.js">
+  <link rel="modulepreload" href="js/sound.js">
+  <link rel="modulepreload" href="js/version.js">
+  <link rel="modulepreload" href="games/fuse-box/demo.js">
+  <link rel="modulepreload" href="games/fuse-box/rules.js">
+  <script type="module" src="js/hall.js"></script>
+</head>
+<body class="hall">
+  <header class="marquee">
+    <h1><span class="marquee-brand">Notchup</span> <span class="marquee-arcade">Arcade</span></h1>
+    <p class="tagline">Tiny original games. No coins needed: notch up to play.</p>
+    <p class="badge">Alpha</p>
+  </header>
+
+  <main>
+    <ul class="cabinets">
+      <li class="cabinet" data-game="fuse-box">
+        <a href="games/fuse-box/">
+          <span class="cabinet-name">Fuse Box</span>
+          <span class="screen"><canvas class="screen-canvas" aria-hidden="true"></canvas></span>
+          <span class="cabinet-pitch">Find the blown fuses before you test them. A logic puzzle.</span>
+          <span class="cabinet-play">Notch up to play</span>
+        </a>
+      </li>
+      <li class="cabinet soon">
+        <div class="cabinet-body">
+          <span class="cabinet-name">Lob</span>
+          <span class="screen"><span class="screen-soon">Soon</span></span>
+          <span class="cabinet-pitch">A rooftop duel: wind, angle, power. Gears fly.</span>
+          <span class="cabinet-play">Coming soon</span>
+        </div>
+      </li>
+      <li class="cabinet soon">
+        <div class="cabinet-body">
+          <span class="cabinet-name">Night Shift</span>
+          <span class="screen"><span class="screen-soon">Soon</span></span>
+          <span class="cabinet-pitch">Keep the drones off the billboard until sunrise.</span>
+          <span class="cabinet-play">Coming soon</span>
+        </div>
+      </li>
+    </ul>
+  </main>
+
+  <footer class="site-footer">
+    <ul class="links">
+      <li><a href="https://notchup.fi">Made by Notchup</a></li>
+      <li><a href="https://github.com/notchup-hq/arcade">Source on GitHub</a></li>
+      <li>MIT licence</li>
+      <li id="version">v0.1.0</li>
+    </ul>
+    <p>No ads, no cookies, no tracking. High scores stay in this browser.</p>
+    <p class="settings">
+      <button type="button" id="sound" aria-pressed="true">Sound on</button>
+    </p>
+  </footer>
+</body>
+</html>

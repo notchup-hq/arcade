@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#060b16">
+  <meta name="color-scheme" content="dark">
+  <title>Fuse Box: a neon logic puzzle · Notchup Arcade</title>
+  <meta name="description" content="Find the blown fuses from the numbers on the good ones, then fix the panel. A free logic puzzle in the Notchup Arcade. No ads, no tracking.">
+  <link rel="canonical" href="https://arcade.notchup.fi/games/fuse-box/">
+  <link rel="icon" href="../../assets/mark.svg" type="image/svg+xml">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Notchup Arcade">
+  <meta property="og:title" content="Fuse Box: a neon logic puzzle">
+  <meta property="og:description" content="Find the blown fuses from the numbers on the good ones, then fix the panel.">
+  <meta property="og:url" content="https://arcade.notchup.fi/games/fuse-box/">
+  <meta property="og:locale" content="en">
+  <link rel="stylesheet" href="../../styles.css">
+  <!-- Every module main.js pulls in, fetched at once (tests/preload.test.js keeps the list whole). -->
+  <link rel="modulepreload" href="../../js/gear.js">
+  <link rel="modulepreload" href="../../js/initials.js">
+  <link rel="modulepreload" href="../../js/memory.js">
+  <link rel="modulepreload" href="../../js/scores.js">
+  <link rel="modulepreload" href="../../js/settings.js">
+  <link rel="modulepreload" href="../../js/sound.js">
+  <link rel="modulepreload" href="../../js/version.js">
+  <link rel="modulepreload" href="rules.js">
+  <script type="module" src="main.js"></script>
+</head>
+<body class="game">
+  <header class="game-bar">
+    <a class="back" href="../../">← Arcade</a>
+    <h1>Fuse Box</h1>
+  </header>
+
+  <main class="game-main">
+    <noscript><p class="note">Fuse Box needs JavaScript to run.</p></noscript>
+
+    <fieldset class="levels">
+      <legend class="visually-hidden">Level</legend>
+      <label><input type="radio" name="level" value="easy" checked> Easy</label>
+      <label><input type="radio" name="level" value="medium"> Medium</label>
+      <label><input type="radio" name="level" value="hard"> Hard</label>
+    </fieldset>
+
+    <div class="console">
+      <p class="readout"><span class="readout-label">Blown left</span> <span id="left" class="readout-value">10</span></p>
+      <div id="machine" class="machine" aria-hidden="true"><span class="lever"></span></div>
+      <p class="readout"><span class="readout-label">Time</span> <span id="time" class="readout-value">0.0</span></p>
+    </div>
+
+    <div class="panel-frame">
+      <div id="panel" class="panel" role="group" aria-label="Fuse panel" data-small-target></div>
+    </div>
+
+    <p id="status" class="status" role="status"></p>
+
+    <div class="actions">
+      <button type="button" id="tag-mode" class="tool" aria-pressed="false">Tag mode</button>
+      <button type="button" id="again" class="primary">New panel</button>
+    </div>
+
+    <details class="how">
+      <summary>How to play</summary>
+      <p>Every number on a lit fuse says how many of the eight fuses around it are blown. Test every good fuse to fix the panel; test a blown one and it sparks.</p>
+      <ul>
+        <li>Tap or click a fuse to test it. The first one is always good.</li>
+        <li>Tag a fuse you think is blown: right click, long press, the T key, or Tag mode.</li>
+        <li>When a number has all its blown fuses tagged, test it again to test the rest around it.</li>
+        <li>On a keyboard, the arrow keys move around the panel and Enter tests.</li>
+      </ul>
+    </details>
+
+    <section class="fame" aria-labelledby="fame-title">
+      <h2 id="fame-title">Hall of fame</h2>
+      <table>
+        <caption id="scores-caption">Easy</caption>
+        <thead>
+          <tr><th scope="col">#</th><th scope="col">Who</th><th scope="col">Time (s)</th><th scope="col">Date</th></tr>
+        </thead>
+        <tbody id="scores"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <dialog id="initials" class="initials" aria-labelledby="initials-title">
+    <form method="dialog">
+      <h2 id="initials-title">New high score!</h2>
+      <label for="initials-input">Your initials, three letters</label>
+      <input id="initials-input" name="initials" maxlength="3" autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="text" enterkeyhint="done">
+      <p class="initials-error" hidden>Three letters, please.</p>
+      <p class="initials-note">Kept in this browser only.</p>
+      <div class="actions">
+        <button type="submit" value="skip">Skip</button>
+        <button type="submit" value="save" class="primary">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <footer class="site-footer">
+    <ul class="links">
+      <li><a href="https://notchup.fi">Made by Notchup</a></li>
+      <li><a href="https://github.com/notchup-hq/arcade">Source on GitHub</a></li>
+      <li>MIT licence</li>
+      <li id="version">v0.1.0</li>
+    </ul>
+    <p>No ads, no cookies, no tracking. High scores stay in this browser.</p>
+    <p class="settings">
+      <button type="button" id="sound" aria-pressed="true">Sound on</button>
+    </p>
+  </footer>
+</body>
+</html>
