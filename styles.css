@@ -316,6 +316,7 @@ body.game { height: 100dvh; min-height: 0; }
   font: 800 max(16px, calc(var(--cell) * 0.55))/1 var(--mono);
 }
 .fuse:hover { border-color: var(--neon-cyan); }
+.panel.tagging { border-color: var(--neon-gold); box-shadow: var(--glow-gold); }
 .panel.tagging .fuse:not(.lit) { border-color: rgb(242 201 76 / 0.55); }
 .fuse.lit { border-color: transparent; background: rgb(94 242 255 / 0.05); cursor: default; }
 .fuse.n1 { color: var(--neon-cyan); }
@@ -342,6 +343,17 @@ body.game { height: 100dvh; min-height: 0; }
 
 .status { margin: 0; min-height: 1.5em; text-align: center; }
 .actions { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; }
+
+/* Test or Tag: one switch, both sides always visible, the active side lit in its colour. */
+.mode { display: inline-flex; }
+.mode button { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 0.75rem; box-shadow: none; }
+.mode button:first-child { border-radius: var(--radius) 0 0 var(--radius); }
+.mode button:last-child { border-radius: 0 var(--radius) var(--radius) 0; border-left: 0; }
+#mode-test[aria-pressed="true"] { border-color: var(--neon-cyan); background: rgb(94 242 255 / 0.15); box-shadow: var(--glow-cyan); }
+#mode-tag[aria-pressed="true"] { border-color: var(--neon-gold); background: rgb(242 201 76 / 0.15); box-shadow: var(--glow-gold); border-left: 2px solid var(--neon-gold); }
+.mode-icon { width: 1rem; height: 1rem; }
+.mode-icon.test { border: 2px solid var(--neon-cyan); border-radius: 3px; background: rgb(94 242 255 / 0.25); }
+.mode-icon.tag { background: var(--neon-gold); clip-path: polygon(50% 0, 100% 100%, 0 100%); }
 
 /* Dialogs: help, hall of fame, initials. */
 .sheet {

@@ -22,7 +22,8 @@ const ui = {
   board: $('panel'),
   left: $('left'),
   time: $('time'),
-  tagMode: $('tag-mode'),
+  modeTest: $('mode-test'),
+  modeTag: $('mode-tag'),
   again: $('again'),
   status: $('status'),
   badge: $('badge'),
@@ -42,6 +43,7 @@ let started = 0;
 let finished = 0;
 let clock = 0;
 let lastAdded = -1;
+let tagging = false; // what a tap does: test a fuse, or tag it
 
 function levelFromUrl() {
   const l = new URLSearchParams(location.search).get('level');
@@ -123,6 +125,7 @@ function build() {
   ui.board.replaceChildren(frag);
   paintAll();
   paintCounters();
+  setTagging(false); // a new panel starts with testing, since the first tap must test
   say('Tap any fuse. The first is always safe.');
   renderScores();
 }
@@ -235,7 +238,7 @@ ui.board.addEventListener('click', (e) => {
   if (!b) return;
   const i = Number(b.dataset.i);
   if (i === pressed) { pressed = -1; return; } // the long press already tagged it
-  act(i, ui.tagMode.getAttribute('aria-pressed') === 'true');
+  act(i, tagging);
 });
 ui.board.addEventListener('contextmenu', (e) => {
   const b = e.target.closest('button');
@@ -270,11 +273,16 @@ ui.board.addEventListener('keydown', (e) => {
   }
 });
 
-ui.tagMode.addEventListener('click', () => {
-  const on = ui.tagMode.getAttribute('aria-pressed') !== 'true';
-  ui.tagMode.setAttribute('aria-pressed', String(on));
+/** Switch what a tap does. The panel's frame turns gold while tapping tags. */
+function setTagging(on) {
+  tagging = on;
+  ui.modeTest.setAttribute('aria-pressed', String(!on));
+  ui.modeTag.setAttribute('aria-pressed', String(on));
   ui.board.classList.toggle('tagging', on);
-});
+  if (p.status === 'ready' || p.status === 'playing') say(on ? 'Tapping now tags a fuse as blown.' : 'Tapping now tests a fuse.');
+}
+ui.modeTest.addEventListener('click', () => setTagging(false));
+ui.modeTag.addEventListener('click', () => setTagging(true));
 
 ui.again.addEventListener('click', () => {
   sfx.start();

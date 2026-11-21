@@ -61,7 +61,10 @@
     <p id="status" class="status" role="status"></p>
 
     <div class="actions">
-      <button type="button" id="tag-mode" class="tool" aria-pressed="false">Tag mode</button>
+      <div class="mode" role="group" aria-label="A tap on a fuse">
+        <button type="button" id="mode-test" aria-pressed="true"><span class="mode-icon test" aria-hidden="true"></span>Test</button>
+        <button type="button" id="mode-tag" aria-pressed="false"><span class="mode-icon tag" aria-hidden="true"></span>Tag</button>
+      </div>
       <button type="button" id="again" class="primary">New panel</button>
     </div>
   </main>
@@ -72,7 +75,7 @@
       <p>Every number on a lit fuse says how many of the eight fuses around it are blown. Test every good fuse to fix the panel; test a blown one and it sparks.</p>
       <ul>
         <li>Tap or click a fuse to test it. The first one is always safe.</li>
-        <li>Tag a fuse you think is blown: long press, right click, the T key, or Tag mode.</li>
+        <li>Tag a fuse you think is blown: switch the buttons under the panel from Test to Tag, or long press, right click, or press T.</li>
         <li>When a number has all its blown fuses tagged, test it again to test the rest around it.</li>
         <li>On a keyboard, the arrow keys move around the panel and Enter tests.</li>
       </ul>
