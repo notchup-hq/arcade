@@ -11,7 +11,7 @@ All notable changes to this project are listed here, newest first. The format fo
 
 ### Changed
 
-- The hall is calmer: the logo stays still until you tap it, then its gear turns four teeth with a click each and its arrow notches up. Cabinets no longer lift on hover; they light up gold.
+- The hall is calmer: the logo is a still mark that links to the Notchup home page. Cabinets no longer lift on hover; they light up gold.
 
 ## 0.1.0 – 2026-11-21
 

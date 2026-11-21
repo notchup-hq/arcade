@@ -11,7 +11,7 @@ Notchup Arcade: a neon hall of tiny original browser games, at https://arcade.no
 - **Fast:** each page's first load stays under 50 KB gzipped and a game adds under 30 KB (`tests/budget.test.js`). Animate only `transform` and `opacity`; canvases pause off screen and in hidden tabs; draw only when something changed.
 - **Phone first, desktop as good:** a game page fits the screen with no scrolling (help and scores open in dialogs); works from 320 px, touch and keyboard both, tap targets 44 px (24 px inside a game board, marked `data-small-target`), text 16 px or more. `./dev layout` checks this in a real browser.
 - **Accessible:** semantic HTML, one `h1` per page, labels, keyboard play, WCAG AA contrast, all motion inside `prefers-reduced-motion: no-preference`.
-- **Look:** dark neon hall in Notchup navy and gold plus cyan and magenta, tokens in `styles.css` (`--neon-*`, read by canvas code too), system fonts. The Notchup logo is the mascot (`js/logo.js`, the shapes of `assets/mark.svg` in parts): in the hall it stays still until tapped, then its gear turns and its arrow notches up. Motion stays calm: nothing fast or flashing. English only.
+- **Look:** dark neon hall in Notchup navy and gold plus cyan and magenta, tokens in `styles.css` (`--neon-*`, read by canvas code too), system fonts. The Notchup logo is the mascot (`js/logo.js`, the shapes of `assets/mark.svg` in parts): in the hall it is a still link to notchup.fi. Motion stays calm: nothing fast or flashing. English only.
 - **Search and previews:** a changed headline or description changes the `<title>`, meta description and Open Graph tags together. Absolute URLs point only at https://arcade.notchup.fi/.
 
 ## Workflow

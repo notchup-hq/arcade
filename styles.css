@@ -109,8 +109,6 @@ button.sound[aria-pressed="false"] { color: var(--neon-muted); }
 .marquee .sound { position: absolute; top: 0.25rem; right: 0.25rem; }
 .marquee-title { display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
 .marquee-logo { flex: none; width: 2.75rem; height: 2.75rem; filter: drop-shadow(0 0 8px rgb(242 201 76 / 0.35)); }
-/* With JavaScript the logo is a button: a tap notches it up. */
-button.marquee-logo { padding: 0; border: 0; border-radius: 50%; background: none; }
 .marquee h1 {
   margin: 0;
   font: 800 clamp(1.5rem, 7vw, 4rem)/1.05 var(--mono);
@@ -517,10 +515,6 @@ body.game { height: 100dvh; min-height: 0; }
   }
   /* The demo's picture fades out early, before it is stretched much; the game fades in as it grows. */
   ::view-transition-old(*.game-screen) { animation-duration: 0.12s; }
-  /* The hall's logo moves only when tapped: the gear turns four teeth, one at a time, and the arrow
-     notches up and settles back. */
-  .marquee-mark .logo-gear { transition: transform 1.2s steps(4, end); }
-  .marquee-mark .logo-arrow.up { animation: notch-up 1.2s ease-in-out 1; }
   /* A fixed panel: the gear turns four teeth, one at a time, and the arrow rises and stays up. */
   .badge-logo.fixed .logo-gear { animation: four-notches 1.2s steps(4, end) 0.3s 1 both; }
   .badge-logo.fixed .logo-arrow { animation: rise 0.6s cubic-bezier(0.3, 1.6, 0.5, 1) 0.3s 1 both; }
@@ -528,10 +522,6 @@ body.game { height: 100dvh; min-height: 0; }
   .fuse.lit { animation: light-up 0.25s ease-out 1; }
 }
 
-@keyframes notch-up {
-  0%, 100% { transform: translate(0, 0); }
-  40%, 60% { transform: translate(9px, -9px); }
-}
 @keyframes four-notches { to { transform: rotate(120deg); } }
 @keyframes rise { to { transform: translate(10px, -10px); } }
 @keyframes shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
