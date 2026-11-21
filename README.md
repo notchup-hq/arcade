@@ -13,7 +13,7 @@ Alpha (v0.1). One game so far, more on the way.
 | Game | What it is |
 |---|---|
 | **Fuse Box** | A logic puzzle. Every lit fuse shows how many of its neighbours are blown; find them all without testing one. Three levels, and the panel turns to fit a phone. |
-| **Lob** | Coming soon: a turn-based duel between rooftops, with wind, angle and power. |
+| **Lob** | A rooftop duel at night. Lob glowing bulbs across the street at your rival's billboard, with the wind changing every throw. Three hits win. Play a run against computer rivals who get better one after another, or share one device with a friend. |
 | **Night Shift** | Coming soon: keep the drones off the billboard until sunrise. |
 
 Every game is our own: names, art, rules and levels. The hall shows each game playing itself on its cabinet's screen, and each game keeps a top 10 with three-letter initials, in your browser only.
