@@ -136,13 +136,20 @@ function paintStreet(g, w, h, c, stage) {
   g.restore();
 }
 
-/** Smoke that leans with the wind: puffs stepping up from the chimney, further sideways the stronger it blows. */
-function smoke(ctx, side, wind) {
+const SMOKE_PUFFS = 5;
+const SMOKE_PERIOD = 9000; // ms for a puff to rise to the top: slow enough to stay in the background
+
+/**
+ * Smoke that leans with the wind: puffs rise from the chimney, swelling and fading, and drift sideways the
+ * more the higher they are and the stronger it blows. `t` is the time in ms (0 for a still picture).
+ */
+function smoke(ctx, side, wind, t) {
   const cx = chimneyX(side) + 1.4;
-  for (let k = 0; k < 4; k++) {
-    ctx.fillStyle = `rgb(200 215 235 / ${0.3 - k * 0.06})`;
+  for (let k = 0; k < SMOKE_PUFFS; k++) {
+    const u = (t / SMOKE_PERIOD + k / SMOKE_PUFFS) % 1;
+    ctx.fillStyle = `rgb(200 215 235 / ${0.3 * (1 - u) * Math.min(1, u * 8)})`;
     ctx.beginPath();
-    ctx.arc(cx + wind * 0.45 * (k + 1) * (k + 1) * 0.5, side.roof + 6.5 + k * 3, 1.2 + k * 0.5, 0, Math.PI * 2);
+    ctx.arc(cx + wind * 0.45 * u * u * 8, side.roof + 6 + u * 14, 1 + u * 2.2, 0, Math.PI * 2);
     ctx.fill();
   }
 }
@@ -269,7 +276,7 @@ function dotted(ctx, path, colour, alpha, width) {
 /**
  * Draw one frame. `view`: stage, hits {left, right}, wind, rival {sign, colour}, holding (the side with a
  * bulb in hand, or null), target (the side whose sign is being aimed at), trails [{ path, alpha }] (the last throws, faint), guide (the start of the arc
- * being aimed, or null), bulb ([x, y] in flight, or null) and pop ({ x, y, t } with t from 0 to 1).
+ * being aimed, or null), smoke (ms, 0 for still), bulb ([x, y] in flight, or null) and pop ({ x, y, t } with t from 0 to 1).
  */
 export function drawScene(ctx, w, h, c, view) {
   const { stage } = view;
@@ -280,8 +287,8 @@ export function drawScene(ctx, w, h, c, view) {
   ctx.translate(ox, h);
   ctx.scale(s, -s);
 
-  smoke(ctx, left, view.wind);
-  smoke(ctx, right, view.wind);
+  smoke(ctx, left, view.wind, view.smoke);
+  smoke(ctx, right, view.wind, view.smoke);
   ownSign(ctx, c, left.board, left.roof, view.hits.left);
   rivalSign(ctx, c, right.board, right.roof, view.hits.right, view.rival.sign, view.rival.colour);
   brackets(ctx, c, stage.sides[view.target].board);

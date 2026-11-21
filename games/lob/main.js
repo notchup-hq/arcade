@@ -66,6 +66,7 @@ let primary = 'throw';   // what the big button does now: 'throw', 'next', 'agai
 let drag = null;
 let epoch = 0;           // bumped when a match is thrown away, so old timers do nothing
 let matches = 0;
+let smokeMs = 0;         // the smoke's clock; it stays at 0 for visitors who asked for less motion
 
 const names = () => (twoPlayers ? { left: 'Player 1', right: 'Player 2' } : { left: 'You', right: rival.sign });
 const myTurn = () => phase === 'aim' && (twoPlayers || match.turn === 'left');
@@ -98,6 +99,7 @@ function render() {
     rival,
     holding: phase === 'aim' && !match.winner ? match.turn : null,
     target: (anim ? anim.flight.side : match.turn) === 'left' ? 'right' : 'left',
+    smoke: smokeMs,
     trails,
     guide: myTurn() ? guide(stage, match.turn, a.angle, a.power, match.wind) : null,
     bulb,
@@ -257,6 +259,10 @@ const loop = createLoop({
   },
   draw: render,
 });
+
+// The smoke drifts slowly: redrawn about 15 times a second, and not at all in a hidden tab or with reduced motion.
+const smokeLoop = createLoop({ step: (dt) => { smokeMs += dt; }, draw: render, dt: 1000 / 15 });
+if (!still.matches) smokeLoop.start();
 
 function finishThrow() {
   loop.stop();
