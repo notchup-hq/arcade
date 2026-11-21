@@ -13,6 +13,7 @@ const WON_MS = 3600;
 const SCORES_MS = 5000;
 const NOTCH_MS = 600;
 const SPEED = 0.9;       // path points (1/60 s each) per tick
+const SMOKE_FRAME = 1000 / 12; // the smoke is redrawn this often, so a waiting screen stays cheap
 const SKILL = 0.55;      // good enough to hit now and then
 
 /** @param {{ scores: () => Array<{ initials: string, value: number }> }} source the top runs to show */
@@ -27,6 +28,7 @@ export function createDemo({ scores, seed = 5 }) {
   let anim;
   let trails;
   let notches;
+  let smoke = 0;
 
   function reset() {
     rival = rivalFor(level++);
@@ -55,38 +57,44 @@ export function createDemo({ scores, seed = 5 }) {
 
   reset();
 
+  function advance(dt) {
+    timer += dt;
+    if (phase === 'aim' && timer >= AIM_MS) {
+      anim = { flight: turn(), at: 0 };
+      phase = 'fly';
+      return true;
+    }
+    if (phase === 'fly') {
+      anim.at += SPEED;
+      if (anim.at >= anim.flight.path.length - 1) { phase = 'ring'; timer = 0; }
+      return true;
+    }
+    if (phase === 'ring') {
+      if (timer < RING_MS) return anim.flight.hit;
+      trails = [{ path: anim.flight.path, alpha: 0.35 }, ...trails.slice(0, 1).map((t) => ({ ...t, alpha: 0.15 }))];
+      anim = null;
+      phase = match.winner ? 'won' : 'aim';
+      timer = 0;
+      return true;
+    }
+    if (phase === 'won') {
+      const n = Math.min(Math.floor(timer / NOTCH_MS), 4);
+      if (timer >= WON_MS) { phase = 'scores'; timer = 0; return true; }
+      if (n !== notches) { notches = n; return true; }
+      return false;
+    }
+    if (phase === 'scores' && timer >= SCORES_MS) {
+      reset();
+      return true;
+    }
+    return false;
+  }
+
   return {
     step(dt) {
-      timer += dt;
-      if (phase === 'aim' && timer >= AIM_MS) {
-        anim = { flight: turn(), at: 0 };
-        phase = 'fly';
-        return true;
-      }
-      if (phase === 'fly') {
-        anim.at += SPEED;
-        if (anim.at >= anim.flight.path.length - 1) { phase = 'ring'; timer = 0; }
-        return true;
-      }
-      if (phase === 'ring') {
-        if (timer < RING_MS) return anim.flight.hit;
-        trails = [{ path: anim.flight.path, alpha: 0.35 }, ...trails.slice(0, 1).map((t) => ({ ...t, alpha: 0.15 }))];
-        anim = null;
-        phase = match.winner ? 'won' : 'aim';
-        timer = 0;
-        return true;
-      }
-      if (phase === 'won') {
-        const n = Math.min(Math.floor(timer / NOTCH_MS), 4);
-        if (timer >= WON_MS) { phase = 'scores'; timer = 0; return true; }
-        if (n !== notches) { notches = n; return true; }
-        return false;
-      }
-      if (phase === 'scores' && timer >= SCORES_MS) {
-        reset();
-        return true;
-      }
-      return false;
+      smoke += dt;
+      const drifted = Math.floor(smoke / SMOKE_FRAME) !== Math.floor((smoke - dt) / SMOKE_FRAME);
+      return advance(dt) || (drifted && phase !== 'scores');
     },
 
     draw(ctx, w, h, c) {
@@ -101,6 +109,7 @@ export function createDemo({ scores, seed = 5 }) {
         holding: phase === 'aim' ? match.turn : null,
         target: (anim ? anim.flight.side : match.turn) === 'left' ? 'right' : 'left',
         trails,
+        smoke,
         guide: null,
         bulb: phase === 'fly' ? path[Math.min(Math.floor(anim.at), path.length - 1)] : null,
         pop: phase === 'ring' && anim.flight.hit ? { x: anim.flight.landing.x, y: anim.flight.landing.y, t: timer / RING_MS } : null,
