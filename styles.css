@@ -451,6 +451,27 @@ body.game { height: 100dvh; min-height: 0; }
 .mode-icon.test { border: 2px solid var(--neon-cyan); border-radius: 3px; background: rgb(94 242 255 / 0.25); }
 .mode-icon.tag { background: var(--neon-gold); clip-path: polygon(50% 0, 100% 100%, 0 100%); }
 
+/* Lob: the street fills what is left of the screen; the wind sits in the readout like the counters. */
+.readout-value.wind { display: inline-flex; gap: 0.25em; min-width: 2.5ch; justify-content: center; color: var(--neon-cyan); text-shadow: 0 0 8px rgb(94 242 255 / 0.6); }
+.readout-value.wind:has(#wind-arrow:empty) { color: var(--neon-muted); text-shadow: none; }
+.arena {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  max-width: 56rem;
+  border: 2px solid var(--neon-cyan);
+  border-radius: var(--radius);
+  box-shadow: var(--glow-cyan);
+  background: var(--neon-bg);
+  overflow: hidden;
+}
+.scene { display: block; width: 100%; height: 100%; touch-action: none; cursor: crosshair; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.aim { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem 1rem; }
+.stepper { display: flex; align-items: center; gap: 0.25rem; }
+.stepper button { font-size: 1.5rem; line-height: 1; padding: 0; touch-action: manipulation; }
+.stepper-value { margin: 0; display: flex; flex-direction: column; align-items: center; min-width: 4.5rem; line-height: 1.15; }
+.readout-number { font: 800 1rem/1.15 var(--mono); color: var(--neon-gold); font-variant-numeric: tabular-nums; }
+
 /* Dialogs: help, hall of fame, initials. */
 .sheet {
   width: min(30rem, calc(100vw - 2 * var(--gap)));
@@ -501,6 +522,7 @@ body.game { height: 100dvh; min-height: 0; }
    and visitors who asked for less motion, get a normal page load. */
 .cabinet[data-game] .screen, .game .game-main { view-transition-class: game-screen; }
 .cabinet[data-game="fuse-box"] .screen, .game[data-game="fuse-box"] .game-main { view-transition-name: fuse-box; }
+.cabinet[data-game="lob"] .screen, .game[data-game="lob"] .game-main { view-transition-name: lob; }
 
 /* ---------- Motion, only when the visitor has not asked for less ---------- */
 

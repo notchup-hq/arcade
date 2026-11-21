@@ -6,9 +6,11 @@ import { mountAttract } from './attract.js';
 import { memory } from './memory.js';
 import { initSettings } from './settings.js';
 import { createDemo } from '../games/fuse-box/demo.js';
+import { createDemo as createLobDemo } from '../games/lob/demo.js';
 
 const DEMOS = {
   'fuse-box': () => createDemo({ scores: () => memory.scores('fuse-box:easy', 'low') }),
+  lob: () => createLobDemo({ scores: () => memory.scores('lob:solo', 'high') }),
 };
 
 initSettings();

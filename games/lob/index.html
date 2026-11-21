@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#060b16">
+  <meta name="color-scheme" content="dark">
+  <title>Lob: a rooftop duel · Notchup Arcade</title>
+  <meta name="description" content="Lob bulbs across the street at your rival&#39;s billboard, with wind to fight. Three hits win. A free rooftop duel in the Notchup Arcade. No ads, no tracking.">
+  <link rel="canonical" href="https://arcade.notchup.fi/games/lob/">
+  <link rel="icon" href="../../assets/mark.svg" type="image/svg+xml">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Notchup Arcade">
+  <meta property="og:title" content="Lob: a rooftop duel">
+  <meta property="og:description" content="Lob bulbs across the street at your rival&#39;s billboard. Three hits win.">
+  <meta property="og:url" content="https://arcade.notchup.fi/games/lob/">
+  <meta property="og:locale" content="en">
+  <link rel="stylesheet" href="../../styles.css">
+  <!-- Every module main.js pulls in, fetched at once (tests/preload.test.js keeps the list whole). -->
+  <link rel="modulepreload" href="../../js/attract.js">
+  <link rel="modulepreload" href="../../js/initials.js">
+  <link rel="modulepreload" href="../../js/logo.js">
+  <link rel="modulepreload" href="../../js/loop.js">
+  <link rel="modulepreload" href="../../js/memory.js">
+  <link rel="modulepreload" href="../../js/scores.js">
+  <link rel="modulepreload" href="../../js/settings.js">
+  <link rel="modulepreload" href="../../js/sound.js">
+  <link rel="modulepreload" href="../../js/version.js">
+  <link rel="modulepreload" href="rules.js">
+  <link rel="modulepreload" href="scene.js">
+  <script type="module" src="main.js"></script>
+</head>
+<body class="game" data-game="lob">
+  <header class="game-bar">
+    <a class="back" href="../../">←<span class="back-text"> Arcade</span></a>
+    <h1>Lob</h1>
+    <div class="tools">
+      <button type="button" id="help-open" class="icon" aria-label="How to play" title="How to play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9a3 3 0 1 1 4.5 2.6c-.9.5-1.5 1.2-1.5 2.4M12 17.5v.5"/></svg></button>
+      <button type="button" id="fame-open" class="icon" aria-label="Hall of fame" title="Hall of fame"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20h7"/></svg></button>
+      <button type="button" id="sound" class="icon sound" aria-pressed="true" aria-label="Sound" title="Sound"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10h3l4-4v12l-4-4H4z"/><path class="sound-on" d="M15 9a4 4 0 0 1 0 6M17.5 6.5a7.5 7.5 0 0 1 0 11"/><path class="sound-off" d="M15 9l6 6M21 9l-6 6"/></svg></button>
+    </div>
+  </header>
+
+  <main class="game-main">
+    <noscript><p class="note">Lob needs JavaScript to run.</p></noscript>
+
+    <div class="console">
+      <p class="readout"><span class="readout-label">Wind</span> <span class="readout-value wind"><span id="wind-arrow" aria-hidden="true"></span><span id="wind-number">0</span><span id="wind-words" class="visually-hidden"></span></span></p>
+      <div id="badge" class="badge-logo"><img src="../../assets/mark.svg" alt="" width="56" height="56"></div>
+      <p class="readout"><span id="side-label" class="readout-label">Score</span> <span id="side-value" class="readout-value">0</span></p>
+    </div>
+
+    <div id="arena" class="arena">
+      <canvas id="scene" class="scene" role="img" aria-label="Two rooftops across a street at night. Throw bulbs at the rival's billboard on the right."></canvas>
+    </div>
+
+    <p id="status" class="status" role="status"></p>
+
+    <div class="aim">
+      <div class="stepper" role="group" aria-label="Angle">
+        <button type="button" id="angle-down" aria-label="Lower the angle">−</button>
+        <p class="stepper-value"><span class="readout-label">Angle</span> <span id="angle" class="readout-number">50°</span></p>
+        <button type="button" id="angle-up" aria-label="Raise the angle">+</button>
+      </div>
+      <div class="stepper" role="group" aria-label="Power">
+        <button type="button" id="power-down" aria-label="Less power">−</button>
+        <p class="stepper-value"><span class="readout-label">Power</span> <span id="power" class="readout-number">60</span></p>
+        <button type="button" id="power-up" aria-label="More power">+</button>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="button" id="players" aria-pressed="false">2 players</button>
+      <button type="button" id="go" class="primary">Throw</button>
+    </div>
+  </main>
+
+  <dialog id="help" class="sheet" aria-labelledby="help-title">
+    <form method="dialog">
+      <h2 id="help-title">How to play</h2>
+      <p>Lob glowing bulbs at the billboard on the other roof. Three hits and it goes dark. The wind changes every throw: the smoke leans with it and the number says how strong.</p>
+      <ul>
+        <li>Drag back from your roof and let go. Pulling further throws harder, pulling lower throws higher.</li>
+        <li>Or use − and + for the angle and the power, then press Throw.</li>
+        <li>On a keyboard: up and down for the angle, left and right for the power, Space to throw.</li>
+        <li>Solo is a run: beat one rival after another. Each aims a little better, with a little more wind. The run ends on your first loss. Beat a rival in fewer throws for a bonus.</li>
+        <li>Two players share one device and take turns. It has no scores.</li>
+      </ul>
+      <p class="credit">Lob is made by <a href="https://www.notchup.fi">Notchup</a>. No ads, no cookies, no tracking. <span class="version">v0.1.0</span></p>
+      <div class="actions"><button type="submit" class="primary">Close</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="fame" class="sheet" aria-labelledby="fame-title">
+    <form method="dialog">
+      <h2 id="fame-title">Hall of fame</h2>
+      <table>
+        <caption>Best runs against the computer</caption>
+        <thead>
+          <tr><th scope="col">#</th><th scope="col">Who</th><th scope="col">Score</th><th scope="col">Date</th></tr>
+        </thead>
+        <tbody id="scores"></tbody>
+      </table>
+      <p class="credit">Kept in this browser only.</p>
+      <div class="actions"><button type="submit" class="primary">Close</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="initials" class="sheet initials" aria-labelledby="initials-title">
+    <form method="dialog">
+      <h2 id="initials-title">New high score!</h2>
+      <label for="initials-input">Your initials, three letters</label>
+      <input id="initials-input" name="initials" maxlength="3" autocomplete="off" autocapitalize="characters" spellcheck="false" enterkeyhint="done">
+      <p class="initials-error" hidden>Three letters, please.</p>
+      <p class="credit">Kept in this browser only.</p>
+      <div class="actions">
+        <button type="submit" value="skip">Skip</button>
+        <button type="submit" value="save" class="primary">Save</button>
+      </div>
+    </form>
+  </dialog>
+</body>
+</html>

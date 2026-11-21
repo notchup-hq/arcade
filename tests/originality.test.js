@@ -11,7 +11,7 @@ const NAMES = [
   'minesweeper', 'mine sweeper', 'worms', 'scorched earth', 'gorillas', 'space invaders', 'invaders',
   'galaga', 'galaxian', 'pac-man', 'pacman', 'tetris', 'breakout', 'arkanoid', 'asteroids', 'pong',
   'frogger', 'donkey kong', 'mario', 'sonic', 'zelda', 'pokemon', 'pokémon', 'snake ii', 'bomberman',
-  'lemmings', 'angry birds', 'flappy', 'candy crush', 'sokoban',
+  'lemmings', 'tank wars', 'bowmasters', 'pocket tanks', 'angry birds', 'flappy', 'candy crush', 'sokoban',
 ];
 
 const checked = () => [

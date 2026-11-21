@@ -22,11 +22,15 @@
   <link rel="modulepreload" href="js/loop.js">
   <link rel="modulepreload" href="js/memory.js">
   <link rel="modulepreload" href="js/scores.js">
+  <link rel="modulepreload" href="js/screens.js">
   <link rel="modulepreload" href="js/settings.js">
   <link rel="modulepreload" href="js/sound.js">
   <link rel="modulepreload" href="js/version.js">
   <link rel="modulepreload" href="games/fuse-box/demo.js">
   <link rel="modulepreload" href="games/fuse-box/rules.js">
+  <link rel="modulepreload" href="games/lob/demo.js">
+  <link rel="modulepreload" href="games/lob/rules.js">
+  <link rel="modulepreload" href="games/lob/scene.js">
   <script type="module" src="js/hall.js"></script>
 </head>
 <body class="hall">
@@ -52,16 +56,16 @@
           </span>
         </a>
       </li>
-      <li class="cabinet soon">
-        <div class="cabinet-body">
+      <li class="cabinet" data-game="lob">
+        <a href="games/lob/">
           <span class="cabinet-marquee"><span class="cabinet-name">Lob</span></span>
-          <span class="cabinet-bezel"><span class="screen"></span></span>
+          <span class="cabinet-bezel"><span class="screen"><canvas class="screen-canvas" aria-hidden="true"></canvas></span></span>
           <span class="cabinet-deck" aria-hidden="true"><span class="stick"></span><span class="knob"></span><span class="knob"></span><span class="knob"></span></span>
           <span class="cabinet-base">
-            <span class="cabinet-pitch">A rooftop duel: wind, angle, power. Gears fly.</span>
-            <span class="cabinet-play">Coming soon</span>
+            <span class="cabinet-pitch">A rooftop duel: wind, angle, power. Three hits win.</span>
+            <span class="cabinet-play">Play</span>
           </span>
-        </div>
+        </a>
       </li>
       <li class="cabinet soon">
         <div class="cabinet-body">
