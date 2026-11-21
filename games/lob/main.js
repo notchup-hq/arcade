@@ -97,6 +97,7 @@ function render() {
     wind: seen.wind,
     rival,
     holding: phase === 'aim' && !match.winner ? match.turn : null,
+    target: (anim ? anim.flight.side : match.turn) === 'left' ? 'right' : 'left',
     trails,
     guide: myTurn() ? guide(stage, match.turn, a.angle, a.power, match.wind) : null,
     bulb,
@@ -186,7 +187,7 @@ function startMatch() {
   ui.badge.className = 'badge-logo';
   setPrimary('throw');
   showAll();
-  say(twoPlayers ? 'Player 1: drag back from your roof and let go, or use the buttons.' : `Rival ${run.level + 1}: ${rival.sign}. Drag back from your roof and let go.`);
+  say(twoPlayers ? 'Player 1: hit the sign on the right roof. Drag back and let go, or use the buttons.' : `Rival ${run.level + 1}: ${rival.sign}. Hit the sign: drag back from your roof and let go.`);
 }
 
 function startFresh() {

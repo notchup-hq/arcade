@@ -99,6 +99,7 @@ export function createDemo({ scores, seed = 5 }) {
         wind: seen.wind,
         rival,
         holding: phase === 'aim' ? match.turn : null,
+        target: (anim ? anim.flight.side : match.turn) === 'left' ? 'right' : 'left',
         trails,
         guide: null,
         bulb: phase === 'fly' ? path[Math.min(Math.floor(anim.at), path.length - 1)] : null,

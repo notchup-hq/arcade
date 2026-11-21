@@ -217,6 +217,25 @@ function rivalSign(ctx, c, b, roof, hits, sign, colour) {
   lives(ctx, c, b, hits);
 }
 
+/** Gold corner brackets round the sign that is being aimed at, so it is plain that the sign is the target. */
+function brackets(ctx, c, b) {
+  const x0 = b.x - 1.6;
+  const x1 = b.x + b.w + 1.6;
+  const y0 = b.y - 0.4;
+  const y1 = b.y + b.h + 0.4;
+  const k = 3;
+  ctx.strokeStyle = c.gold;
+  ctx.lineWidth = 0.7;
+  ctx.lineCap = 'square';
+  ctx.beginPath();
+  for (const [x, y, dx, dy] of [[x0, y0, 1, 1], [x1, y0, -1, 1], [x0, y1, 1, -1], [x1, y1, -1, -1]]) {
+    ctx.moveTo(x + dx * k, y);
+    ctx.lineTo(x, y);
+    ctx.lineTo(x, y + dy * k);
+  }
+  ctx.stroke();
+}
+
 function thrower(ctx, c, side, colour, holding) {
   const { x, y } = side.stand;
   ctx.fillStyle = c[colour];
@@ -249,7 +268,7 @@ function dotted(ctx, path, colour, alpha, width) {
 
 /**
  * Draw one frame. `view`: stage, hits {left, right}, wind, rival {sign, colour}, holding (the side with a
- * bulb in hand, or null), trails [{ path, alpha }] (the last throws, faint), guide (the start of the arc
+ * bulb in hand, or null), target (the side whose sign is being aimed at), trails [{ path, alpha }] (the last throws, faint), guide (the start of the arc
  * being aimed, or null), bulb ([x, y] in flight, or null) and pop ({ x, y, t } with t from 0 to 1).
  */
 export function drawScene(ctx, w, h, c, view) {
@@ -265,6 +284,7 @@ export function drawScene(ctx, w, h, c, view) {
   smoke(ctx, right, view.wind);
   ownSign(ctx, c, left.board, left.roof, view.hits.left);
   rivalSign(ctx, c, right.board, right.roof, view.hits.right, view.rival.sign, view.rival.colour);
+  brackets(ctx, c, stage.sides[view.target].board);
   thrower(ctx, c, left, 'cyan', view.holding === 'left');
   thrower(ctx, c, right, 'magenta', view.holding === 'right');
 
