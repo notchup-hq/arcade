@@ -25,7 +25,7 @@ Notchup Arcade: a neon hall of tiny original browser games, at https://arcade.no
 ## Commands
 
 ```sh
-./dev serve --open    # serve the folder (ES modules do not load from file://)
+./dev serve           # serve the folder and open it (ES modules do not load from file://)
 ./dev test            # unit tests, privacy scan, size budget
 ./dev check           # tests, then check that every file loads over HTTP
 ./dev layout          # every page in Chromium at 320, 360, 768 and 1280 px (--shots saves screenshots)

@@ -19,10 +19,13 @@ Usage: ./dev <command> [options]
 
 Commands:
   help                      Show this help (also: ./dev with no command, -h, --help).
-  serve [--port N] [--open] Serve the repo root at http://127.0.0.1:N/ (default 8080, or $PORT).
+  serve [--port N] [--no-open]
+                            Serve the repo root at http://127.0.0.1:N/ (default 8080, or $PORT)
+                            and open it in the browser.
                             Uses python3 -m http.server, else npx --yes serve (which listens
                             on all interfaces, so the page is visible on your network).
-                            --open opens the browser (open, xdg-open, or wslview / cmd.exe on WSL).
+                            The browser opens with open, xdg-open, or wslview / cmd.exe on WSL;
+                            --no-open only serves (--open is still accepted).
   test [--watch]            Run node --test tests/*.test.js (--watch needs Node 18.11+).
   check                     Run the tests (privacy scan and size budget included), then fetch every page,
                             the CSS and every JS module over HTTP and check they load (JS as JavaScript).
@@ -114,7 +117,7 @@ start_bg_server() {
 }
 
 cmd_serve() {
-  local port=${PORT:-$DEFAULT_PORT} open=0
+  local port=${PORT:-$DEFAULT_PORT} open=1
   while [ $# -gt 0 ]; do
     case "$1" in
       --port)
@@ -123,13 +126,17 @@ cmd_serve() {
         shift 2
         ;;
       --open) open=1; shift ;;
+      --no-open) open=0; shift ;;
       *) die_usage "Unknown option for serve: $1" ;;
     esac
   done
   valid_port "$port" || die_usage "Invalid port: $port (use 1-65535)."
 
   local url="http://127.0.0.1:$port/"
-  echo "🌐 Serving $ROOT_DIR at $url (Ctrl-C to stop)"
+  echo "🌐 Serving $ROOT_DIR (Ctrl-C to stop)"
+  echo
+  echo "   👉 $url"
+  echo
   if [ "$open" -eq 1 ]; then
     if command -v curl >/dev/null 2>&1; then
       (wait_for_url "$url" && { open_url "$url" || echo "   Could not open a browser; open $url yourself."; }) &

@@ -28,7 +28,7 @@ Every game is our own: names, art, rules and levels. The hall shows each game pl
 
 ```sh
 git clone https://github.com/notchup-hq/arcade.git && cd arcade
-./dev serve --open      # needs python3 (or Node.js)
+./dev serve             # opens the browser; needs python3 (or Node.js)
 ./dev check             # tests, plus a check that every page loads
 ./dev layout            # every page in a real browser at phone, tablet and laptop widths
 ```
