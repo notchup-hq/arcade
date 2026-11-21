@@ -21,6 +21,7 @@
 | `sound.js` | Sound effects made with the Web Audio API, no files. The audio context starts on the first sound, which always follows a tap. |
 | `scores.js` | High score rules: top 10 per board, ordered by time (`low`) or points (`high`), initials A–Z and Å Ä Ö. Pure. |
 | `memory.js` | The only code that uses `localStorage`: one key, `arcade:v1`, holding the sound setting, the last initials and the tables. Works without storage. |
+| `screens.js` | The two screens a demo ends with: the logo notching up under a line of text, and this browser's top 5. |
 | `initials.js` | The "New high score" dialog (native `<dialog>`). |
 | `settings.js` | The sound switch (an icon button) and the version. |
 
@@ -40,6 +41,18 @@
 - The page fits the screen with no scrolling: a bar (back, title, help, hall of fame, sound), the levels, the counters with the logo, the panel, one status line and the two buttons. The panel takes the room that is left and `main.js` sizes the cells to the biggest that fits, 24 to 52 px; below 24 px the panel scrolls inside its frame. Help and the hall of fame open in dialogs. The panel is a grid of real buttons with one tab stop: arrow keys move, Enter tests, and each button says its row, column and state to a screen reader.
 - On a win the logo's gear turns four teeth and its arrow rises. A time that makes the top 10 of its level asks for initials, then shows the hall of fame.
 - Attract mode (`demo.js`) plays Easy by the same rules, calmly: about one move a second, the cursor stepping to a fuse near the last one, no glow or flashing. Then the logo notches up and this browser's top 5 for Easy shows.
+
+## Lob
+
+- Two rooftops face each other across a street at night. You throw glowing bulbs at the rival's billboard on the right; the rival throws at yours, which shows the Notchup mark. A billboard that has taken three hits goes dark, and its owner loses. Rooftops do not break.
+- A throw has an angle (5° to 85°, up from flat, toward the other roof) and a power (10 to 100). `rules.js` holds the whole simulation, with no DOM: fixed 1/120 s steps, gravity, and a sideways push from the wind. A bulb that meets the other billboard hits; one that meets a roof, your own sign, the street or the edge misses. The first wind of a match and a new wind after every throw are whole numbers from −9 to 9 (the rival sets the limit), shown by the number beside the readout and by chimney smoke that leans with it.
+- Aiming: drag back from your roof and let go (touch and mouse; a drag under 14 px is a tap and does nothing), or − and + for each value and Throw, or the arrow keys (up and down for the angle, left and right for the power) and Space. A short dotted guide shows only the start of the arc. The last throw stays on screen as a faint dotted trail, the one before it fainter.
+- Solo is the main mode and opens straight into a match against the computer. It is a run: rival after rival, each aiming a little better (`skill` 0.3 up to 0.9) with a little more wind (up to 9). The run ends on your first loss. A won match is worth 100 points and 10 more for every throw under ten. A run with points that makes the top 10 asks for initials (board `lob:solo`, points, higher wins, kept in this browser only). Two players on one device is a small switch under the street; it has no scores.
+- The computer aims like a person (`aimComputer`): a rough first guess that reads only part of the wind, then after each throw it scales its power by how far it carried and adds what it thinks the change in wind is worth, so it overcorrects when the wind changes a lot. Its hand wobbles less as `skill` rises.
+- Each rival has its own sign and its own stretch of street (`STREETS`: roof heights and the skyline). On an upright screen the rooftops are closer and taller, so the tall screen is used for higher arcs; the shape is chosen when a match starts.
+- The picture (`scene.js`) is the same city as notchup.fi in the arcade's colours: navy night, stars, two skylines with lit windows, billboards on steel frames. It is drawn on one canvas; the street is cached and copied. The camera is still, nothing shakes or flashes, a hit is a soft ring and the rival's letters go dark. With `prefers-reduced-motion` a throw is shown at once instead of flying.
+- Win a match and the logo's gear turns four teeth and its arrow rises, as in Fuse Box.
+- Attract mode (`demo.js`) has two computer players trade throws by the real rules at a calm pace, then the logo notches up and this browser's top 5 shows.
 
 ## Adding a game
 
