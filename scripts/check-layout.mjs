@@ -4,6 +4,7 @@
 //
 // Each page, at each width, must have:
 // - no sideways scroll of the page itself (a game panel may scroll inside its own frame)
+// - on a game page, no scrolling up and down either: the whole game fits the screen
 // - no visible text under 16 px
 // - tap targets of at least 44 x 44 px; inside [data-small-target] (a game board) at least 24 x 24 px
 // - exactly one h1, alt text on every image, a label on every form field
@@ -33,6 +34,7 @@ function inspect() {
   const problems = [];
   const doc = document.documentElement;
   if (doc.scrollWidth > doc.clientWidth + 1) problems.push(`scrolls sideways: ${doc.scrollWidth} px wide in ${doc.clientWidth} px`);
+  if (document.body.classList.contains('game') && doc.scrollHeight > doc.clientHeight + 1) problems.push(`game scrolls: ${doc.scrollHeight} px tall in ${doc.clientHeight} px`);
 
   const visible = (el) => {
     const r = el.getBoundingClientRect();

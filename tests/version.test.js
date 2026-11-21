@@ -14,5 +14,5 @@ test('version matches the newest CHANGELOG heading', () => {
 });
 
 test('every page shows the same version before its script runs', () => {
-  for (const page of pages()) assert.match(read(page), new RegExp(`<li id="version">v${VERSION.replace(/\./g, '\\.')}</li>`), page);
+  for (const page of pages()) assert.match(read(page), new RegExp(`class="version">v${VERSION.replace(/\./g, '\\.')}<`), page);
 });

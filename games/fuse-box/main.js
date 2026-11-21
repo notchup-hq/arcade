@@ -1,9 +1,10 @@
 // Fuse Box on its own page: the panel is a grid of real buttons, so it works with a mouse, a finger, a
-// keyboard and a screen reader. Tap or click to test a fuse; tag one with a right click, a long press,
+// keyboard and a screen reader. The page fits the screen without scrolling: the cells are sized to the
+// room the panel has, and help and the hall of fame open in dialogs. Tap or click to test a fuse; tag one with a right click, a long press,
 // the T key, or the Tag button. The level lives in the link (?level=medium).
 
-import { gearSvg, NOTCH_STEP } from '../../js/gear.js';
 import { askInitials } from '../../js/initials.js';
+import { logoSvg } from '../../js/logo.js';
 import { memory } from '../../js/memory.js';
 import { formatDate, formatTime, placeOf } from '../../js/scores.js';
 import { initSettings } from '../../js/settings.js';
@@ -13,6 +14,8 @@ import { LEVELS, TAGGED, TESTED, fusesLeft, newPanel, shaped, testFuse, toggleTa
 const GAME = 'fuse-box';
 const ORDER = 'low'; // a faster time is better
 const LONG_PRESS_MS = 450;
+const MIN_CELL = 24; // WCAG's smallest target; below it the panel scrolls inside its frame
+const MAX_CELL = 52;
 
 const $ = (id) => document.getElementById(id);
 const ui = {
@@ -22,7 +25,10 @@ const ui = {
   tagMode: $('tag-mode'),
   again: $('again'),
   status: $('status'),
-  machine: $('machine'),
+  badge: $('badge'),
+  frame: $('frame'),
+  help: $('help'),
+  fame: $('fame'),
   scores: $('scores'),
   scoresCaption: $('scores-caption'),
   dialog: $('initials'),
@@ -102,7 +108,8 @@ function build() {
   ui.board.style.setProperty('--rows', p.rows);
   ui.board.dataset.level = level;
   ui.board.classList.remove('dark');
-  ui.machine.className = 'machine';
+  ui.badge.className = 'badge-logo';
+  fit();
   const frag = document.createDocumentFragment();
   buttons = [];
   for (let i = 0; i < p.cols * p.rows; i++) {
@@ -116,7 +123,7 @@ function build() {
   ui.board.replaceChildren(frag);
   paintAll();
   paintCounters();
-  say('Test any fuse to start. The first one is always good.');
+  say('Tap any fuse. The first is always safe.');
   renderScores();
 }
 
@@ -154,8 +161,8 @@ function lose() {
   sfx.spark();
   paintAll();
   ui.board.classList.add('dark');
-  ui.machine.className = 'machine sparked';
-  say('Spark! That fuse was blown and the panel went dark.');
+  ui.badge.className = 'badge-logo sparked';
+  say('Spark! That one was blown.');
   ui.again.focus();
 }
 
@@ -163,11 +170,11 @@ async function win() {
   stopClock();
   const ms = Math.round(elapsed());
   sfx.win();
-  for (let k = 1; k <= 360 / NOTCH_STEP; k++) sfx.notch(0.4 + k * 0.08);
+  for (let k = 1; k <= 4; k++) sfx.notch(0.4 + k * 0.25);
   paintAll();
   paintCounters();
-  ui.machine.className = 'machine fixed';
-  say(`Panel fixed in ${formatTime(ms)} s! The gear notches up.`);
+  ui.badge.className = 'badge-logo fixed';
+  say(`Fixed in ${formatTime(ms)} s. Notch up!`);
   const place = placeOf(memory.scores(board(), ORDER), ms, ORDER);
   if (place >= 0) {
     const initials = await askInitials(ui.dialog, { place, last: memory.initials() });
@@ -176,6 +183,8 @@ async function win() {
       lastAdded = place;
       renderScores();
       lastAdded = -1;
+      ui.fame.showModal();
+      return;
     }
   }
   ui.again.focus();
@@ -285,6 +294,20 @@ for (const r of ui.levels) {
   });
 }
 
-ui.machine.prepend(gearSvg('gear machine-gear'));
+/** Size the cells to the room the panel has: as big as fits, between MIN_CELL and MAX_CELL. */
+function fit() {
+  if (!p) return;
+  const pad = 20; // the panel's padding and border
+  const w = ui.frame.clientWidth - pad;
+  const h = ui.frame.clientHeight - pad;
+  const cell = Math.floor(Math.max(MIN_CELL, Math.min(MAX_CELL, w / p.cols, h / p.rows)));
+  ui.board.style.setProperty('--cell', `${cell}px`);
+}
+new ResizeObserver(fit).observe(ui.frame);
+
+$('help-open').addEventListener('click', () => ui.help.showModal());
+$('fame-open').addEventListener('click', () => { renderScores(); ui.fame.showModal(); });
+
+ui.badge.replaceChildren(logoSvg('logo badge-mark'));
 initSettings();
 build();

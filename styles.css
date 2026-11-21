@@ -1,7 +1,7 @@
 /* Notchup Arcade: one stylesheet for the hall and every game page. A dark neon hall in Notchup's navy
-   and gold, with cyan and magenta tubes. Mobile first. Colours live here as tokens only; canvas code
-   reads the --neon-* ones (js/attract.js), so a colour is changed in one place. Every animation sits
-   inside prefers-reduced-motion: no-preference. */
+   and gold, with cyan and magenta tubes. Mobile first; every page fits the screen without scrolling.
+   Colours live here as tokens only; canvas code reads the --neon-* ones (js/attract.js). Every
+   animation sits inside prefers-reduced-motion: no-preference and moves only transform or opacity. */
 
 :root {
   --neon-bg: #060b16;        /* the hall at night, a deeper Notchup navy */
@@ -81,6 +81,14 @@ button.primary {
   box-shadow: var(--glow-gold);
 }
 
+/* Icon buttons: a 24 px line drawing in a 44 px button. */
+button.icon { display: inline-grid; place-items: center; padding: 0; width: 44px; border-color: transparent; background: none; }
+button.icon:hover { border-color: var(--neon-dim); }
+button.icon svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+button.sound[aria-pressed] { box-shadow: none; border-color: transparent; }
+button.sound[aria-pressed="true"] .sound-off, button.sound[aria-pressed="false"] .sound-on { display: none; }
+button.sound[aria-pressed="false"] { color: var(--neon-muted); }
+
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -90,54 +98,54 @@ button.primary {
   white-space: nowrap;
 }
 
-/* The gear (js/gear.js): gold, turned by CSS. */
-.gear { display: inline-block; fill: var(--neon-gold); filter: drop-shadow(0 0 6px rgb(242 201 76 / 0.6)); }
+/* The Notchup logo (js/logo.js): the gear and the arrow move around the logo's centre. */
+.logo { display: block; width: 100%; height: 100%; overflow: visible; }
+.logo-gear, .logo-arrow { transform-origin: 0 0; }
+.marquee-logo img, .badge-logo img { display: block; width: 100%; height: 100%; }
 
 /* ---------- Hall ---------- */
 
-.marquee { text-align: center; padding: 2rem var(--gap) 1.5rem; }
+.marquee { position: relative; text-align: center; padding: 0.75rem var(--gap) 0.75rem; }
+.marquee .sound { position: absolute; top: 0.25rem; right: 0.25rem; }
+.marquee-title { display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+.marquee-logo { flex: none; width: 2.75rem; height: 2.75rem; filter: drop-shadow(0 0 8px rgb(242 201 76 / 0.35)); }
 .marquee h1 {
   margin: 0;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 0.2em 0.35em;
-  font: 800 clamp(2rem, 9vw, 4.25rem)/1.05 var(--mono);
+  font: 800 clamp(1.5rem, 7vw, 4rem)/1.05 var(--mono);
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
-.marquee-gear { width: 0.9em; height: 0.9em; }
 .marquee-brand { color: var(--neon-gold); text-shadow: var(--glow-gold); }
 .marquee-arcade { color: var(--neon-magenta); text-shadow: var(--glow-magenta); }
-.tagline { margin: 0.75rem auto 0; max-width: 34rem; color: var(--neon-muted); }
+.tagline { margin: 0.4rem auto 0; max-width: 34rem; color: var(--neon-muted); }
 .badge {
   display: inline-block;
-  margin: 0.75rem 0 0;
-  padding: 0.1rem 0.6rem;
+  padding: 0 0.5rem;
   border: 2px solid var(--neon-cyan);
   border-radius: 999px;
   color: var(--neon-cyan);
-  font: 700 1rem/1.5 var(--mono);
+  font: 700 1rem/1.4 var(--mono);
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
 
+/* Phone: the ready game is a big cabinet, the ones still coming share a row below it. */
 .cabinets {
   list-style: none;
   margin: 0;
-  padding: 0 0 2rem;
+  padding: 0 0 1rem;
   display: grid;
-  gap: 1.5rem;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+  gap: 0.75rem;
+  grid-template-columns: 1fr 1fr;
 }
+.cabinet:not(.soon) { grid-column: 1 / -1; }
 
 .cabinet > a, .cabinet-body {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem;
   height: 100%;
-  padding: 1rem;
+  padding: 0.75rem;
   border: 2px solid var(--neon-cyan);
   border-radius: 18px 18px var(--radius) var(--radius);
   background: linear-gradient(to bottom, #0f2240, var(--surface));
@@ -146,41 +154,29 @@ button.primary {
   text-decoration: none;
 }
 .cabinet > a:hover { border-color: var(--neon-gold); box-shadow: var(--glow-gold); color: var(--neon-ink); }
-.cabinet.soon .cabinet-body { border-color: var(--neon-dim); box-shadow: none; }
+.cabinet.soon .cabinet-body { border-color: var(--line); box-shadow: none; }
 
 .cabinet-name {
-  font: 800 1.5rem/1.2 var(--mono);
+  font: 800 1.25rem/1.2 var(--mono);
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--neon-gold);
   text-shadow: var(--glow-gold);
 }
-.soon .cabinet-name { color: var(--neon-muted); text-shadow: none; }
+.soon .cabinet-name { color: var(--neon-muted); text-shadow: none; font-size: 1rem; }
 
 .screen {
-  display: grid;
-  place-items: center;
-  aspect-ratio: 4 / 3;
-  border: 6px solid #02050b;
-  border-radius: 14px;
+  display: block;
+  aspect-ratio: 16 / 10;
+  border: 5px solid #02050b;
+  border-radius: 12px;
   background: var(--neon-bg);
   box-shadow: inset 0 0 30px rgb(0 0 0 / 0.9);
   overflow: hidden;
 }
 .screen-canvas { display: block; width: 100%; height: 100%; }
-.screen-soon {
-  font: 800 1.5rem/1 var(--mono);
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  color: var(--neon-dim);
-}
-/* On a phone the cabinets stack, so the ones still coming get a short screen and the ready game leads. */
-.soon .screen { aspect-ratio: 3 / 1; }
-@media (min-width: 40rem) {
-  .soon .screen { aspect-ratio: 4 / 3; }
-}
-.cabinet-pitch { flex: 1; color: var(--neon-muted); }
+.cabinet-pitch { flex: 1; color: var(--neon-muted); display: none; }
 .cabinet-play {
   font: 700 1rem/1.5 var(--mono);
   text-align: center;
@@ -191,45 +187,69 @@ button.primary {
 }
 .soon .cabinet-play { color: var(--neon-muted); text-shadow: none; }
 
-/* ---------- Footer ---------- */
-
-.site-footer {
-  padding: 1.5rem var(--gap) 2rem;
-  border-top: 1px solid var(--line);
-  text-align: center;
-  color: var(--neon-muted);
+/* Wider screens: three cabinets side by side, each with its screen and pitch. */
+@media (min-width: 48rem) {
+  .marquee { padding: 2rem var(--gap) 1.5rem; }
+  .marquee-logo { width: 4.5rem; height: 4.5rem; }
+  .cabinets { grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+  .cabinet:not(.soon) { grid-column: auto; }
+  .cabinet > a, .cabinet-body { padding: 1rem; gap: 0.75rem; }
+  .cabinet-name { font-size: 1.5rem; }
+  .screen { aspect-ratio: 4 / 3; }
+  .cabinet-pitch, .soon .cabinet-pitch { display: block; }
+  .soon .cabinet-name { font-size: 1.5rem; }
+  .soon .cabinet-body::after {
+    content: "";
+    order: 1;
+    aspect-ratio: 4 / 3;
+    border: 5px solid #02050b;
+    border-radius: 12px;
+    background: var(--neon-bg);
+  }
+  .soon .cabinet-pitch, .soon .cabinet-play { order: 2; }
 }
-.site-footer p { margin: 0.25rem 0; }
-.links { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 0 1rem; }
-@media (min-width: 40rem) {
-  .links { gap: 0; }
-  .links li + li::before { content: "·"; padding: 0 0.4rem; }
-}
-.site-footer a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 0.25rem; }
-.settings { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; margin-top: 0.75rem; }
 
-/* ---------- Game pages ---------- */
+/* ---------- Footer: one slim line ---------- */
+
+.site-footer { padding: 0.25rem var(--gap) 0.5rem; color: var(--neon-muted); }
+.links { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 0 0.75rem; }
+.links a { display: inline-flex; align-items: center; min-height: 44px; }
+
+/* ---------- Game pages: everything on one screen ---------- */
+
+body.game { height: 100dvh; min-height: 0; }
 
 .game-bar {
   display: flex;
   align-items: center;
-  gap: var(--gap);
-  padding: 0.5rem var(--gap);
+  gap: 0.5rem;
+  padding: 0.25rem var(--gap);
   max-width: 72rem;
   width: 100%;
   margin: 0 auto;
 }
-.back { display: inline-flex; align-items: center; min-height: 44px; font-family: var(--mono); }
+.back { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; font-family: var(--mono); white-space: nowrap; }
+
+.back-text { margin-left: 0.3em; }
+/* On the narrowest phones the back link is just the arrow; the word stays for screen readers. */
+@media (max-width: 22.4rem) {
+  .game-bar { padding: 0.25rem 0.5rem; gap: 0.25rem; }
+  .back-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+}
 .game-bar h1 {
+  flex: 1;
   margin: 0;
-  font: 800 clamp(1.5rem, 6vw, 2.25rem)/1.1 var(--mono);
+  text-align: center;
+  font: 800 clamp(1.25rem, 6vw, 2rem)/1.1 var(--mono);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--neon-gold);
   text-shadow: var(--glow-gold);
+  white-space: nowrap;
 }
+.tools { display: flex; }
 
-.game-main { display: flex; flex-direction: column; align-items: center; gap: 1rem; padding-bottom: 2rem; }
+.game-main { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; min-height: 0; padding-bottom: 0.75rem; }
 
 .levels { display: flex; gap: 0.5rem; margin: 0; padding: 0; border: 0; }
 .levels label {
@@ -237,7 +257,7 @@ button.primary {
   align-items: center;
   gap: 0.4rem;
   min-height: 44px;
-  padding: 0 0.9rem;
+  padding: 0 0.8rem;
   border: 2px solid var(--neon-dim);
   border-radius: var(--radius);
   cursor: pointer;
@@ -245,44 +265,32 @@ button.primary {
 .levels label:has(:checked) { border-color: var(--neon-cyan); box-shadow: var(--glow-cyan); }
 .levels input { accent-color: var(--neon-cyan); width: 1.1rem; height: 1.1rem; margin: 0; }
 
-.console { display: flex; align-items: center; justify-content: center; gap: 1.25rem; }
-.readout { margin: 0; display: flex; flex-direction: column; align-items: center; min-width: 6rem; }
-.readout-label { color: var(--neon-muted); font-size: 1rem; }
+.console { display: flex; align-items: center; justify-content: center; gap: 1.5rem; }
+.readout { margin: 0; display: flex; flex-direction: column; align-items: center; min-width: 4.5rem; line-height: 1.2; }
+.readout-label { color: var(--neon-muted); }
 .readout-value {
-  font: 800 1.75rem/1.1 var(--mono);
+  font: 800 1.5rem/1.1 var(--mono);
   color: var(--neon-red);
   text-shadow: 0 0 8px rgb(255 107 107 / 0.6);
   font-variant-numeric: tabular-nums;
 }
+.badge-logo { width: 3.25rem; height: 3.25rem; }
+.badge-logo.sparked .logo { filter: grayscale(1) brightness(0.6); }
 
-/* The main switch: the Notchup gear and a lever that clicks up a notch when the panel is fixed. */
-.machine { position: relative; width: 4rem; height: 4rem; display: grid; place-items: center; }
-.machine-gear { width: 100%; height: 100%; }
-.lever {
-  position: absolute;
-  right: -0.9rem;
-  bottom: 0.4rem;
-  width: 0.5rem;
-  height: 1.8rem;
-  border-radius: 0.25rem;
-  background: var(--neon-cyan);
-  box-shadow: var(--glow-cyan);
-  transform-origin: 50% 100%;
-  transform: rotate(35deg);
+/* The panel takes whatever room is left; js sets --cell to the biggest size that fits. Below 24 px
+   cells it scrolls inside this frame, never the page. */
+.panel-frame {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: grid;
+  place-items: center;
+  overflow: auto;
 }
-.machine.fixed .lever { transform: rotate(-20deg); background: var(--neon-green); }
-.machine.sparked .gear { fill: var(--neon-dim); filter: none; }
-.machine.sparked .lever { background: var(--neon-red); }
-
-/* The panel: one CSS grid of buttons, sized to fit the window's width and, where it can, its height
-   (the controls take about 17rem). Cells are at least 26 px (WCAG's 24 px plus room); a panel wider
-   than the window scrolls inside its frame, never the page. */
-.panel-frame { max-width: 100%; overflow-x: auto; padding: 4px; }
 .panel {
-  --cell: clamp(26px, min((100vw - 2 * var(--gap) - 24px) / var(--cols), (100dvh - 17rem) / var(--rows)), 44px);
+  --cell: 32px;
   display: grid;
   grid-template-columns: repeat(var(--cols), var(--cell));
-  gap: 0;
   padding: 6px;
   border: 2px solid var(--neon-cyan);
   border-radius: var(--radius);
@@ -332,41 +340,34 @@ button.primary {
   background: linear-gradient(45deg, transparent 44%, var(--neon-red) 44% 56%, transparent 56%);
 }
 
-.status { margin: 0; min-height: 3em; text-align: center; max-width: 34rem; }
+.status { margin: 0; min-height: 1.5em; text-align: center; }
 .actions { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; }
 
-.how { width: 100%; max-width: 34rem; border: 1px solid var(--line); border-radius: var(--radius); padding: 0 1rem; }
-.how summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; font-weight: 700; }
-.how ul { padding-left: 1.25rem; }
-
-.fame { width: 100%; max-width: 34rem; }
-.fame h2 {
-  margin: 0 0 0.5rem;
-  text-align: center;
-  font: 800 1.5rem/1.2 var(--mono);
-  text-transform: uppercase;
-  color: var(--neon-cyan);
-  text-shadow: var(--glow-cyan);
-}
-.fame table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-variant-numeric: tabular-nums; }
-.fame caption { color: var(--neon-muted); padding-bottom: 0.25rem; }
-.fame th, .fame td { padding: 0.35rem 0.5rem; text-align: left; border-bottom: 1px solid var(--line); }
-.fame th { color: var(--neon-muted); font-weight: 400; }
-.fame tbody tr:first-child td { color: var(--neon-gold); }
-.fame tr.new td { color: var(--neon-magenta); }
-
-.initials {
-  max-width: min(22rem, calc(100vw - 2 * var(--gap)));
-  padding: 1.5rem;
-  border: 2px solid var(--neon-magenta);
+/* Dialogs: help, hall of fame, initials. */
+.sheet {
+  width: min(30rem, calc(100vw - 2 * var(--gap)));
+  max-height: calc(100dvh - 2 * var(--gap));
+  padding: 1.25rem;
+  border: 2px solid var(--neon-cyan);
   border-radius: var(--radius);
   background: var(--surface);
   color: var(--neon-ink);
-  box-shadow: var(--glow-magenta);
-  text-align: center;
+  box-shadow: var(--glow-cyan);
 }
-.initials::backdrop { background: rgb(2 5 11 / 0.75); }
-.initials h2 { margin: 0 0 1rem; font: 800 1.5rem/1.2 var(--mono); color: var(--neon-gold); text-shadow: var(--glow-gold); }
+.sheet::backdrop { background: rgb(2 5 11 / 0.75); }
+.sheet h2 { margin: 0 0 0.75rem; text-align: center; font: 800 1.5rem/1.2 var(--mono); text-transform: uppercase; color: var(--neon-cyan); text-shadow: var(--glow-cyan); }
+.sheet ul { padding-left: 1.25rem; }
+.sheet .actions { margin-top: 1rem; }
+.credit { color: var(--neon-muted); }
+.sheet table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.sheet caption { color: var(--neon-muted); padding-bottom: 0.25rem; }
+.sheet th, .sheet td { padding: 0.3rem 0.4rem; text-align: left; border-bottom: 1px solid var(--line); }
+.sheet th { color: var(--neon-muted); font-weight: 400; }
+.sheet tbody tr:first-child td { color: var(--neon-gold); }
+.sheet tbody tr.new td { color: var(--neon-magenta); }
+
+.initials { width: min(22rem, calc(100vw - 2 * var(--gap))); border-color: var(--neon-magenta); box-shadow: var(--glow-magenta); text-align: center; }
+.initials h2 { color: var(--neon-gold); text-shadow: var(--glow-gold); }
 .initials label { display: block; margin-bottom: 0.5rem; }
 .initials input {
   width: 6ch;
@@ -381,24 +382,31 @@ button.primary {
   letter-spacing: 0.15em;
 }
 .initials-error { color: var(--neon-red); margin: 0.5rem 0 0; }
-.initials-note { color: var(--neon-muted); margin: 0.5rem 0 1rem; }
 
 .note { text-align: center; color: var(--neon-muted); }
 
 /* ---------- Motion, only when the visitor has not asked for less ---------- */
 
 @media (prefers-reduced-motion: no-preference) {
-  .marquee-gear { animation: notch-up 6s steps(12) infinite; }
-  .cabinet-play { animation: blink 1.6s steps(2, jump-none) infinite; }
+  /* The hall's logo: the gear rolls slowly, and now and then the arrow notches up and settles back. */
+  .marquee-mark .logo-gear { animation: roll 40s linear infinite; }
+  .marquee-mark .logo-arrow { animation: notch-up 8s ease-in-out infinite; }
   .cabinet > a { transition: transform 0.15s ease-out; }
   .cabinet > a:hover { transform: translateY(-3px); }
-  .lever { transition: transform 0.25s cubic-bezier(0.3, 1.6, 0.5, 1); }
-  .machine.fixed .gear { animation: notch-up 1s steps(12) 0.4s 1; }
-  .machine.sparked .gear { animation: shake 0.3s linear 1; }
+  /* A fixed panel: the gear turns four teeth, one at a time, and the arrow rises and stays up. */
+  .badge-logo.fixed .logo-gear { animation: four-notches 1.2s steps(4, end) 0.3s 1 both; }
+  .badge-logo.fixed .logo-arrow { animation: rise 0.6s cubic-bezier(0.3, 1.6, 0.5, 1) 0.3s 1 both; }
+  .badge-logo.sparked .logo { animation: shake 0.3s linear 1; }
   .fuse.lit { animation: light-up 0.25s ease-out 1; }
 }
 
-@keyframes notch-up { to { transform: rotate(360deg); } }
-@keyframes blink { 50% { opacity: 0.35; } }
+@keyframes roll { to { transform: rotate(360deg); } }
+@keyframes notch-up {
+  0%, 82%, 100% { transform: translate(0, 0); }
+  88% { transform: translate(9px, -9px); }
+  94% { transform: translate(6px, -6px); }
+}
+@keyframes four-notches { to { transform: rotate(120deg); } }
+@keyframes rise { to { transform: translate(10px, -10px); } }
 @keyframes shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
 @keyframes light-up { from { background: rgb(94 242 255 / 0.35); } }
