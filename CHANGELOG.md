@@ -13,6 +13,7 @@ All notable changes to this project are listed here, newest first. The format fo
 
 ### Changed
 
+- Each page's source carries `<meta name="build" content="abc1234 2026-11-21">`: the short commit and date of the deploy, stamped by Cloudflare's build command (`scripts/stamp-build.mjs`). Locally it says `dev`.
 - The hall no longer calls the games "original": the tagline, meta descriptions and README say "tiny classic arcade games".
 - The hall is calmer: the logo is a still mark that links to the Notchup home page and glows softly on hover. Cabinets no longer lift on hover; they light up gold.
 
