@@ -6,7 +6,7 @@ Neon arcade of tiny classic arcade games by Notchup. Plain HTML, CSS and JS: no 
 
 **Made by Notchup:** this arcade is a free side project of [Notchup](https://www.notchup.fi), a small Finnish software company. Come and see what else we make at **[www.notchup.fi](https://www.notchup.fi)**.
 
-Alpha (v0.1). One game so far, more on the way.
+Alpha (v0.1). Two games so far, more on the way.
 
 ## The games
 
@@ -14,14 +14,14 @@ Alpha (v0.1). One game so far, more on the way.
 |---|---|
 | **Fuse Box** | A logic puzzle. Every lit fuse shows how many of its neighbours are blown; find them all without testing one. Three levels, and the panel turns to fit a phone. |
 | **Lob** | A rooftop duel at night. Lob glowing bulbs across the street at your rival's billboard, with the wind changing every throw. Three hits win. Play a run against computer rivals who get better one after another, or share one device with a friend. |
-| **Night Shift** | Coming soon: keep the drones off the billboard until sunrise. |
+| **Patch Night** | A times-table bug zapper. Bugs crawl in with answers on their backs; zap the one that is right before it reaches the logo. Three levels, and the facts you miss come back until you know them. |
 
 Every game is our own: names, art, rules and levels. The hall shows each game playing itself on its cabinet's screen, and each game keeps a top 10 with three-letter initials, in your browser only.
 
 ## Why it's built this way
 
 - **Light:** each page loads in under 50 KB, the size of one small photo. No framework, no build step, no downloads besides the site itself; even the sounds are made in code.
-- **Private:** no cookies, no ads, no tracking, no requests to anyone else. Your high scores and sound setting stay in this browser.
+- **Private:** no cookies, no ads, no tracking, no requests to anyone else. Your high scores, sound setting and the few times-table facts you missed stay in this browser.
 - **Phone first:** made for a thumb, and just as good with a mouse and a keyboard. Checked in a real browser at 320, 360, 768 and 1280 px wide.
 
 ## Run it locally

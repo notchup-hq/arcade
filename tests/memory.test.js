@@ -67,3 +67,22 @@ test('with storage blocked the arcade still works, and a score lasts while the p
   assert.equal(table.length, 1);
   assert.equal(m.scores('fuse-box:easy', 'low').length, 1);
 });
+
+test('missed facts are kept per board, bounded and cleaned', () => {
+  const s = fakeStorage();
+  const m = createMemory(() => s);
+  assert.deepEqual(m.weak('patch-night:medium'), []);
+  m.setWeak('patch-night:medium', ['7x8', 'bad', '7x8', ...Array.from({ length: 30 }, (_, i) => `2x${i + 1}`)]);
+  const kept = createMemory(() => s).weak('patch-night:medium');
+  assert.equal(kept.length, 20);
+  assert.equal(kept[0], '7x8');
+  assert.ok(kept.every((k) => /^\d{1,2}x\d{1,2}$/.test(k)));
+  m.setWeak('patch-night:medium', []);
+  assert.deepEqual(createMemory(() => s).weak('patch-night:medium'), []);
+});
+
+test('missed facts work with blocked storage', () => {
+  const m = createMemory(blocked);
+  m.setWeak('patch-night:simple', ['3x4']);
+  assert.deepEqual(m.weak('patch-night:simple'), ['3x4']);
+});
