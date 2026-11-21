@@ -5,6 +5,8 @@
 // you think are blown; test every good one to fix the panel. The first test is always safe, and so
 // are its neighbours, because the blown fuses are placed only after it.
 
+import { seeded } from '../../js/random.js';
+
 // Sizes for a landscape screen; on a portrait screen (most phones) the panel turns, see shaped().
 export const LEVELS = {
   easy: { cols: 8, rows: 8, blown: 10 },
@@ -21,17 +23,7 @@ export const UNTESTED = 0;
 export const TESTED = 1;
 export const TAGGED = 2;
 
-/** A small, fast, seedable random number generator (mulberry32), so a demo or a test can replay. */
-export function seeded(seed) {
-  let a = seed >>> 0;
-  return () => {
-    a = (a + 0x6d2b79f5) >>> 0;
-    let x = a;
-    x = Math.imul(x ^ (x >>> 15), x | 1);
-    x ^= x + Math.imul(x ^ (x >>> 7), x | 61);
-    return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
-  };
-}
+export { seeded };
 
 /** A fresh panel. status: 'ready' (nothing tested), 'playing', 'won' or 'lost'. */
 export function newPanel({ cols, rows, blown }) {
