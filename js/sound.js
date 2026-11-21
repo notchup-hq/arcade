@@ -64,4 +64,8 @@ export const sfx = {
   notch: (delay = 0) => tone(1320, 0.03, { delay, volume: 0.05 }),
   win: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.12, { delay: i * 0.09 })),
   start: () => tone([330, 660], 0.12, { type: 'triangle' }),
+  /** A bulb leaving a hand, a soft pop where it hits, a dull thud where it does not. */
+  lob: () => tone([300, 620], 0.16, { type: 'triangle' }),
+  pop: () => { tone([700, 350], 0.14, { type: 'sine', volume: 0.07 }); noise(0.08, { volume: 0.04 }); },
+  thud: () => tone([140, 60], 0.12, { type: 'triangle', volume: 0.07 }),
 };
