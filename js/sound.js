@@ -68,4 +68,9 @@ export const sfx = {
   lob: () => tone([300, 620], 0.16, { type: 'triangle' }),
   pop: () => { tone([700, 350], 0.14, { type: 'sine', volume: 0.07 }); noise(0.08, { volume: 0.04 }); },
   thud: () => tone([140, 60], 0.12, { type: 'triangle', volume: 0.07 }),
+  /** A soft zap, a low buzz for a wrong one, and a light going out. */
+  zap: () => tone([1100, 1500], 0.1, { type: 'sine', volume: 0.06 }),
+  sparkle: () => [1500, 1900, 2300].forEach((f, i) => tone(f, 0.08, { type: 'sine', delay: 0.05 + i * 0.05, volume: 0.035 })),
+  buzz: () => tone([150, 120], 0.2, { type: 'triangle', volume: 0.07 }),
+  lampOut: () => tone([330, 165], 0.35, { type: 'triangle', volume: 0.07 }),
 };

@@ -91,9 +91,10 @@ const pathOf = (points) => {
 
 /**
  * Draw the logo on a canvas: centre x, y, `size` across, the gear turned by `turn` degrees and the
- * arrow lifted by `lift` (0 to 1, a notch up and to the right).
+ * arrow lifted by `lift` (0 to 1, a notch up and to the right) and turned by `aim` degrees around the
+ * centre (0 keeps it pointing up and to the right).
  */
-export function drawLogo(ctx, { x, y, size, turn = 0, lift = 0 }) {
+export function drawLogo(ctx, { x, y, size, turn = 0, lift = 0, aim = 0 }) {
   const lin = (stops) => {
     const g = ctx.createLinearGradient(-VIEW, -VIEW, VIEW, VIEW);
     stops.forEach((c, i) => g.addColorStop(i / (stops.length - 1), c));
@@ -114,6 +115,7 @@ export function drawLogo(ctx, { x, y, size, turn = 0, lift = 0 }) {
   for (const [f, points] of STAR) { ctx.fillStyle = fill[f]; ctx.fill(pathOf(points)); }
   ctx.save();
   ctx.translate(lift * 10, -lift * 10);
+  ctx.rotate((aim * Math.PI) / 180);
   ctx.strokeStyle = COLOURS.line; ctx.lineWidth = 1.2; ctx.lineJoin = 'round';
   for (const [f, points] of ARROW) { ctx.fillStyle = fill[f]; ctx.fill(pathOf(points)); ctx.stroke(pathOf(points)); }
   ctx.restore();
