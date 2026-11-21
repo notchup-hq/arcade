@@ -4,7 +4,7 @@
 
 | Path | What |
 |---|---|
-| `index.html`, `js/hall.js` | The hall: one cabinet per game. A ready game plays itself on its screen; the rest say "Soon". Without JavaScript the cabinets are plain links. |
+| `index.html`, `js/hall.js` | The hall: one arcade cabinet per game (below). A ready game plays itself on its screen; the rest say "Coming soon". Without JavaScript the cabinets are plain links. |
 | `games/<game>/` | One folder per game: `index.html` (its page), `main.js` (the page's code), `rules.js` (the rules, no DOM, tested), `demo.js` (attract mode for the hall). |
 | `js/` | Shared by the hall and every game (below). |
 | `styles.css` | The one stylesheet. Colour tokens `--neon-*` are read by canvas code too. |
@@ -24,6 +24,13 @@
 | `initials.js` | The "New high score" dialog (native `<dialog>`). |
 | `settings.js` | The sound switch (an icon button) and the version. |
 
+## Cabinets and the zoom into a game
+
+- Each cabinet is an arcade machine drawn in CSS only, no images: a lit marquee with the name, the screen in its bezel with a still glass sheen, a control panel that sticks out past the sides (a stick and three buttons, decoration hidden from screen readers), and the base with the pitch (wide screens only) and a lit Play plate. A game still coming has its marquee unlit, its screen off with a faint Notchup mark, and "Coming soon" on its base. Nothing on a cabinet moves on its own; only the demo on a ready screen does.
+- Phones: the ready game is one big cabinet, the coming ones share a row below it. From 768 px: three cabinets side by side.
+- Opening a game, the cabinet's screen grows into the game's play area (`.game-main`) in 0.3 s, and going back it shrinks into the screen again. This is a cross-document view transition, pure CSS: `@view-transition` opts both pages in, the screen and the play area share a `view-transition-name` (one per game, since a name may be used once per page), and the growing box is a solid lit screen so the pages never show through each other. The demo's picture fades out in 0.12 s, before it is stretched much.
+- Browsers without cross-document view transitions get a normal page load. Under `prefers-reduced-motion: reduce` the `@view-transition` rule is off, so every visitor who asked for less motion gets a normal page load too. `tests/site.test.js` checks both the names and this.
+
 ## Fuse Box
 
 - A panel is a grid of fuses; some are blown. Testing a good fuse lights it and shows how many of its eight neighbours are blown; a fuse with none lights its neighbours too. Testing a blown fuse sparks and the game is over. Test every good fuse to fix the panel.
@@ -37,7 +44,7 @@
 ## Adding a game
 
 1. `games/<name>/` with `rules.js` (pure, with tests in `tests/<name>.test.js`), `main.js`, `index.html` (copy the Fuse Box page's head, bar and dialogs) and `demo.js` (`{ step(dt), draw(ctx, w, h, colours) }`).
-2. Its cabinet in `index.html` with `data-game="<name>"`, and its demo in `DEMOS` in `js/hall.js`.
+2. Its cabinet in `index.html` with `data-game="<name>"` (copy a ready one), its demo in `DEMOS` in `js/hall.js`, `data-game="<name>"` on its page's `<body>`, and its line next to Fuse Box's `view-transition-name` rule in `styles.css` (`tests/site.test.js` says what is missing).
 3. Its page in `sitemap.xml` and in `PAGES` in `scripts/check-layout.mjs`.
 4. Keep the preload lists whole (`tests/preload.test.js` says what is missing) and the budget green.
 5. Pick an original name and check it is not another game's: add the names you checked against to `tests/originality.test.js`.

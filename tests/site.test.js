@@ -30,3 +30,21 @@ test('pages have no inline scripts, inline styles or event handler attributes', 
     assert.doesNotMatch(read(f), /\.innerHTML\s*=|setAttribute\(\s*['"]style['"]/, `${f}: markup or styles from strings`);
   }
 });
+
+test('every ready cabinet zooms into its own game with a view transition name of its own', () => {
+  const css = read('styles.css');
+  const games = [...read('index.html').matchAll(/class="cabinet" data-game="([a-z-]+)"/g)].map((m) => m[1]);
+  assert.ok(games.length > 0);
+  for (const game of games) {
+    assert.match(read(`games/${game}/index.html`), new RegExp(`<body class="game" data-game="${game}">`), `${game}: body data-game`);
+    const rule = new RegExp(`\\.cabinet\\[data-game="${game}"\\] \\.screen, \\.game\\[data-game="${game}"\\] \\.game-main \\{ view-transition-name: ${game}; \\}`);
+    assert.match(css, rule, `${game}: view-transition-name rule in styles.css`);
+  }
+});
+
+test('the zoom between pages runs only when the visitor has not asked for less motion', () => {
+  const css = read('styles.css');
+  const motion = css.slice(css.indexOf('@media (prefers-reduced-motion: no-preference)'));
+  assert.equal(css.match(/@view-transition/g).length, 1);
+  assert.match(motion, /@view-transition \{ navigation: auto; \}/);
+});
