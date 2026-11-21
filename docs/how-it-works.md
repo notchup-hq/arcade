@@ -17,7 +17,7 @@
 |---|---|
 | `loop.js` | `requestAnimationFrame` loop with a fixed timestep; stops in hidden tabs. |
 | `attract.js` | Runs a game's demo on a cabinet canvas: sharp at any pixel ratio, paused off screen, one still frame with reduced motion, redrawn only when the demo says something changed. |
-| `logo.js` | The Notchup logo in parts (gear, compass, arrow), with the same shapes as `assets/mark.svg` (`tests/logo.test.js`), as inline SVG or on canvas. In the hall the gear rolls once in 40 s and the arrow notches up every 8 s; on a win the gear turns four teeth and the arrow rises. |
+| `logo.js` | The Notchup logo in parts (gear, compass, arrow), with the same shapes as `assets/mark.svg` (`tests/logo.test.js`), as inline SVG or on canvas. In the hall the logo is a button and stays still until tapped: then the gear turns four teeth with a click each and the arrow notches up once; on a win the gear turns four teeth and the arrow rises. |
 | `sound.js` | Sound effects made with the Web Audio API, no files. The audio context starts on the first sound, which always follows a tap. |
 | `scores.js` | High score rules: top 10 per board, ordered by time (`low`) or points (`high`), initials A–Z and Å Ä Ö. Pure. |
 | `memory.js` | The only code that uses `localStorage`: one key, `arcade:v1`, holding the sound setting, the last initials and the tables. Works without storage. |

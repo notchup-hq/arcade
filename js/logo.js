@@ -1,4 +1,4 @@
-// The Notchup logo, in parts, so it can move: the gear turns slowly while the compass stays put, and
+// The Notchup logo, in parts, so it can move: the gear turns while the compass stays put, and
 // the arrow notches up. The shapes are the ones in assets/mark.svg (tests/logo.test.js keeps the two
 // the same); the static file stays the favicon. One module draws it as inline SVG and on canvas.
 

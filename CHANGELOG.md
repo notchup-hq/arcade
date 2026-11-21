@@ -9,6 +9,10 @@ All notable changes to this project are listed here, newest first. The format fo
 - The hall's cabinets look like real arcade machines, all in CSS: a lit marquee, the screen in its bezel with the game playing itself, a control panel with a stick and buttons, and a lit Play plate. Games still coming stand unlit with their screens off.
 - Opening a game, the cabinet's screen grows into the game in 0.3 s, and shrinks back on the way out. Browsers without view transitions, and visitors who ask for less motion, get a normal page load.
 
+### Changed
+
+- The hall is calmer: the logo stays still until you tap it, then its gear turns four teeth with a click each and its arrow notches up. Cabinets no longer lift on hover; they light up gold.
+
 ## 0.1.0 – 2026-11-21
 
 The first alpha: the hall and one game.
