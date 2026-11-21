@@ -109,6 +109,9 @@ button.sound[aria-pressed="false"] { color: var(--neon-muted); }
 .marquee .sound { position: absolute; top: 0.25rem; right: 0.25rem; }
 .marquee-title { display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
 .marquee-logo { flex: none; width: 2.75rem; height: 2.75rem; filter: drop-shadow(0 0 8px rgb(242 201 76 / 0.35)); }
+/* On hover or keyboard focus a soft gold light glows behind the mark. */
+a.marquee-logo { border-radius: 50%; transition: background-color 0.2s, box-shadow 0.2s; }
+a.marquee-logo:hover, a.marquee-logo:focus-visible { background: radial-gradient(circle, rgb(242 201 76 / 0.28), rgb(242 201 76 / 0.08) 65%, transparent 72%); box-shadow: 0 0 22px rgb(242 201 76 / 0.45); }
 .marquee h1 {
   margin: 0;
   font: 800 clamp(1.5rem, 7vw, 4rem)/1.05 var(--mono);
