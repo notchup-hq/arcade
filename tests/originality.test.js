@@ -1,4 +1,4 @@
-// The arcade's games are original: our own names, art, rules text and levels. Genres and mechanics
+// The arcade's games are our own takes on classic genres: our own names, art, rules text and levels. Genres and mechanics
 // are free to use; other games' names are not ours to use, not even to describe ours. This fails if
 // a well-known game's name appears anywhere in the repo, so no page, doc or commit-ready file leans
 // on someone else's brand. Add a name here before it can slip in.
