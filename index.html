@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="styles.css">
   <!-- Every module hall.js pulls in, fetched at once (tests/preload.test.js keeps the list whole). -->
   <link rel="modulepreload" href="js/attract.js">
-  <link rel="modulepreload" href="js/gear.js">
+  <link rel="modulepreload" href="js/logo.js">
   <link rel="modulepreload" href="js/loop.js">
   <link rel="modulepreload" href="js/memory.js">
   <link rel="modulepreload" href="js/scores.js">
@@ -31,9 +31,12 @@
 </head>
 <body class="hall">
   <header class="marquee">
-    <h1><span class="marquee-brand">Notchup</span> <span class="marquee-arcade">Arcade</span></h1>
-    <p class="tagline">Tiny original games. No coins needed: notch up to play.</p>
-    <p class="badge">Alpha</p>
+    <div class="marquee-title">
+      <div id="logo" class="marquee-logo"><img src="assets/mark.svg" alt="" width="64" height="64"></div>
+      <h1><span class="marquee-brand">Notchup</span> <span class="marquee-arcade">Arcade</span></h1>
+    </div>
+    <p class="tagline">Tiny original games. <span class="badge">Alpha</span></p>
+    <button type="button" id="sound" class="icon sound" aria-pressed="true" aria-label="Sound" title="Sound"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10h3l4-4v12l-4-4H4z"/><path class="sound-on" d="M15 9a4 4 0 0 1 0 6M17.5 6.5a7.5 7.5 0 0 1 0 11"/><path class="sound-off" d="M15 9l6 6M21 9l-6 6"/></svg></button>
   </header>
 
   <main>
@@ -43,13 +46,12 @@
           <span class="cabinet-name">Fuse Box</span>
           <span class="screen"><canvas class="screen-canvas" aria-hidden="true"></canvas></span>
           <span class="cabinet-pitch">Find the blown fuses before you test them. A logic puzzle.</span>
-          <span class="cabinet-play">Notch up to play</span>
+          <span class="cabinet-play">Play</span>
         </a>
       </li>
       <li class="cabinet soon">
         <div class="cabinet-body">
           <span class="cabinet-name">Lob</span>
-          <span class="screen"><span class="screen-soon">Soon</span></span>
           <span class="cabinet-pitch">A rooftop duel: wind, angle, power. Gears fly.</span>
           <span class="cabinet-play">Coming soon</span>
         </div>
@@ -57,7 +59,6 @@
       <li class="cabinet soon">
         <div class="cabinet-body">
           <span class="cabinet-name">Night Shift</span>
-          <span class="screen"><span class="screen-soon">Soon</span></span>
           <span class="cabinet-pitch">Keep the drones off the billboard until sunrise.</span>
           <span class="cabinet-play">Coming soon</span>
         </div>
@@ -67,15 +68,11 @@
 
   <footer class="site-footer">
     <ul class="links">
-      <li><a href="https://notchup.fi">Made by Notchup</a></li>
-      <li><a href="https://github.com/notchup-hq/arcade">Source on GitHub</a></li>
-      <li>MIT licence</li>
-      <li id="version">v0.1.0</li>
+      <li><a href="https://www.notchup.fi">Made by Notchup</a></li>
+      <li><a href="https://github.com/notchup-hq/arcade">Source</a></li>
+      <li>No ads, no cookies, no tracking</li>
+      <li class="version">v0.1.0</li>
     </ul>
-    <p>No ads, no cookies, no tracking. High scores stay in this browser.</p>
-    <p class="settings">
-      <button type="button" id="sound" aria-pressed="true">Sound on</button>
-    </p>
   </footer>
 </body>
 </html>

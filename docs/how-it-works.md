@@ -17,12 +17,12 @@
 |---|---|
 | `loop.js` | `requestAnimationFrame` loop with a fixed timestep; stops in hidden tabs. |
 | `attract.js` | Runs a game's demo on a cabinet canvas: sharp at any pixel ratio, paused off screen, one still frame with reduced motion, redrawn only when the demo says something changed. |
-| `gear.js` | The Notchup gear (12 teeth, one taller: the notch) for canvas and inline SVG. It turns one tooth at a time: "notching up". |
+| `logo.js` | The Notchup logo in parts (gear, compass, arrow), with the same shapes as `assets/mark.svg` (`tests/logo.test.js`), as inline SVG or on canvas. In the hall the gear rolls once in 40 s and the arrow notches up every 8 s; on a win the gear turns four teeth and the arrow rises. |
 | `sound.js` | Sound effects made with the Web Audio API, no files. The audio context starts on the first sound, which always follows a tap. |
 | `scores.js` | High score rules: top 10 per board, ordered by time (`low`) or points (`high`), initials A–Z and Å Ä Ö. Pure. |
 | `memory.js` | The only code that uses `localStorage`: one key, `arcade:v1`, holding the sound setting, the last initials and the tables. Works without storage. |
 | `initials.js` | The "New high score" dialog (native `<dialog>`). |
-| `settings.js` | The footer: sound switch and version. |
+| `settings.js` | The sound switch (an icon button) and the version. |
 
 ## Fuse Box
 
@@ -30,13 +30,13 @@
 - The first test is always safe, and so are its neighbours: the blown fuses are placed after it.
 - Tag a suspected blown fuse: right click, long press (with a short buzz where the phone can), the T or F key, or Tag mode. Testing a lit number again when all its blown neighbours are tagged tests the rest around it.
 - Levels: Easy 8×8 with 10 blown, Medium 13×9 with 22, Hard 18×10 with 40. On a portrait screen the panel turns (9×13, 10×18) so cells stay big; the fuse count is the same, so times compare. The level is in the link (`?level=hard`).
-- Cells are sized to fit the window (width and height), between 26 and 44 px. The panel is a grid of real buttons with one tab stop: arrow keys move, Enter tests, and each button says its row, column and state to a screen reader.
-- On a win the gear turns a full circle one notch at a time and the lever clicks up. A time that makes the top 10 of its level asks for initials.
-- Attract mode (`demo.js`) plays Easy by the same rules, knowing where the blown fuses are, then shows the gear notching up and this browser's top 5 for Easy.
+- The page fits the screen with no scrolling: a bar (back, title, help, hall of fame, sound), the levels, the counters with the logo, the panel, one status line and the two buttons. The panel takes the room that is left and `main.js` sizes the cells to the biggest that fits, 24 to 52 px; below 24 px the panel scrolls inside its frame. Help and the hall of fame open in dialogs. The panel is a grid of real buttons with one tab stop: arrow keys move, Enter tests, and each button says its row, column and state to a screen reader.
+- On a win the logo's gear turns four teeth and its arrow rises. A time that makes the top 10 of its level asks for initials, then shows the hall of fame.
+- Attract mode (`demo.js`) plays Easy by the same rules, calmly: about one move a second, the cursor stepping to a fuse near the last one, no glow or flashing. Then the logo notches up and this browser's top 5 for Easy shows.
 
 ## Adding a game
 
-1. `games/<name>/` with `rules.js` (pure, with tests in `tests/<name>.test.js`), `main.js`, `index.html` (copy the Fuse Box page's head, footer and initials dialog) and `demo.js` (`{ step(dt), draw(ctx, w, h, colours) }`).
+1. `games/<name>/` with `rules.js` (pure, with tests in `tests/<name>.test.js`), `main.js`, `index.html` (copy the Fuse Box page's head, bar and dialogs) and `demo.js` (`{ step(dt), draw(ctx, w, h, colours) }`).
 2. Its cabinet in `index.html` with `data-game="<name>"`, and its demo in `DEMOS` in `js/hall.js`.
 3. Its page in `sitemap.xml` and in `PAGES` in `scripts/check-layout.mjs`.
 4. Keep the preload lists whole (`tests/preload.test.js` says what is missing) and the budget green.
@@ -46,4 +46,4 @@
 
 - `./dev test`: rules, scores, memory, a privacy scan of every shipped file, the originality scan, the size budget, preload lists, the sitemap and the security headers.
 - `./dev check`: the tests, then every page, its links and every module over HTTP.
-- `./dev layout`: every page in Chromium at 320×568, 360×780, 768×1024 and 1280×800. It fails on sideways scroll, text under 16 px, tap targets under 44 px (24 px on a game board), not exactly one `h1`, unlabelled fields, requests to other origins and console errors. The first run installs Playwright into `.local/tools`.
+- `./dev layout`: every page in Chromium at 320×568, 360×780, 768×1024 and 1280×800. It fails on sideways scroll, a game page that scrolls at all, text under 16 px, tap targets under 44 px (24 px on a game board), not exactly one `h1`, unlabelled fields, requests to other origins and console errors. The first run installs Playwright into `.local/tools`.

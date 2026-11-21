@@ -1,30 +1,37 @@
-// Fuse Box in attract mode: the hall's cabinet screen plays a small panel by the real rules, shows
-// the gear notching up when the panel is fixed, then this browser's hall of fame, and starts over.
-// The demo cheats (it knows where the blown fuses are), so it never loses and always looks clever.
+// Fuse Box in attract mode: the hall's cabinet screen plays a small panel by the real rules, calmly
+// (about one move a second, the cursor stepping to a fuse near the last one), shows the Notchup logo
+// notching up when the panel is fixed, then this browser's hall of fame, and starts over. The demo
+// cheats (it knows where the blown fuses are), so it never loses.
 
-import { drawGear, NOTCH_STEP } from '../../js/gear.js';
+import { drawLogo, NOTCH_STEP } from '../../js/logo.js';
 import { formatTime } from '../../js/scores.js';
 import { LEVELS, TAGGED, TESTED, UNTESTED, around, newPanel, seeded, testFuse, toggleTag } from './rules.js';
 
-const MOVE_MS = 330;
-const FIXED_MS = 2400;
-const SCORES_MS = 3600;
-const NOTCH_MS = 200;
+const MOVE_MS = 1100;
+const FIXED_MS = 4000;
+const SCORES_MS = 5000;
+const NOTCH_MS = 600;
 const FONT = 'ui-monospace, Menlo, Consolas, monospace';
 
 /** The colour of a count, from calm cyan for 1 to hot red for 5 and up. */
 export const countColour = (c, k) => [c.ink, c.cyan, c.green, c.gold, c.magenta, c.red][Math.min(k, 5)];
 
-/** The next move a perfect player would make: tag a known blown fuse, else test a good one next to the lit area. */
-function nextMove(p, rand) {
-  const frontier = [];
+/**
+ * The next move a perfect player would make, as close to the last one as it can be, so the cursor
+ * walks instead of jumping around: an untested fuse next to the lit area, tagged if it is blown.
+ */
+function nextMove(p, from) {
+  const fx = from % p.cols;
+  const fy = Math.floor(from / p.cols);
+  let best = -1;
+  let bestD = Infinity;
   for (let i = 0; i < p.cells.length; i++) {
     if (p.cells[i] !== UNTESTED) continue;
-    if (around(p, i).some((j) => p.cells[j] === TESTED)) frontier.push(i);
+    const frontier = around(p, i).some((j) => p.cells[j] === TESTED);
+    const d = Math.hypot((i % p.cols) - fx, Math.floor(i / p.cols) - fy) + (frontier ? 0 : 100);
+    if (d < bestD) { bestD = d; best = i; }
   }
-  const pool = frontier.length ? frontier : [...p.cells.keys()].filter((i) => p.cells[i] === UNTESTED);
-  const pick = pool[Math.floor(rand() * pool.length)];
-  return { i: pick, tag: p.isBlown[pick] === 1 };
+  return { i: best, tag: p.isBlown[best] === 1 };
 }
 
 /** @param {{ scores: () => Array<{ initials: string, value: number }> }} source the hall of fame to show */
@@ -34,7 +41,7 @@ export function createDemo({ scores, seed = 7 }) {
   let phase;
   let timer;
   let cursor;
-  let turn = 0;
+  let notches = 0;
 
   function reset() {
     p = newPanel(LEVELS.easy);
@@ -47,7 +54,7 @@ export function createDemo({ scores, seed = 7 }) {
   }
 
   function move() {
-    const m = nextMove(p, rand);
+    const m = nextMove(p, cursor);
     cursor = m.i;
     if (m.tag) toggleTag(p, m.i);
     else testFuse(p, m.i, rand);
@@ -61,17 +68,14 @@ export function createDemo({ scores, seed = 7 }) {
       if (phase === 'play' && timer >= MOVE_MS) {
         timer = 0;
         move();
-        if (p.status === 'won') phase = 'fixed';
+        if (p.status === 'won') { phase = 'fixed'; notches = 0; }
         return true;
       }
       if (phase === 'fixed') {
-        // The gear clicks up one notch at a time.
-        const notches = Math.min(Math.floor(timer / NOTCH_MS), 360 / NOTCH_STEP);
-        if (notches * NOTCH_STEP !== turn % 360 || timer >= FIXED_MS) {
-          turn = notches * NOTCH_STEP;
-          if (timer >= FIXED_MS) { phase = 'scores'; timer = 0; turn = 0; }
-          return true;
-        }
+        // The gear turns one tooth at a time, slowly; the arrow rises with it.
+        const n = Math.min(Math.floor(timer / NOTCH_MS), 4);
+        if (timer >= FIXED_MS) { phase = 'scores'; timer = 0; return true; }
+        if (n !== notches) { notches = n; return true; }
         return false;
       }
       if (phase === 'scores' && timer >= SCORES_MS) {
@@ -86,7 +90,7 @@ export function createDemo({ scores, seed = 7 }) {
       ctx.fillRect(0, 0, w, h);
       if (phase === 'scores') return drawScores(ctx, w, h, c, scores());
       drawPanel(ctx, w, h, c, p, cursor);
-      if (phase === 'fixed') drawFixed(ctx, w, h, c, turn);
+      if (phase === 'fixed') drawFixed(ctx, w, h, c, notches);
     },
   };
 }
@@ -124,30 +128,24 @@ function drawPanel(ctx, w, h, c, p, cursor) {
       ctx.fill();
     }
   }
-  // The player's cursor, in magenta neon: the one glow per frame.
+  // The player's cursor: a steady magenta frame, no glow, so nothing flashes.
   ctx.save();
-  ctx.shadowColor = c.magenta;
-  ctx.shadowBlur = cell * 0.5;
   ctx.strokeStyle = c.magenta;
   ctx.lineWidth = Math.max(1.5, cell * 0.1);
   ctx.strokeRect(x0 + (cursor % p.cols) * cell + 1, y0 + Math.floor(cursor / p.cols) * cell + 1, cell - 2, cell - 2);
   ctx.restore();
 }
 
-function drawFixed(ctx, w, h, c, turn) {
-  ctx.fillStyle = 'rgb(5 10 20 / 0.72)';
+function drawFixed(ctx, w, h, c, notches) {
+  ctx.fillStyle = 'rgb(5 10 20 / 0.8)';
   ctx.fillRect(0, 0, w, h);
-  const r = Math.min(w, h) * 0.2;
-  ctx.save();
-  ctx.shadowColor = c.gold;
-  ctx.shadowBlur = r * 0.4;
-  drawGear(ctx, { x: w / 2, y: h * 0.42, r, turn, fill: c.gold });
-  ctx.restore();
+  const size = Math.min(w, h) * 0.5;
+  drawLogo(ctx, { x: w / 2, y: h * 0.42, size, turn: notches * NOTCH_STEP, lift: Math.min(notches / 4, 1) });
   ctx.fillStyle = c.gold;
   ctx.font = `bold ${Math.round(Math.min(w, h) * 0.09)}px ${FONT}`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('PANEL FIXED', w / 2, h * 0.78);
+  ctx.fillText('PANEL FIXED', w / 2, h * 0.84);
 }
 
 function drawScores(ctx, w, h, c, table) {

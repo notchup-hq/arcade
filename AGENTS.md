@@ -6,12 +6,12 @@ Notchup Arcade: a neon hall of tiny original browser games, at https://arcade.no
 
 - **Original games only.** Genres and mechanics are free to use; other games' names, characters, art, sounds, levels and look are not. Never name another game anywhere (code, docs, commits, PRs); describe the genre in plain words. `tests/originality.test.js` fails on known names.
 - **Stack:** plain HTML, one stylesheet (`styles.css`), small ES modules. No build step, no npm dependencies, no framework, no third-party scripts, fonts, images or trackers. Sounds are made in code.
-- **Shared first:** anything two games or the hall need lives once in `js/` (loop, attract mode, gear, sound, scores, memory, initials, footer). A game folder holds only its rules (`rules.js`, pure and tested), its page (`main.js`) and its attract-mode demo (`demo.js`).
+- **Shared first:** anything two games or the hall need lives once in `js/` (loop, attract mode, logo, sound, scores, memory, initials, settings). A game folder holds only its rules (`rules.js`, pure and tested), its page (`main.js`) and its attract-mode demo (`demo.js`).
 - **Privacy:** no cookies, no requests, no forms that send. `localStorage` only in `js/memory.js` (sound setting, last initials, high scores of this browser); everything works when storage is blocked. `tests/privacy.test.js` enforces this.
 - **Fast:** each page's first load stays under 50 KB gzipped and a game adds under 30 KB (`tests/budget.test.js`). Animate only `transform` and `opacity`; canvases pause off screen and in hidden tabs; draw only when something changed.
-- **Phone first, desktop as good:** works from 320 px, touch and keyboard both, tap targets 44 px (24 px inside a game board, marked `data-small-target`), text 16 px or more. `./dev layout` checks this in a real browser.
+- **Phone first, desktop as good:** a game page fits the screen with no scrolling (help and scores open in dialogs); works from 320 px, touch and keyboard both, tap targets 44 px (24 px inside a game board, marked `data-small-target`), text 16 px or more. `./dev layout` checks this in a real browser.
 - **Accessible:** semantic HTML, one `h1` per page, labels, keyboard play, WCAG AA contrast, all motion inside `prefers-reduced-motion: no-preference`.
-- **Look:** dark neon hall in Notchup navy and gold plus cyan and magenta, tokens in `styles.css` (`--neon-*`, read by canvas code too), system fonts. The Notchup gear is the mascot (`js/gear.js`): it notches up on a win. English only.
+- **Look:** dark neon hall in Notchup navy and gold plus cyan and magenta, tokens in `styles.css` (`--neon-*`, read by canvas code too), system fonts. The Notchup logo is the mascot (`js/logo.js`, the shapes of `assets/mark.svg` in parts): its gear rolls slowly and its arrow notches up. Motion stays calm: nothing fast or flashing. English only.
 - **Search and previews:** a changed headline or description changes the `<title>`, meta description and Open Graph tags together. Absolute URLs point only at https://arcade.notchup.fi/.
 
 ## Workflow
@@ -36,7 +36,7 @@ Run tests quietly; show the output only on failure.
 ## Deploy and releases
 
 - Cloudflare Pages via its Git integration: a merge to `main` deploys https://arcade.notchup.fi, and PRs get preview URLs. No build command, output directory `/`. Security headers live in `_headers`. Cloudflare Web Analytics stays off (it injects a script).
-- The version lives only in `js/version.js` and must match the newest `## x.y.z – date` heading in `CHANGELOG.md` (`tests/version.test.js`) and the footer of each page. A PR adds its changes under `## Unreleased`. The owner tags releases (`v0.1.0`).
+- The version lives only in `js/version.js` and must match the newest `## x.y.z – date` heading in `CHANGELOG.md` (`tests/version.test.js`) and the version shown on each page. A PR adds its changes under `## Unreleased`. The owner tags releases (`v0.1.0`).
 
 ## For agents
 
