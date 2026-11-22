@@ -51,7 +51,7 @@ function skyline(ctx, rand, from, to, { top, base, wall, windowOn, lit }) {
   }
 }
 
-/** A rooftop building with its lit windows and a chimney; it runs off the edge of the picture. */
+/** A rooftop building with its lit windows; it runs off the edge of the picture. */
 function building(ctx, c, rand, side, reach) {
   const x0 = side.dir > 0 ? reach[0] : side.x0;
   const x1 = side.dir > 0 ? side.x1 : reach[1];
@@ -65,11 +65,24 @@ function building(ctx, c, rand, side, reach) {
   }
   ctx.fillStyle = 'rgb(94 242 255 / 0.6)';   // the lit edge of the roof
   ctx.fillRect(x0, side.roof - 0.5, x1 - x0, 0.9);
-  ctx.fillStyle = '#16263f';
-  ctx.fillRect(chimneyX(side), side.roof, 2.8, 5);
 }
 
-const chimneyX = (side) => (side.dir > 0 ? side.x1 - 17 : side.x0 + 14);
+/**
+ * The chimney whose smoke shows the wind: on the rival's roof, at the inner edge beside its thrower, so the
+ * billboard never hides it (a chimney beside the billboard did, on a phone) and the street stays clear.
+ */
+function stackOf(stage) {
+  const side = stage.sides.right;
+  return { x: side.x0 + 3.9, base: side.roof, top: side.roof + 6 };
+}
+
+function paintStack(g, stage) {
+  const { x, base, top } = stackOf(stage);
+  g.fillStyle = '#16263f';
+  g.fillRect(x - 1.4, base - 1, 2.8, top - base + 1);
+  g.fillStyle = 'rgb(94 242 255 / 0.55)';   // a lit rim on top, like the roof
+  g.fillRect(x - 1.8, top - 0.5, 3.6, 0.8);
+}
 
 let cached = null;
 
@@ -133,23 +146,24 @@ function paintStreet(g, w, h, c, stage) {
   }
   building(g, c, rand, left, reach);
   building(g, c, rand, right, reach);
+  paintStack(g, stage);
   g.restore();
 }
 
-const SMOKE_PUFFS = 5;
+const SMOKE_PUFFS = 6;
 const SMOKE_PERIOD = 9000; // ms for a puff to rise to the top: slow enough to stay in the background
 
 /**
  * Smoke that leans with the wind: puffs rise from the chimney, swelling and fading, and drift sideways the
  * more the higher they are and the stronger it blows. `t` is the time in ms (0 for a still picture).
  */
-function smoke(ctx, side, wind, t) {
-  const cx = chimneyX(side) + 1.4;
+function smoke(ctx, stage, wind, t) {
+  const { x, top } = stackOf(stage);
   for (let k = 0; k < SMOKE_PUFFS; k++) {
     const u = (t / SMOKE_PERIOD + k / SMOKE_PUFFS) % 1;
-    ctx.fillStyle = `rgb(200 215 235 / ${0.3 * (1 - u) * Math.min(1, u * 8)})`;
+    ctx.fillStyle = `rgb(205 220 240 / ${0.34 * (1 - u) * Math.min(1, u * 8)})`;
     ctx.beginPath();
-    ctx.arc(cx + wind * 0.45 * u * u * 8, side.roof + 6 + u * 14, 1 + u * 2.2, 0, Math.PI * 2);
+    ctx.arc(x + wind * 0.5 * u * u * 9, top + 1.5 + u * 20, 1.2 + u * 2.6, 0, Math.PI * 2);
     ctx.fill();
   }
 }
@@ -287,8 +301,7 @@ export function drawScene(ctx, w, h, c, view) {
   ctx.translate(ox, h);
   ctx.scale(s, -s);
 
-  smoke(ctx, left, view.wind, view.smoke);
-  smoke(ctx, right, view.wind, view.smoke);
+  smoke(ctx, stage, view.wind, view.smoke);
   ownSign(ctx, c, left.board, left.roof, view.hits.left);
   rivalSign(ctx, c, right.board, right.roof, view.hits.right, view.rival.sign, view.rival.colour);
   brackets(ctx, c, stage.sides[view.target].board);

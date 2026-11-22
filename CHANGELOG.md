@@ -16,6 +16,11 @@ All notable changes to this project are listed here, newest first. The format fo
 - The hall no longer calls the games "original": the tagline, meta descriptions and README say "tiny classic arcade games".
 - The hall is calmer: the logo is a still mark that links to the Notchup home page and glows softly on hover. Cabinets no longer lift on hover; they light up gold.
 
+### Fixed
+
+- Lob no longer rescales when the turn changes: the status line is always two lines high, so a longer message cannot take room from the street.
+- Lob's wind smoke is visible on a phone: it rises from a small chimney at the inner edge of the rival's roof, clear of the billboard that used to hide it.
+
 ## 0.1.0 – 2026-11-21
 
 The first alpha: the hall and one game.
