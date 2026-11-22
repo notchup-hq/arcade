@@ -2,7 +2,8 @@
 // keyboard and a screen reader; each card's face is a small canvas (faces.js) behind the card's back,
 // and turning a card is a CSS flip (none with reduced motion). The page fits the screen without
 // scrolling: the cards are sized to the room the deck has. Help and the hall of fame open in dialogs.
-// A won run ends on a cheer card with the logo notching up; the level lives in the link (?level=hard).
+// A cleared deck gets a cheer card with the logo notching up, then the next round is dealt by itself;
+// the run ends when the chances are gone. The level lives in the link (?level=hard).
 
 import { neonColours } from '../../js/attract.js';
 import { renderFame } from '../../js/fame.js';
@@ -14,13 +15,14 @@ import { placeOf } from '../../js/scores.js';
 import { initSettings } from '../../js/settings.js';
 import { sfx } from '../../js/sound.js';
 import { drawFace } from './faces.js';
-import { LEVELS, MISS_MS, flip, nameOf, newGame, seeded, settle, shape } from './rules.js';
+import { LEVELS, MISS_MS, flip, nameOf, newGame, nextRound, seeded, settle, shape } from './rules.js';
 
 const ORDER = 'high';        // more points are better
 const MIN_CELL = 44;         // a finger's size; below it the deck scrolls inside its frame
 const MAX_CELL = 120;
 const GAP = 6;               // between cards, as in styles.css
-const WIN_MS = 700;          // the last pair shows this long before the cheer
+const CLEAR_MS = 700;        // the last pair shows this long before the cheer
+const CHEER_MS = 2600;       // the cheer stays this long before the next round starts, or sooner on a tap
 const LOSE_MS = 1600;        // the faces show this long before the end card
 
 const $ = (id) => document.getElementById(id);
@@ -35,6 +37,7 @@ const ui = {
   again: $('again'),
   score: $('score'),
   lamps: $('lamps'),
+  round: $('round'),
   pairs: $('pairs'),
   status: $('status'),
   help: $('help'),
@@ -84,7 +87,9 @@ function paintAll() {
 
 function paintCounters() {
   ui.score.textContent = String(g.score);
+  ui.round.textContent = `Round ${g.round}`;
   ui.pairs.textContent = `${g.found}/${g.pairs}`;
+  ui.pairs.setAttribute('aria-label', `${g.found} of ${g.pairs} pairs`);
   [...ui.lamps.children].forEach((lamp, k) => lamp.classList.toggle('on', k < g.chances));
   ui.lamps.setAttribute('aria-label', `${g.chances} of ${g.maxChances} chances left`);
 }
@@ -117,16 +122,11 @@ function fit() {
   drawFaces();
 }
 
-function build() {
-  clearTimeout(missTimer);
-  clearTimeout(endTimer);
-  g = newGame(level, seeded(Math.floor(Math.random() * 2 ** 32)));
-  [cols] = shape(level, window.matchMedia('(orientation: portrait)').matches);
-  ui.deck.style.setProperty('--cols', cols);
+/** Lay out the cards of the deck in `g`, face down. */
+function layDeck() {
   ui.deck.classList.remove('dark', 'won');
   ui.card.hidden = true;
   ui.deck.inert = false;
-  ui.lamps.replaceChildren(...Array.from({ length: g.maxChances }, () => Object.assign(document.createElement('span'), { className: 'lamp on' })));
   cell = 0;
   const frag = document.createDocumentFragment();
   buttons = g.cards.map((_, i) => {
@@ -150,35 +150,67 @@ function build() {
   fit();
   paintAll();
   paintCounters();
+}
+
+const lamp = () => Object.assign(document.createElement('span'), { className: 'lamp on' });
+
+function build() {
+  clearTimeout(missTimer);
+  clearTimeout(endTimer);
+  g = newGame(level, seeded(Math.floor(Math.random() * 2 ** 32)));
+  [cols] = shape(level, window.matchMedia('(orientation: portrait)').matches);
+  ui.deck.style.setProperty('--cols', cols);
+  ui.lamps.replaceChildren(...Array.from({ length: g.maxChances }, lamp));
+  layDeck();
   say('Turn a card.');
   renderScores();
 }
 
-function showCard(title, text, won) {
+/** The next round: a fresh deck, the run goes on. */
+function startNextRound() {
+  clearTimeout(endTimer);
+  const open = document.querySelector('dialog[open]');
+  if (open) { // help or the hall of fame is open: deal when it closes, not behind it
+    open.addEventListener('close', startNextRound, { once: true });
+    return;
+  }
+  nextRound(g);
+  layDeck();
+  sfx.start();
+  say(`Round ${g.round}. Turn a card.`);
+  buttons[0].focus();
+}
+
+function showCard(title, text, { cleared = false } = {}) {
   ui.cardTitle.textContent = title;
   ui.cardText.textContent = text;
+  ui.go.textContent = cleared ? 'Next round' : 'Play again';
   ui.badge.className = 'badge-logo';
   void ui.badge.offsetWidth; // so the logo's animation starts over
-  if (won) ui.badge.className = 'badge-logo fixed';
+  if (cleared) ui.badge.className = 'badge-logo fixed';
   ui.card.hidden = false;
   ui.deck.inert = true;
   ui.go.focus();
 }
 
-async function endRun(won) {
+const chancesLeft = () => `${g.chances} ${g.chances === 1 ? 'chance' : 'chances'} left`;
+
+function roundCleared() {
+  showCard(g.cheer.praise, `${g.cheer.quip} Round ${g.round} cleared. ${g.score} points.`, { cleared: true });
+  say(`${g.cheer.praise}! Round ${g.round} cleared, ${chancesLeft()}. ${g.score} points. The next round starts in a moment.`);
+  endTimer = setTimeout(startNextRound, CHEER_MS);
+}
+
+async function endRun() {
   const score = g.score;
   const place = score > 0 ? placeOf(memory.scores(board(), ORDER), score, ORDER) : -1;
-  if (won) {
-    showCard(g.cheer.praise, `${g.cheer.quip} ${score} points.`, true);
-    say(`${g.cheer.praise}! All ${g.pairs} pairs found, ${g.chances} ${g.chances === 1 ? 'chance' : 'chances'} left. ${score} points.`);
-  } else {
-    showCard('Out of chances', `${g.found} of ${g.pairs} pairs found. ${score} points.`, false);
-    say(`Out of chances. ${g.found} of ${g.pairs} pairs found.`);
-  }
+  const cleared = g.round - 1;
+  showCard('Out of chances', `${cleared} ${cleared === 1 ? 'round' : 'rounds'} cleared, ${g.total} pairs found. ${score} points.`);
+  say(`Out of chances. ${g.total} pairs found over ${g.round} ${g.round === 1 ? 'round' : 'rounds'}. ${score} points.`);
   if (place < 0) return;
   const initials = await askInitials(ui.dialog, { place, score: `${score} points`, last: memory.initials(), grace: GRACE_MS });
   if (!initials) return;
-  memory.addScore(board(), ORDER, { initials, value: score, extra: { pairs: g.found } });
+  memory.addScore(board(), ORDER, { initials, value: score, extra: { pairs: g.total } });
   lastAdded = place;
   renderScores();
   lastAdded = -1;
@@ -197,23 +229,23 @@ function act(i) {
     say(`${label(i)}: ${name}. Find its twin.`);
   } else if (result.type === 'match') {
     sfx.sparkle();
-    say(`A pair: ${name}. ${g.chances} ${g.chances === 1 ? 'chance' : 'chances'} left.`);
+    say(`A pair: ${name}. ${chancesLeft()}.`);
   } else if (result.type === 'miss') {
     sfx.buzz();
-    say(`Not a pair. ${g.chances} ${g.chances === 1 ? 'chance' : 'chances'} left.`);
+    say(`Not a pair. ${chancesLeft()}.`);
     missTimer = setTimeout(() => { settle(g); paintAll(); }, MISS_MS);
-  } else if (result.type === 'won') {
+  } else if (result.type === 'cleared') {
     sfx.win();
     for (let k = 1; k <= 4; k++) sfx.notch(0.4 + k * 0.25);
     ui.deck.classList.add('won');
     say(`A pair: ${name}.`);
-    endTimer = setTimeout(() => endRun(true), WIN_MS);
+    endTimer = setTimeout(roundCleared, CLEAR_MS);
   } else {
     sfx.lampOut();
     ui.deck.classList.add('dark');
     paintAll(); // the cards still down show their faces
     say('Out of chances.');
-    endTimer = setTimeout(() => endRun(false), LOSE_MS);
+    endTimer = setTimeout(endRun, LOSE_MS);
   }
 }
 
@@ -223,7 +255,7 @@ function renderScores() {
     score: { head: 'Points', cell: String },
     columns: [{ key: 'pairs', head: 'Pairs', cell: String }],
     fresh: lastAdded,
-    empty: 'No scores on this browser yet. Find the pairs to be the first.',
+    empty: 'No scores on this browser yet. Clear a round to be the first.',
   });
 }
 
@@ -264,7 +296,7 @@ function restart() {
   buttons[0].focus();
 }
 ui.again.addEventListener('click', restart);
-ui.go.addEventListener('click', restart);
+ui.go.addEventListener('click', () => (g.status === 'cleared' ? startNextRound() : restart()));
 
 for (const r of ui.levels) {
   r.checked = r.value === level;

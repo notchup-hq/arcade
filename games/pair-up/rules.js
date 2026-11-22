@@ -1,7 +1,8 @@
 // Pair Up's rules, with no DOM: a deck of face-down cards, two of each face. Turn two cards; a pair
 // stays up, anything else turns back down and costs a chance, and every pair found lights one chance
-// back (up to the level's own number: 3, 4 or 5). All chances gone ends the run; every
-// pair found wins. The deal is seeded, so tests and the hall's demo replay.
+// back (up to the level's own number: 4, 5 or 6). A deck with every pair found is a round cleared: the
+// next round deals a fresh deck and the run goes on with the chances it has, until they are all gone.
+// The deal is seeded, so tests and the hall's demo replay.
 
 import { seeded } from '../../js/random.js';
 
@@ -11,7 +12,7 @@ const SHARP_MISSES = 2;         // up to this many wrong pairs is still sharp
 export const MISS_MS = 900;      // a wrong pair stays up this long before it turns back down
 export const PAIR_POINTS = 100;
 export const STREAK_POINTS = 50; // more for every pair found right after another
-export const SPARE_TOTAL = 450;  // when the last pair is found with every chance left; fewer chances left win their share
+export const SPARE_TOTAL = 450;  // for clearing a round with every chance left; fewer chances left win their share
 
 /** The pictures from the other games: the logo, Patch Night's bug, Lob's bulb, Fuse Box's fuse, Notch Up's floor. */
 export const SPRITES = ['logo', 'bug', 'bulb', 'fuse', 'floor'];
@@ -20,9 +21,9 @@ export const LETTERS = [...'ABDEFGHKLNPRSTUXZ'];
 
 // Pairs and chances per level (more pairs, more chances); the deck's shape follows the screen (a tall one for a phone held upright).
 export const LEVELS = {
-  easy: { pairs: 6, tall: [3, 4], wide: [4, 3], sprites: 3, chances: 3 },
-  medium: { pairs: 8, tall: [4, 4], wide: [4, 4], sprites: 4, chances: 4 },
-  hard: { pairs: 10, tall: [4, 5], wide: [5, 4], sprites: 5, chances: 5 },
+  easy: { pairs: 6, tall: [3, 4], wide: [4, 3], sprites: 3, chances: 4 },
+  medium: { pairs: 8, tall: [4, 4], wide: [4, 4], sprites: 4, chances: 5 },
+  hard: { pairs: 10, tall: [4, 5], wide: [5, 4], sprites: 5, chances: 6 },
 };
 
 // The cheers, by how many wrong pairs it took: none, a couple, more (relieved). Praise word, then a dry line.
@@ -61,26 +62,45 @@ export function facesFor(level, rand) {
   return [...shuffled(SPRITES, rand).slice(0, sprites), ...shuffled(LETTERS, rand).slice(0, pairs - sprites)];
 }
 
+const dealt = (level, rand) => {
+  const faces = facesFor(level, rand);
+  return shuffled([...faces, ...faces], rand).map((face) => ({ face, state: 'down' }));
+};
+
 /** A new run on `level`, dealt with `rand`. */
 export function newGame(level, rand) {
-  const faces = facesFor(level, rand);
   return {
     level,
-    cards: shuffled([...faces, ...faces], rand).map((face) => ({ face, state: 'down' })),
-    pairs: faces.length,
-    found: 0,
+    cards: dealt(level, rand),
+    pairs: LEVELS[level].pairs,
+    round: 1,
+    found: 0,          // pairs found in this round's deck
+    total: 0,          // pairs found in the whole run
     maxChances: LEVELS[level].chances,
     chances: LEVELS[level].chances,
-    misses: 0,
+    misses: 0,         // wrong pairs in this round
     streak: 0,
     score: 0,
     open: [],          // the cards turned up and not yet matched: none, one, or a wrong pair waiting to turn back
-    status: 'playing', // 'won' when every pair is found, 'lost' when the chances are gone
+    status: 'playing', // 'cleared' when every pair of the round is found, 'lost' when the chances are gone
     cheer: null,
     lastPraise: '',
     lastQuip: '',
     rand,
   };
+}
+
+/** Deal the next round after a cleared one: a fresh deck, the chances as they are, the streak and misses counted anew. */
+export function nextRound(g) {
+  if (g.status !== 'cleared') return;
+  g.cards = dealt(g.level, g.rand);
+  g.round++;
+  g.found = 0;
+  g.misses = 0;
+  g.streak = 0;
+  g.open = [];
+  g.cheer = null;
+  g.status = 'playing';
 }
 
 /** Turn a wrong pair back down. */
@@ -100,7 +120,7 @@ function cheerOf(g) {
 
 /**
  * Turn card `i` up. Returns { type: 'ignored' } when nothing happens (the run is over, the card is
- * already up or found), else { type: 'first' | 'match' | 'miss' | 'won' | 'lost' }. Turning a card
+ * already up or found), else { type: 'first' | 'match' | 'miss' | 'cleared' | 'lost' }. Turning a card
  * while a wrong pair is still showing turns that pair back down first, so one of those two can be
  * turned again at once.
  */
@@ -118,16 +138,16 @@ export function flip(g, i) {
     g.cards[b].state = 'matched';
     g.open = [];
     g.found++;
+    g.total++;
     g.streak++;
     g.score += PAIR_POINTS + STREAK_POINTS * (g.streak - 1);
-    if (g.found < g.pairs) {
-      g.chances = Math.min(g.maxChances, g.chances + 1); // a pair found lights a chance back
-      return { type: 'match' };
+    if (g.found === g.pairs) {
+      g.status = 'cleared';
+      g.score += Math.round((SPARE_TOTAL * g.chances) / g.maxChances);
+      g.cheer = cheerOf(g);
     }
-    g.status = 'won';
-    g.score += Math.round((SPARE_TOTAL * g.chances) / g.maxChances);
-    g.cheer = cheerOf(g);
-    return { type: 'won' };
+    g.chances = Math.min(g.maxChances, g.chances + 1); // a pair found lights a chance back
+    return { type: g.status === 'cleared' ? 'cleared' : 'match' };
   }
   g.chances--;
   g.misses++;

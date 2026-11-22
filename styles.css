@@ -647,6 +647,12 @@ body.game { height: 100dvh; min-height: 0; }
 .pair.matched, .pair.shown { cursor: default; }
 .deck.won .pair-front { border-color: var(--neon-gold); box-shadow: var(--glow-gold); }
 
+/* Six lamps on Hard: tighter on a narrow phone so the console still fits. */
+@media (max-width: 24rem) {
+  .game[data-game="pair-up"] .console { gap: 0.75rem; }
+  .game[data-game="pair-up"] .lamps { gap: 0.3rem; }
+}
+
 /* Dialogs: help, hall of fame, initials. */
 .sheet {
   width: min(30rem, calc(100vw - 2 * var(--gap)));
