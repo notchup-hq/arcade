@@ -35,7 +35,7 @@ Run tests quietly; show the output only on failure.
 
 ## Deploy and releases
 
-- Cloudflare Pages via its Git integration: a merge to `main` deploys https://arcade.notchup.fi, and PRs get preview URLs. No build command, output directory `/`. Security headers live in `_headers`. Cloudflare Web Analytics stays off (it injects a script).
+- Cloudflare Pages via its Git integration: a merge to `main` deploys https://arcade.notchup.fi, and PRs get preview URLs. Build command `node scripts/stamp-build.mjs` (stamps the commit and date into `<meta name="build">`, set in `wrangler.jsonc`), output directory `/`. Security headers live in `_headers`. Cloudflare Web Analytics stays off (it injects a script).
 - The version lives only in `js/version.js` and must match the newest `## x.y.z – date` heading in `CHANGELOG.md` (`tests/version.test.js`) and the version shown on each page. A PR adds its changes under `## Unreleased`. The owner tags releases (`v0.1.0`).
 
 ## For agents
