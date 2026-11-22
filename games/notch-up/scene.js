@@ -1,7 +1,8 @@
 // Notch Up's picture, drawn on a canvas by the game page and the hall's demo alike: the Notchup tower
 // rising over the night city of notchup.fi. The Notchup logo hangs over the lobby, every tenth floor
 // wears a magenta neon band, and the floor sliding above the top is trimmed in gold. Nothing flashes
-// or shakes: a cut-off piece fades where it was, a perfect drop leaves a gold seam that fades, and a
+// or shakes: a cut-off piece fades where it was, the windows of the floor just built light up and fade back, a
+// perfect drop leaves a gold seam that fades, and a
 // cheer's words swell in and fade over calm sparks. With `still` (reduced motion) the sliding floor
 // moves in steps, nothing swells and there are no sparks.
 //
@@ -11,13 +12,14 @@
 import { skyline } from '../../js/city.js';
 import { drawLogo } from '../../js/logo.js';
 import { drawSparks } from '../../js/sparks.js';
-import { BURST_MS, CHEER_MS, FADE_MS, FLOOR, SEAM_MS, START_WIDTH, WORLD, moverX, seeded } from './rules.js';
+import { BURST_MS, CHEER_MS, FADE_MS, FLOOR, LIT_MS, SEAM_MS, START_WIDTH, WORLD, moverX, seeded } from './rules.js';
 
 export const FONT = 'ui-monospace, Menlo, Consolas, monospace';
 const WALL = '#0e1b33';
 const WINDOW_OFF = 'rgb(24 42 72)';
 const WINDOW_ON = 'rgb(242 201 76 / 0.8)';
 const TOP_AT = 0.6;          // the camera keeps the sliding floor at about this share of the height
+const LIT_GLOW = 0.7;        // how bright the dark windows of the floor just built get, at most
 const CITY_DRIFT = 0.4;      // the distant city sinks this much slower than the tower: depth, calmly
 
 /** Scale (px per world unit) and how much of the world fits in a canvas of w by h. */
@@ -76,8 +78,11 @@ function paintCity(g, w, h) {
   g.restore();
 }
 
-/** One floor of the tower: wall, a row of windows (or a neon band every tenth floor), a lit top edge. */
-function drawFloor(ctx, c, n, x, w) {
+/**
+ * One floor of the tower: wall, a row of windows (or a neon band every tenth floor), a lit top edge.
+ * `glow` (0 to 1) lights the dark windows too, for the floor just built.
+ */
+function drawFloor(ctx, c, n, x, w, glow = 0) {
   const left = x - w / 2;
   const y = n * FLOOR;
   ctx.fillStyle = WALL;
@@ -89,6 +94,12 @@ function drawFloor(ctx, c, n, x, w) {
     for (let k = 0, wx = left + 2.5; wx < left + w - 5.5; k++, wx += 7) {
       ctx.fillStyle = lit(n, k) ? WINDOW_ON : WINDOW_OFF;
       ctx.fillRect(wx, y + 3.5, 3.6, 4.5);
+      if (glow > 0 && !lit(n, k)) {
+        ctx.globalAlpha = glow;
+        ctx.fillStyle = WINDOW_ON;
+        ctx.fillRect(wx, y + 3.5, 3.6, 4.5);
+        ctx.globalAlpha = 1;
+      }
     }
   }
   ctx.fillStyle = 'rgb(94 242 255 / 0.6)';
@@ -118,7 +129,8 @@ export function drawScene(ctx, w, h, c, { g, camera = 0, still = false }) {
   const floors = g?.floors ?? [{ x: 0, w: START_WIDTH }];
   const first = Math.max(0, Math.floor(camera / FLOOR));
   const last = Math.min(floors.length - 1, Math.ceil((camera + high) / FLOOR));
-  for (let n = first; n <= last; n++) drawFloor(ctx, c, n, floors[n].x, floors[n].w);
+  const glowOf = (n) => (!still && g?.lit?.floor === n ? LIT_GLOW * (1 - g.lit.age / LIT_MS) : 0);
+  for (let n = first; n <= last; n++) drawFloor(ctx, c, n, floors[n].x, floors[n].w, glowOf(n));
   if (first === 0) {
     // The logo over the lobby door, drawn upright in the flipped world.
     ctx.save();

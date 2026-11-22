@@ -24,6 +24,7 @@ const SPEED_UP = 2;              // more for every floor built
 const MAX_SPEED = 150;
 export const FADE_MS = 500;      // a cut-off piece fading where it was
 export const SEAM_MS = 400;      // the gold line of a perfect drop fading
+export const LIT_MS = 500;       // the windows of the floor just built lighting up and fading back
 export const CHEER_MS = 2600;    // a cheer's words swelling in and fading out
 export const BURST_MS = 1100;    // one burst of sparks drifting out
 const MIN_RECORD = 10;           // beating a best lower than this is not worth a cheer
@@ -105,6 +106,7 @@ export function newGame(rand, best = 0) {
     bestPerfect: 0,
     cut: null,        // { x, w, floor, age }: the piece cut off, fading
     seam: null,       // { floor, age }: the gold line of a perfect drop, fading
+    lit: null,        // { floor, age }: the floor just built, its windows lit for a moment
     cheer: null,
     lastPraise: '',
     lastQuip: '',
@@ -127,10 +129,10 @@ export function step(g, dt) {
       m.dir = -Math.sign(m.x);
     }
   }
-  for (const part of ['cut', 'seam']) {
+  for (const [part, ms] of [['cut', FADE_MS], ['seam', SEAM_MS], ['lit', LIT_MS]]) {
     if (g[part]) {
       g[part].age += dt;
-      if (g[part].age >= (part === 'cut' ? FADE_MS : SEAM_MS)) g[part] = null;
+      if (g[part].age >= ms) g[part] = null;
     }
   }
   if (g.cheer) {
@@ -179,6 +181,7 @@ export function drop(g, still = false) {
     g.seam = { floor, age: 0 };
   }
   g.floors.push(next);
+  g.lit = { floor, age: 0 };
   const cheer = cheerOf(g, built(g));
   if (cheer) g.cheer = cheer;
   g.mover = newMover(g, next.w, -g.mover.from);
@@ -186,4 +189,4 @@ export function drop(g, still = false) {
 }
 
 /** True while something is still moving or fading, so the page keeps drawing after a run ends. */
-export const moving = (g) => g.status === 'playing' || g.cut !== null || g.seam !== null || g.cheer !== null;
+export const moving = (g) => g.status === 'playing' || g.cut !== null || g.seam !== null || g.lit !== null || g.cheer !== null;
