@@ -6,7 +6,7 @@ All notable changes to this project are listed here, newest first. The format fo
 
 ### Added
 
-- Patch Night, a times-table bug zapper: each wave asks one question and a bug carrying a number crawls in along every lane; zap the right one before it reaches the logo. Three levels (four lanes with easy tables, eight lanes with close wrong answers, and up to 12 × 12 with missing factors), a streak multiplier, and a top 10 per level. Missed facts come back a few questions later and are listed at the end; this browser remembers up to 20 per level, nothing leaves it. Its cabinet plays itself, and it takes the third cabinet.
+- Patch Night, a times-table bug zapper: each wave asks one question and a bug carrying a number crawls in along every lane; zap the right one before it reaches the logo. Three levels (four lanes with easy tables, eight lanes with close wrong answers, and up to 12 × 12 with missing factors), a streak multiplier, and a top 5 per level. Missed facts come back a few questions later and are listed at the end; this browser remembers up to 20 per level, nothing leaves it. Its cabinet plays itself, and it takes the third cabinet.
 - Lob, a rooftop duel: lob glowing bulbs across the street at your rival's billboard, with the wind changing every throw; three hits win. Solo is a run against computer rivals who aim a little better each time, scored by rivals beaten plus a bonus for few throws; two players can share one device. Drag back and let go, use the buttons, or use the keyboard. Its cabinet plays a duel between two computer players.
 - The hall's cabinets look like real arcade machines, all in CSS: a lit marquee, the screen in its bezel with the game playing itself, a control panel with a stick and buttons, and a lit Play plate. Games still coming stand unlit with their screens off.
 - Opening a game, the cabinet's screen grows into the game in 0.3 s, and shrinks back on the way out. Browsers without view transitions, and visitors who ask for less motion, get a normal page load.
@@ -14,6 +14,7 @@ All notable changes to this project are listed here, newest first. The format fo
 
 ### Changed
 
+- High scores work the same in every game: a top 5 per board (was 10), and initials may have dots in them, so P.K works. Older tables keep their best 5.
 - README: says the games are inspired by the great arcade classics but our own take, lists three games, and a "Name and logo" section says forks need their own name and branding and are not Notchup's responsibility.
 - Each page's source carries `<meta name="build" content="abc1234 2026-11-21">`: the short commit and date of the deploy, stamped by Cloudflare's build command (`scripts/stamp-build.mjs`). Locally it says `dev`.
 - The hall no longer calls the games "original": the tagline, meta descriptions and README say "tiny classic arcade games".

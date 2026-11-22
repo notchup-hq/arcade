@@ -1,16 +1,29 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { MAX_ENTRIES, cleanInitials, cleanTable, formatDate, formatTime, insertScore, placeOf } from '../js/scores.js';
+import { MAX_ENTRIES, cleanInitials, cleanTable, formatDate, formatTime, insertScore, placeOf, typedInitials } from '../js/scores.js';
 
 const entry = (value, date = 1, initials = 'ABC') => ({ initials, value, date });
 
-test('initials are three letters, upper case, Finnish letters allowed', () => {
+test('initials are three letters or dots, upper case, Finnish letters allowed', () => {
   assert.equal(cleanInitials('abc'), 'ABC');
   assert.equal(cleanInitials('äöå'), 'ÄÖÅ');
+  assert.equal(cleanInitials('p.k'), 'P.K');
+  assert.equal(cleanInitials('PK.'), 'PK.');
+  assert.equal(cleanInitials('...'), null);
   assert.equal(cleanInitials('A1B'), null);
   assert.equal(cleanInitials('AB'), null);
   assert.equal(cleanInitials('ABCD'), null);
   assert.equal(cleanInitials(42), null);
+});
+
+test('typing keeps upper case letters and dots, three at most', () => {
+  assert.equal(typedInitials('p.k.'), 'P.K');
+  assert.equal(typedInitials('pete'), 'PET');
+  assert.equal(typedInitials('a1-b c'), 'ABC');
+});
+
+test('a table keeps the top 5', () => {
+  assert.equal(MAX_ENTRIES, 5);
 });
 
 test('a time table puts the fastest first, and the earlier score first on a tie', () => {

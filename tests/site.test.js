@@ -48,3 +48,11 @@ test('the zoom between pages runs only when the visitor has not asked for less m
   assert.equal(css.match(/@view-transition/g).length, 1);
   assert.match(motion, /@view-transition \{ navigation: auto; \}/);
 });
+
+test('every game asks for initials with the same dialog', () => {
+  const dialogOf = (page) => /<dialog id="initials"[\s\S]*?<\/dialog>/.exec(read(page))?.[0];
+  const games = pages().filter((p) => p !== 'index.html');
+  const first = dialogOf(games[0]);
+  assert.ok(first);
+  for (const page of games) assert.equal(dialogOf(page), first, page);
+});

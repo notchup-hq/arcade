@@ -1,16 +1,24 @@
 // High score tables: pure, so the games, the hall and the tests share one set of rules. A table is the
-// top MAX_ENTRIES of one board (a game and its level), newest first among equal scores. An entry is
-// { initials, value, date }: three letters, the score (a time in ms or points) and when it was made (ms).
+// top MAX_ENTRIES of one board (a game and its level), the earlier score first among equal ones. An
+// entry is { initials, value, date }: initials, the score (a time in ms or points) and when it was made.
+// Every game uses these rules and the same initials dialog (js/initials.js).
 
-export const MAX_ENTRIES = 10;
+export const MAX_ENTRIES = 5;
+const INITIALS = /^(?=.*[A-ZÅÄÖ])[A-ZÅÄÖ.]{3}$/;
 
 /** 'low' when a smaller value wins (a time), 'high' when a bigger one does (points). */
 const better = (order) => (order === 'low' ? (a, b) => a < b : (a, b) => a > b);
 
-/** Three letters, upper case (A–Z and Å, Ä, Ö), or null. */
+/** Initials as typed so far: upper case letters (A–Z and Å, Ä, Ö) and dots, at most three. */
+export function typedInitials(raw) {
+  return String(raw).toLocaleUpperCase('fi').replace(/[^A-ZÅÄÖ.]/g, '').slice(0, 3);
+}
+
+/** Valid initials, upper case, or null: three letters or dots ("PEK", "P.K"), at least one a letter. */
 export function cleanInitials(raw) {
-  const s = typeof raw === 'string' ? raw.toLocaleUpperCase('fi').replace(/[^A-ZÅÄÖ]/g, '') : '';
-  return s.length === 3 ? s : null;
+  if (typeof raw !== 'string') return null;
+  const s = raw.toLocaleUpperCase('fi');
+  return INITIALS.test(s) ? s : null;
 }
 
 function cleanEntry(raw) {
