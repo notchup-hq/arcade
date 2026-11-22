@@ -60,7 +60,7 @@ export function createDemo({ scores, seed = 4 }) {
       if (phase === 'play' && g.status === 'playing' && timer >= STEP_MS) {
         flip(g, plan[turned++]);
         timer = 0;
-      } else if (g.status === 'won' && timer >= WIN_MS) {
+      } else if (g.status === 'cleared' && timer >= WIN_MS) {
         phase = 'end';
         timer = 0;
       }
@@ -109,7 +109,7 @@ export function createDemo({ scores, seed = 4 }) {
         ctx.fillStyle = k < g.chances ? c.gold : c.dim;
         ctx.fill();
       }
-      if (phase === 'end') drawNotchUp(ctx, w, h, c, 4, 'ALL PAIRS');
+      if (phase === 'end') drawNotchUp(ctx, w, h, c, 4, 'ROUND CLEARED');
     },
   };
 }
