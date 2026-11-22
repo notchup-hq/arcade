@@ -14,7 +14,7 @@ import { placeOf } from '../../js/scores.js';
 import { initSettings } from '../../js/settings.js';
 import { sfx } from '../../js/sound.js';
 import { drawFace } from './faces.js';
-import { CHANCES, LEVELS, MISS_MS, flip, nameOf, newGame, seeded, settle, shape } from './rules.js';
+import { LEVELS, MISS_MS, flip, nameOf, newGame, seeded, settle, shape } from './rules.js';
 
 const ORDER = 'high';        // more points are better
 const MIN_CELL = 44;         // a finger's size; below it the deck scrolls inside its frame
@@ -86,7 +86,7 @@ function paintCounters() {
   ui.score.textContent = String(g.score);
   ui.pairs.textContent = `${g.found}/${g.pairs}`;
   [...ui.lamps.children].forEach((lamp, k) => lamp.classList.toggle('on', k < g.chances));
-  ui.lamps.setAttribute('aria-label', `${g.chances} of ${CHANCES} chances left`);
+  ui.lamps.setAttribute('aria-label', `${g.chances} of ${g.maxChances} chances left`);
 }
 
 /** Draw every face at the size the cards have now, sharp on a dense screen. */
@@ -126,6 +126,7 @@ function build() {
   ui.deck.classList.remove('dark', 'won');
   ui.card.hidden = true;
   ui.deck.inert = false;
+  ui.lamps.replaceChildren(...Array.from({ length: g.maxChances }, () => Object.assign(document.createElement('span'), { className: 'lamp on' })));
   cell = 0;
   const frag = document.createDocumentFragment();
   buttons = g.cards.map((_, i) => {
@@ -196,7 +197,7 @@ function act(i) {
     say(`${label(i)}: ${name}. Find its twin.`);
   } else if (result.type === 'match') {
     sfx.sparkle();
-    say(`A pair: ${name}.`);
+    say(`A pair: ${name}. ${g.chances} ${g.chances === 1 ? 'chance' : 'chances'} left.`);
   } else if (result.type === 'miss') {
     sfx.buzz();
     say(`Not a pair. ${g.chances} ${g.chances === 1 ? 'chance' : 'chances'} left.`);

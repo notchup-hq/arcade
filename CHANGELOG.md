@@ -16,6 +16,7 @@ All notable changes to this project are listed here, newest first. The format fo
 
 ### Changed
 
+- Pair Up is gentler: the chances depend on the level (Easy 3, Medium 4, Hard 5) and every pair you find lights one chance back. The bonus for chances left is the same total on every level.
 - The hall keeps a last cabinet that would stand alone in its row in the middle, now that there are five games.
 - Patch Night punishes guessing: each wrong zap in a wave takes more off the answer's worth than the last (25, 50, 75) and nudges the other bugs closer by more, and a third wrong zap in one wave puts out a light. One or two slips cost no light.
 - The hall of fame keeps one layout in every game but adds what each game counts: Lob the rivals beaten, Patch Night the share right first time and the average answer time, Notch Up the most perfect drops in a row. The new high score dialog shows your score beside your place. Dates are shorter ("21Nov26"), so the table fits a small phone.

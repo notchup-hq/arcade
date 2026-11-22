@@ -1,30 +1,31 @@
 // Pair Up's rules, with no DOM: a deck of face-down cards, two of each face. Turn two cards; a pair
-// stays up, anything else turns back down and costs a chance. Three chances gone ends the run; every
+// stays up, anything else turns back down and costs a chance, and every pair found lights one chance
+// back (up to the level's own number: 3, 4 or 5). All chances gone ends the run; every
 // pair found wins. The deal is seeded, so tests and the hall's demo replay.
 
 import { seeded } from '../../js/random.js';
 
 export { seeded };
 
-export const CHANCES = 3;
+const SHARP_MISSES = 2;         // up to this many wrong pairs is still sharp
 export const MISS_MS = 900;      // a wrong pair stays up this long before it turns back down
 export const PAIR_POINTS = 100;
 export const STREAK_POINTS = 50; // more for every pair found right after another
-export const SPARE_POINTS = 150; // for every chance left when the last pair is found
+export const SPARE_TOTAL = 450;  // when the last pair is found with every chance left; fewer chances left win their share
 
 /** The pictures from the other games: the logo, Patch Night's bug, Lob's bulb, Fuse Box's fuse, Notch Up's floor. */
 export const SPRITES = ['logo', 'bug', 'bulb', 'fuse', 'floor'];
 /** Letters that are hard to mix up with one another. */
 export const LETTERS = [...'ABDEFGHKLNPRSTUXZ'];
 
-// Pairs per level; the deck's shape follows the screen (a tall one for a phone held upright).
+// Pairs and chances per level (more pairs, more chances); the deck's shape follows the screen (a tall one for a phone held upright).
 export const LEVELS = {
-  easy: { pairs: 6, tall: [3, 4], wide: [4, 3], sprites: 3 },
-  medium: { pairs: 8, tall: [4, 4], wide: [4, 4], sprites: 4 },
-  hard: { pairs: 10, tall: [4, 5], wide: [5, 4], sprites: 5 },
+  easy: { pairs: 6, tall: [3, 4], wide: [4, 3], sprites: 3, chances: 3 },
+  medium: { pairs: 8, tall: [4, 4], wide: [4, 4], sprites: 4, chances: 4 },
+  hard: { pairs: 10, tall: [4, 5], wide: [5, 4], sprites: 5, chances: 5 },
 };
 
-// The cheers, by how many chances were left: the fewer, the more relieved. Praise word, then a dry line.
+// The cheers, by how many wrong pairs it took: none, a couple, more (relieved). Praise word, then a dry line.
 export const PRAISE = {
   flawless: ['Flawless', 'Spotless', 'No misses'],
   sharp: ['Sharp', 'Well played', 'Tidy'],
@@ -68,7 +69,9 @@ export function newGame(level, rand) {
     cards: shuffled([...faces, ...faces], rand).map((face) => ({ face, state: 'down' })),
     pairs: faces.length,
     found: 0,
-    chances: CHANCES,
+    maxChances: LEVELS[level].chances,
+    chances: LEVELS[level].chances,
+    misses: 0,
     streak: 0,
     score: 0,
     open: [],          // the cards turned up and not yet matched: none, one, or a wrong pair waiting to turn back
@@ -87,7 +90,7 @@ export function settle(g) {
 }
 
 function cheerOf(g) {
-  const size = g.chances === CHANCES ? 'flawless' : g.chances > 1 ? 'sharp' : 'close';
+  const size = g.misses === 0 ? 'flawless' : g.misses <= SHARP_MISSES ? 'sharp' : 'close';
   const praise = pickLine(PRAISE[size], g.rand, g.lastPraise);
   const quip = pickLine(QUIPS[size], g.rand, g.lastQuip);
   g.lastPraise = praise;
@@ -117,13 +120,17 @@ export function flip(g, i) {
     g.found++;
     g.streak++;
     g.score += PAIR_POINTS + STREAK_POINTS * (g.streak - 1);
-    if (g.found < g.pairs) return { type: 'match' };
+    if (g.found < g.pairs) {
+      g.chances = Math.min(g.maxChances, g.chances + 1); // a pair found lights a chance back
+      return { type: 'match' };
+    }
     g.status = 'won';
-    g.score += SPARE_POINTS * g.chances;
+    g.score += Math.round((SPARE_TOTAL * g.chances) / g.maxChances);
     g.cheer = cheerOf(g);
     return { type: 'won' };
   }
   g.chances--;
+  g.misses++;
   g.streak = 0;
   if (g.chances > 0) return { type: 'miss' };
   g.status = 'lost';
