@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  CHANCES, LEVELS, LETTERS, PAIR_POINTS, PRAISE, QUIPS, SPARE_POINTS, SPRITES, STREAK_POINTS,
+  LEVELS, LETTERS, PAIR_POINTS, PRAISE, QUIPS, SPARE_TOTAL, SPRITES, STREAK_POINTS,
   facesFor, flip, nameOf, newGame, pickLine, seeded, settle, shape,
 } from '../games/pair-up/rules.js';
 
@@ -47,7 +47,7 @@ test('a pair stays up and scores', () => {
   assert.deepEqual([g.cards[a].state, g.cards[b].state], ['matched', 'matched']);
   assert.equal(g.found, 1);
   assert.equal(g.score, PAIR_POINTS);
-  assert.equal(g.chances, CHANCES);
+  assert.equal(g.chances, LEVELS.easy.chances);
   assert.deepEqual(g.open, []);
 });
 
@@ -68,7 +68,7 @@ test('a wrong pair costs a chance and stays up until the next card turns it back
   const [x, y] = [pairAt(g, 0)[0], pairAt(g, 1)[0]];
   flip(g, x);
   assert.equal(flip(g, y).type, 'miss');
-  assert.equal(g.chances, CHANCES - 1);
+  assert.equal(g.chances, LEVELS.easy.chances - 1);
   assert.deepEqual(g.open, [x, y]);
   assert.equal(g.cards[x].state, 'up');
   const z = pairAt(g, 2)[0];
@@ -106,7 +106,7 @@ test('a card already up, or a found one, does nothing', () => {
   assert.equal(flip(g, 99).type, 'ignored');
 });
 
-test('the third wrong guess ends the run, and nothing turns after that', () => {
+test('running out of chances ends the run, and nothing turns after that', () => {
   const g = newGame('easy', seeded(1));
   const [p, q, r] = [0, 1, 2].map((k) => pairAt(g, k));
   assert.equal(flip(g, p[0]).type, 'first');
@@ -120,18 +120,53 @@ test('the third wrong guess ends the run, and nothing turns after that', () => {
   assert.equal(flip(g, p[1]).type, 'ignored');
 });
 
-test('every pair found wins, with a bonus per chance left and a cheer that fits', () => {
-  for (const [misses, size] of [[0, 'flawless'], [1, 'sharp'], [2, 'close']]) {
-    const g = newGame('easy', seeded(5));
-    for (let m = 0; m < misses; m++) { flip(g, pairAt(g, 0)[0]); flip(g, pairAt(g, 1)[0]); settle(g); }
-    let last;
-    for (let k = 0; k < g.pairs; k++) for (const i of pairAt(g, k)) last = flip(g, i).type;
-    assert.equal(last, 'won');
-    assert.equal(g.status, 'won');
-    assert.equal(g.chances, CHANCES - misses);
-    const streak = Array.from({ length: g.pairs }, (_, k) => PAIR_POINTS + k * STREAK_POINTS).reduce((a, b) => a + b);
-    assert.equal(g.score, streak + SPARE_POINTS * g.chances);
-    assert.ok(PRAISE[size].includes(g.cheer.praise) && QUIPS[size].includes(g.cheer.quip));
+test('every level has its own number of chances, more with more pairs', () => {
+  assert.deepEqual(Object.values(LEVELS).map((l) => l.chances), [3, 4, 5]);
+  for (const level of Object.keys(LEVELS)) assert.equal(newGame(level, seeded(1)).chances, LEVELS[level].chances);
+});
+
+test('every pair found lights one chance back, never above the level\'s number', () => {
+  const g = newGame('hard', seeded(2));
+  flip(g, pairAt(g, 0)[0]);
+  flip(g, pairAt(g, 1)[0]);
+  flip(g, pairAt(g, 0)[0]);
+  flip(g, pairAt(g, 1)[0]);
+  assert.equal(g.chances, 3);
+  for (const i of pairAt(g, 2)) flip(g, i);
+  assert.equal(g.chances, 4);
+  for (const i of pairAt(g, 0)) flip(g, i);
+  assert.equal(g.chances, 5);
+  for (const i of pairAt(g, 1)) flip(g, i);
+  assert.equal(g.chances, 5);
+});
+
+test('the last pair found lights nothing back, so it cannot add to the bonus', () => {
+  const g = newGame('easy', seeded(5));
+  for (let k = 0; k < g.pairs - 2; k++) for (const i of pairAt(g, k)) flip(g, i);
+  flip(g, pairAt(g, 4)[0]);
+  flip(g, pairAt(g, 5)[0]);
+  assert.equal(g.chances, 2);
+  for (const i of pairAt(g, 4)) flip(g, i);
+  assert.equal(g.chances, 3);
+  for (const i of pairAt(g, 5)) flip(g, i);
+  assert.equal(g.status, 'won');
+  assert.equal(g.chances, 3);
+});
+
+test('every pair found wins; the bonus is the same total on every level and the cheer fits the misses', () => {
+  for (const level of Object.keys(LEVELS)) {
+    for (const [misses, size] of [[0, 'flawless'], [1, 'sharp'], [3, 'close']]) {
+      if (misses >= LEVELS[level].chances) continue; // that many wrong pairs would end the run
+      const g = newGame(level, seeded(5));
+      for (let m = 0; m < misses; m++) { flip(g, pairAt(g, 0)[0]); flip(g, pairAt(g, 1)[0]); settle(g); }
+      let last;
+      for (let k = 0; k < g.pairs; k++) for (const i of pairAt(g, k)) last = flip(g, i).type;
+      assert.equal(last, 'won', `${level} ${misses}`);
+      assert.equal(g.status, 'won');
+      const streak = Array.from({ length: g.pairs }, (_, k) => PAIR_POINTS + k * STREAK_POINTS).reduce((a, b) => a + b);
+      assert.equal(g.score, streak + Math.round((SPARE_TOTAL * g.chances) / g.maxChances));
+      assert.ok(PRAISE[size].includes(g.cheer.praise) && QUIPS[size].includes(g.cheer.quip), `${level} ${misses}`);
+    }
   }
 });
 

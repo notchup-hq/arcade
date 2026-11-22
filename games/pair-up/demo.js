@@ -4,7 +4,7 @@
 
 import { drawNotchUp, drawScores } from '../../js/screens.js';
 import { drawBack, drawFace } from './faces.js';
-import { CHANCES, flip, newGame, seeded, shape } from './rules.js';
+import { flip, newGame, seeded, shape } from './rules.js';
 
 const FLIP_MS = 250;     // a card turning over
 const STEP_MS = 700;     // between two turns
@@ -103,9 +103,9 @@ export function createDemo({ scores, seed = 4 }) {
         ctx.restore();
       });
       const lampSize = lamps * 0.3;
-      for (let k = 0; k < CHANCES; k++) {
+      for (let k = 0; k < g.maxChances; k++) {
         ctx.beginPath();
-        ctx.arc(w / 2 + (k - 1) * lampSize * 3, h - m - lamps / 2, lampSize, 0, Math.PI * 2);
+        ctx.arc(w / 2 + (k - (g.maxChances - 1) / 2) * lampSize * 3, h - m - lamps / 2, lampSize, 0, Math.PI * 2);
         ctx.fillStyle = k < g.chances ? c.gold : c.dim;
         ctx.fill();
       }
