@@ -4,6 +4,7 @@
 
 | Path | What |
 |---|---|
+| `js/games.js` | The games in the hall, in the order their cabinets stand, each with its demo and the high-score table the demo shows. To change the order, move a line and run `./dev order` (`scripts/order-hall.mjs`), which puts the cabinets in `index.html` in the same order; the hall stays plain HTML, so nothing moves after the first paint. `tests/site.test.js` fails while the two differ. |
 | `index.html`, `js/hall.js` | The hall: one arcade cabinet per game (below). A ready game plays itself on its screen; the rest say "Coming soon". A demo's code is fetched only when its cabinet comes within 200 px of the screen, so the hall's first load stays small however many games there are. Without JavaScript the cabinets are plain links. |
 | `games/<game>/` | One folder per game: `index.html` (its page), `main.js` (the page's code), `rules.js` (the rules, no DOM, tested), `demo.js` (attract mode for the hall). |
 | `js/` | Shared by the hall and every game (below). |
@@ -84,7 +85,7 @@
 ## Adding a game
 
 1. `games/<name>/` with `rules.js` (pure, with tests in `tests/<name>.test.js`), `main.js`, `index.html` (copy the Fuse Box page's head, bar and dialogs) and `demo.js` (`{ step(dt), draw(ctx, w, h, colours) }`).
-2. Its cabinet in `index.html` with `data-game="<name>"` (copy a ready one), its demo in `DEMOS` in `js/hall.js` (a lazy `import()`, with its own budget in `tests/budget.test.js`), `data-game="<name>"` on its page's `<body>`, and its line next to Fuse Box's `view-transition-name` rule in `styles.css` (`tests/site.test.js` says what is missing).
+2. Its cabinet in `index.html` with `data-game="<name>"` (copy a ready one), its line in `GAMES` in `js/games.js` where it should stand (a lazy `import()` of its demo, with its own budget in `tests/budget.test.js`), then `./dev order`, `data-game="<name>"` on its page's `<body>`, and its line next to Fuse Box's `view-transition-name` rule in `styles.css` (`tests/site.test.js` says what is missing).
 3. The `<meta name="build" content="dev">` tag, copied from another page, and its page in `sitemap.xml` and in `PAGES` in `scripts/check-layout.mjs`.
 4. Keep the preload lists whole (`tests/preload.test.js` says what is missing) and the budget green.
 5. Pick a name of our own and check it is not another game's: add the names you checked against to `tests/originality.test.js`.

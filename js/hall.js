@@ -9,15 +9,15 @@
 // centres that game's cabinet, so the player lands where they left rather than on another game.
 
 import { mountAttract } from './attract.js';
+import { GAMES } from './games.js';
 import { memory } from './memory.js';
 import { initSettings } from './settings.js';
 
-const DEMOS = {
-  'fuse-box': () => import('../games/fuse-box/demo.js').then((m) => m.createDemo({ scores: () => memory.scores('fuse-box:easy', 'low') })),
-  lob: () => import('../games/lob/demo.js').then((m) => m.createDemo({ scores: () => memory.scores('lob:solo', 'high') })),
-  'patch-night': () => import('../games/patch-night/demo.js').then((m) => m.createDemo({ scores: () => memory.scores('patch-night:simple', 'high') })),
-  'notch-up': () => import('../games/notch-up/demo.js').then((m) => m.createDemo({ scores: () => memory.scores('notch-up:tower', 'high') })),
-};
+// A ready cabinet's demo, by game id: fetched on demand, showing that game's high scores.
+const DEMOS = Object.fromEntries(GAMES.map(({ id, demo, board, order }) => [
+  id,
+  () => demo().then((m) => m.createDemo({ scores: () => memory.scores(board, order) })),
+]));
 const NEAR = '200px'; // start fetching a demo this far before its cabinet scrolls into view
 
 // The address names the game (#notch-up), not an element id: a real fragment target would make the

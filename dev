@@ -29,6 +29,8 @@ Commands:
   test [--watch]            Run node --test tests/*.test.js (--watch needs Node 18.11+).
   check                     Run the tests (privacy scan and size budget included), then fetch every page,
                             the CSS and every JS module over HTTP and check they load (JS as JavaScript).
+  order                     Put the hall's cabinets in index.html in the order of js/games.js
+                            (scripts/order-hall.mjs).
   layout [--shots]          Load every page in Chromium at 320, 360, 768 and 1280 px and fail on sideways
                             scroll, text under 16 px, small tap targets, other-origin requests or console
                             errors (scripts/check-layout.mjs). Installs Playwright into .local/tools the
@@ -243,6 +245,9 @@ case "$cmd" in
   serve) cmd_serve "$@" ;;
   test) cmd_test "$@" ;;
   layout) cmd_layout "$@" ;;
+  order)
+    need node "needed to reorder the hall" "Install Node.js (18 or newer)."
+    node scripts/order-hall.mjs ;;
   check) cmd_check "$@" ;;
   *) die_usage "Unknown command: $cmd" ;;
 esac
