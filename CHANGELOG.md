@@ -21,6 +21,7 @@ All notable changes to this project are listed here, newest first. The format fo
 
 - Lob no longer rescales when the turn changes: the status line is always two lines high, so a longer message cannot take room from the street.
 - Lob's wind smoke is visible on a phone: it rises from a small chimney at the inner edge of the rival's roof, clear of the billboard that used to hide it.
+- The Lob and Patch Night pages carry the build tag too, so the deploy stamp reaches every page and CI is green again
 
 ## 0.1.0 – 2026-11-21
 
