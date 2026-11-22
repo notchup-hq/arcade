@@ -20,7 +20,7 @@ Notchup Arcade: a neon hall of tiny classic arcade games, at https://arcade.notc
 - Commits: Conventional Commits (`feat: add rooftop duel`), imperative, 72 characters or fewer, then a short `- ` bullet body on what and why. One logical change per commit, no WIP or fixup commits.
 - Author: the owner's GitHub no-reply address from git config; never change `user.email`. No AI attribution lines in commits or PRs (switched off in `.claude/settings.json`).
 - No secrets, Cloudflare IDs or tokens in the repo, and nothing about anyone's machine.
-- GitHub Actions: the one workflow skips draft PRs, has a concurrency group and job timeouts, and runs on `ubuntu-latest`.
+- GitHub Actions: the one workflow runs on every PR, drafts included, has a concurrency group and job timeouts, and runs on `ubuntu-latest`.
 
 ## Commands
 
