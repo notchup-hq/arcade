@@ -17,6 +17,7 @@ All notable changes to this project are listed here, newest first. The format fo
 
 - High scores work the same in every game: a top 5 per board (was 10), and initials may have dots in them, so P.K works. Older tables keep their best 5.
 - The hall fits four cabinets: two side by side from 768 px, all four in a row from 1120 px. Each cabinet's demo is fetched only when the cabinet comes into view, so the hall's first load stays small as games are added.
+- The order of the games in the hall is one list, `js/games.js`; `./dev order` puts the cabinets in `index.html` in that order.
 - The night city and the spark burst are shared (`js/city.js`, `js/sparks.js`) instead of living in Lob and Patch Night.
 - README: says the games are inspired by the great arcade classics but our own take, lists three games, and a "Name and logo" section says forks need their own name and branding and are not Notchup's responsibility.
 - Each page's source carries `<meta name="build" content="abc1234 2026-11-21">`: the short commit and date of the deploy, stamped by Cloudflare's build command (`scripts/stamp-build.mjs`). Locally it says `dev`.

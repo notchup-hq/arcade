@@ -65,3 +65,16 @@ test('the Arcade link of a game opens the hall, and the hall knows each game by 
     assert.match(hall, new RegExp(`<li class="cabinet" data-game="${game}">`), game);
   }
 });
+
+test('the hall shows the games in the order of js/games.js (./dev order puts them so)', async () => {
+  const { GAMES } = await import('../js/games.js');
+  const { orderHall } = await import('../scripts/order-hall.mjs');
+  const hall = read('index.html');
+  const ids = GAMES.map((g) => g.id);
+  const cabinets = (html) => [...html.matchAll(/class="cabinet"[^>]* data-game="([a-z-]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(cabinets(hall), ids, 'run ./dev order');
+  const reversed = orderHall(hall, ids.toReversed());
+  assert.deepEqual(cabinets(reversed), ids.toReversed());
+  assert.equal(orderHall(reversed, ids), hall);
+  assert.throws(() => orderHall(hall, ids.slice(1)), new RegExp(`not in GAMES: ${ids[0]}`));
+});
