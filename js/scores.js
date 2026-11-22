@@ -1,6 +1,7 @@
 // High score tables: pure, so the games, the hall and the tests share one set of rules. A table is the
 // top MAX_ENTRIES of one board (a game and its level), the earlier score first among equal ones. An
-// entry is { initials, value, date }: initials, the score (a time in ms or points) and when it was made.
+// entry is { initials, value, date, extra }: initials, the score (a time in ms or points), when it was
+// made, and the few numbers only that game counts (extra, optional; js/fame.js shows them).
 // Every game uses these rules and the same initials dialog (js/initials.js).
 
 export const MAX_ENTRIES = 5;
@@ -21,12 +22,23 @@ export function cleanInitials(raw) {
   return INITIALS.test(s) ? s : null;
 }
 
+const MAX_EXTRA = 3;
+const EXTRA_KEY = /^[a-z]{1,12}$/;
+
+/** A game's own numbers for an entry, made safe: at most MAX_EXTRA, short names, numbers 0 or more. */
+export function cleanExtra(raw) {
+  if (!raw || typeof raw !== 'object') return undefined;
+  const pairs = Object.entries(raw).filter(([k, v]) => EXTRA_KEY.test(k) && Number.isFinite(v) && v >= 0).slice(0, MAX_EXTRA);
+  return pairs.length ? Object.fromEntries(pairs) : undefined;
+}
+
 function cleanEntry(raw) {
   if (!raw || typeof raw !== 'object') return null;
   const initials = cleanInitials(raw.initials);
   const { value, date } = raw;
   if (!initials || !Number.isFinite(value) || value < 0 || !Number.isFinite(date)) return null;
-  return { initials, value, date };
+  const extra = cleanExtra(raw.extra);
+  return extra ? { initials, value, date, extra } : { initials, value, date };
 }
 
 /** A table made safe: valid entries only, best first (an earlier date wins a tie), at most MAX_ENTRIES. */
@@ -57,10 +69,10 @@ export function insertScore(table, entry, order) {
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-/** A date (ms) as the tables show it: "21 Nov 2026". */
+/** A date (ms) as the tables show it, short enough for a phone: "21Nov26". */
 export function formatDate(ms) {
   const d = new Date(ms);
-  return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+  return `${d.getDate()}${MONTHS[d.getMonth()]}${String(d.getFullYear() % 100).padStart(2, '0')}`;
 }
 
 /** A time in ms as the tables show it: "42.3" seconds, or "1:02.5" from a minute on. */

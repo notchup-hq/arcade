@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createMemory } from '../js/memory.js';
 import {
-  BREAK_EVERY, LEVELS, cheerFor, LIVES, PAUSE_MS, dirOfKey, factsOf, keyOf, makeWave, mergeWeak, multiplier, nearestDir, newGame,
+  BREAK_EVERY, LEVELS, cheerFor, LIVES, PAUSE_MS, dirOfKey, factsOf, fameOf, keyOf, makeWave, mergeWeak, multiplier, nearestDir, newGame,
   practiseList, resume, seeded, step, summarise, worth, zap, dirOfArrows,
 } from '../games/patch-night/rules.js';
 
@@ -270,4 +270,15 @@ test('cheers follow the score, never repeat the last one, and every 50th answer 
   for (let k = 0; k < 40; k++) normal.add(cheerFor({ right: 2, total: 10, answered: 40 }, rand));
   assert.ok([...special].every((c) => /fifty|hundred/i.test(c)));
   assert.ok([...normal].every((c) => !/fifty|hundred/i.test(c)));
+});
+
+test('the hall of fame gets the share right first time and the average answer time', () => {
+  const g = newGame('simple', seeded(3));
+  assert.deepEqual(fameOf(g), { right: 0, avg: 0 });
+  step(g, 1000);
+  next(g);                     // right first time, after a second
+  step(g, 3000);
+  zap(g, wrongBug(g).dir);
+  next(g);                     // right on the second try, after three seconds
+  assert.deepEqual(fameOf(g), { right: 50, avg: 2000 });
 });

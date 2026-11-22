@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { MAX_ENTRIES, cleanInitials, cleanTable, formatDate, formatTime, insertScore, placeOf, typedInitials } from '../js/scores.js';
+import { MAX_ENTRIES, cleanExtra, cleanInitials, cleanTable, formatDate, formatTime, insertScore, placeOf, typedInitials } from '../js/scores.js';
 
 const entry = (value, date = 1, initials = 'ABC') => ({ initials, value, date });
 
@@ -64,6 +64,17 @@ test('times show tenths, and minutes from a minute on', () => {
   assert.equal(formatTime(62_500), '1:02.5');
 });
 
-test('dates show day, month and year', () => {
-  assert.equal(formatDate(new Date(2026, 10, 21, 18).getTime()), '21 Nov 2026');
+test('dates show day, month and year, short: 21Nov26', () => {
+  assert.equal(formatDate(new Date(2026, 10, 21, 18).getTime()), '21Nov26');
+  assert.equal(formatDate(new Date(2030, 4, 2).getTime()), '2May30');
+});
+
+test("an entry keeps the few numbers only its game counts, made safe", () => {
+  assert.deepEqual(cleanExtra({ right: 92, avg: 1800 }), { right: 92, avg: 1800 });
+  assert.equal(cleanExtra({ right: -1, Bad: 2, avg: NaN }), undefined);
+  assert.deepEqual(Object.keys(cleanExtra({ a: 1, b: 2, c: 3, d: 4 })), ['a', 'b', 'c']);
+  assert.equal(cleanExtra('92'), undefined);
+  const [kept, plain] = cleanTable([{ ...entry(5), extra: { perfect: 7, x: 'no' } }, entry(3)], 'high');
+  assert.deepEqual(kept.extra, { perfect: 7 });
+  assert.equal('extra' in plain, false);
 });

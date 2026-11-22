@@ -3,10 +3,11 @@
 // room the panel has, and help and the hall of fame open in dialogs. Tap or click to test a fuse; tag one with a right click, a long press,
 // the T key, or the Tag button. The level lives in the link (?level=medium).
 
+import { renderFame } from '../../js/fame.js';
 import { askInitials } from '../../js/initials.js';
 import { logoSvg } from '../../js/logo.js';
 import { memory } from '../../js/memory.js';
-import { formatDate, formatTime, placeOf } from '../../js/scores.js';
+import { formatTime, placeOf } from '../../js/scores.js';
 import { initSettings } from '../../js/settings.js';
 import { sfx } from '../../js/sound.js';
 import { LEVELS, TAGGED, TESTED, fusesLeft, newPanel, shaped, testFuse, toggleTag } from './rules.js';
@@ -180,7 +181,7 @@ async function win() {
   say(`Fixed in ${formatTime(ms)} s. Notch up!`);
   const place = placeOf(memory.scores(board(), ORDER), ms, ORDER);
   if (place >= 0) {
-    const initials = await askInitials(ui.dialog, { place, last: memory.initials() });
+    const initials = await askInitials(ui.dialog, { place, score: `${formatTime(ms)} s`, last: memory.initials() });
     if (initials) {
       memory.addScore(board(), ORDER, { initials, value: ms });
       lastAdded = place;
@@ -194,27 +195,12 @@ async function win() {
 }
 
 function renderScores() {
-  const table = memory.scores(board(), ORDER);
   ui.scoresCaption.textContent = { easy: 'Easy', medium: 'Medium', hard: 'Hard' }[level];
-  const rows = table.map((e, k) => {
-    const tr = document.createElement('tr');
-    if (k === lastAdded) tr.className = 'new';
-    for (const v of [String(k + 1), e.initials, formatTime(e.value), formatDate(e.date)]) {
-      const td = document.createElement('td');
-      td.textContent = v;
-      tr.append(td);
-    }
-    return tr;
+  renderFame(ui.scores, memory.scores(board(), ORDER), {
+    score: { head: 'Time (s)', cell: formatTime },
+    fresh: lastAdded,
+    empty: 'No scores on this browser yet. Fix a panel to be the first.',
   });
-  if (!rows.length) {
-    const tr = document.createElement('tr');
-    const td = document.createElement('td');
-    td.colSpan = 4;
-    td.textContent = 'No scores on this browser yet. Fix a panel to be the first.';
-    tr.append(td);
-    rows.push(tr);
-  }
-  ui.scores.replaceChildren(...rows);
 }
 
 // Pointer: click tests (or tags in tag mode), a right click or a long press tags.

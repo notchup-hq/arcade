@@ -162,6 +162,8 @@ export function newGame(level, rand, weak = []) {
     queue: [],           // facts to ask again: { key, fact, due, need }
     missed: new Map(),   // key -> fact, in the order missed this run
     answered: 0,         // answers in the whole run, for milestones
+    rightFirst: 0,       // of them right first time, and the time all of them took, for the hall of fame
+    answerMs: 0,
     round: [],           // the answers since the last break: { fact, right, ms }
     rightKeys: new Set(),
     last: '',
@@ -204,8 +206,11 @@ function miss(g) {
 
 function finishWave(g, how) {
   g.wave.done = how;
+  const right = how === 'zapped' && !g.wave.missed;
   g.answered += 1;
-  g.round.push({ fact: g.wave.fact, right: how === 'zapped' && !g.wave.missed, ms: g.wave.age });
+  if (right) g.rightFirst += 1;
+  g.answerMs += g.wave.age;
+  g.round.push({ fact: g.wave.fact, right, ms: g.wave.age });
   g.pause = PAUSE_MS;
   for (const b of g.wave.bugs) if (b.fade < 0) b.fade = 0;
 }
@@ -418,4 +423,10 @@ export function cheerFor({ right, total, answered = 0 }, rand, previous = '') {
   const pool = CHEERS[milestone ? 'milestone' : right === total ? 'flawless' : right >= total * 0.8 ? 'great' : right >= total * 0.5 ? 'good' : 'practice'];
   const options = pool.filter((c) => c !== previous);
   return options[Math.floor(rand() * options.length)];
+}
+
+/** What the hall of fame shows beside a run's score: the share right first time (%) and the average answer time (ms). */
+export function fameOf(g) {
+  if (!g.answered) return { right: 0, avg: 0 };
+  return { right: Math.round((100 * g.rightFirst) / g.answered), avg: Math.round(g.answerMs / g.answered) };
 }

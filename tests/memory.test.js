@@ -101,3 +101,11 @@ test('a stored table of ten from before reads back as the best five', () => {
   const m = createMemory(() => s);
   assert.deepEqual(m.scores('lob:solo', 'high').map((e) => e.value), [9, 8, 7, 6, 5]);
 });
+
+test('a score is saved with the numbers its game counts', () => {
+  const s = fakeStorage();
+  const m = createMemory(() => s);
+  m.addScore('notch-up:tower', 'high', { initials: 'PEK', value: 30, extra: { perfect: 6 } });
+  m.addScore('notch-up:tower', 'high', { initials: 'PEK', value: 20 });
+  assert.deepEqual(m.scores('notch-up:tower', 'high').map((e) => e.extra), [{ perfect: 6 }, undefined]);
+});

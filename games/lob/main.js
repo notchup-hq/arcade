@@ -3,12 +3,13 @@
 // mouse), with the − and + buttons and Throw, or with the arrow keys and Space. The page fits the screen
 // without scrolling; help and the hall of fame open in dialogs.
 
+import { renderFame } from '../../js/fame.js';
 import { askInitials } from '../../js/initials.js';
 import { neonColours } from '../../js/attract.js';
 import { createLoop } from '../../js/loop.js';
 import { logoSvg } from '../../js/logo.js';
 import { memory } from '../../js/memory.js';
-import { formatDate, placeOf } from '../../js/scores.js';
+import { placeOf } from '../../js/scores.js';
 import { initSettings } from '../../js/settings.js';
 import { sfx } from '../../js/sound.js';
 import {
@@ -321,9 +322,9 @@ async function endMatch() {
   say(`Your billboard is out. Run over: ${run.beaten} ${run.beaten === 1 ? 'rival' : 'rivals'} beaten, ${run.score} points.`);
   const place = run.score > 0 ? placeOf(memory.scores(BOARD, ORDER), run.score, ORDER) : -1;
   if (place >= 0) {
-    const initials = await askInitials(ui.dialog, { place, last: memory.initials() });
+    const initials = await askInitials(ui.dialog, { place, score: `${run.score} points`, last: memory.initials() });
     if (initials) {
-      memory.addScore(BOARD, ORDER, { initials, value: run.score });
+      memory.addScore(BOARD, ORDER, { initials, value: run.score, extra: { rivals: run.beaten } });
       renderScores(place);
       ui.fame.showModal();
       return;
@@ -414,25 +415,12 @@ document.addEventListener('keydown', (e) => {
 // ---------- Hall of fame ----------
 
 function renderScores(newPlace = -1) {
-  const rows = memory.scores(BOARD, ORDER).map((e, k) => {
-    const tr = document.createElement('tr');
-    if (k === newPlace) tr.className = 'new';
-    for (const v of [String(k + 1), e.initials, String(e.value), formatDate(e.date)]) {
-      const td = document.createElement('td');
-      td.textContent = v;
-      tr.append(td);
-    }
-    return tr;
+  renderFame(ui.scores, memory.scores(BOARD, ORDER), {
+    score: { head: 'Score', cell: String },
+    columns: [{ key: 'rivals', head: 'Rivals', cell: String }],
+    fresh: newPlace,
+    empty: 'No runs on this browser yet. Beat a rival to be the first.',
   });
-  if (!rows.length) {
-    const tr = document.createElement('tr');
-    const td = document.createElement('td');
-    td.colSpan = 4;
-    td.textContent = 'No runs on this browser yet. Beat a rival to be the first.';
-    tr.append(td);
-    rows.push(tr);
-  }
-  ui.scores.replaceChildren(...rows);
 }
 
 $('help-open').addEventListener('click', () => ui.help.showModal());
