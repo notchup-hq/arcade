@@ -189,7 +189,7 @@ function startMatch() {
   ui.badge.className = 'badge-logo';
   setPrimary('throw');
   showAll();
-  say(twoPlayers ? 'Player 1: hit the sign on the right roof. Drag back and let go, or use the buttons.' : `Rival ${run.level + 1}: ${rival.sign}. Hit the sign: drag back from your roof and let go.`);
+  say(twoPlayers ? 'Player 1: hit the sign. Drag back and let go.' : `Rival ${run.level + 1}: ${rival.sign}. Hit the sign! Drag back and let go.`);
 }
 
 function startFresh() {

@@ -550,6 +550,7 @@ body.game { height: 100dvh; min-height: 0; }
   overflow: hidden;
 }
 .scene { display: block; width: 100%; height: 100%; touch-action: none; cursor: crosshair; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.game[data-game="lob"] .status { height: 3em; overflow: hidden; } /* two lines always, so the street never resizes when the words change */
 .aim { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem 1rem; }
 .stepper { display: flex; align-items: center; gap: 0.25rem; }
 .stepper button { font-size: 1.5rem; line-height: 1; padding: 0; touch-action: manipulation; }
