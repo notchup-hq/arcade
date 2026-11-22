@@ -5,6 +5,7 @@
 // waits while one is open.
 
 import { neonColours } from '../../js/attract.js';
+import { GRACE_MS, holdButton } from '../../js/grace.js';
 import { askInitials } from '../../js/initials.js';
 import { createLoop } from '../../js/loop.js';
 import { logoSvg } from '../../js/logo.js';
@@ -151,10 +152,10 @@ async function endRun() {
   const streak = g.bestPerfect ? ` Most perfects in a row: ${g.bestPerfect}.` : '';
   showCard('Topped out', `${floors === 1 ? '1 floor' : `${floors} floors`}.${streak}`);
   say(`Topped out at ${floors} floors.`);
-  ui.go.focus();
+  holdButton(ui.go); // the player is often still tapping when the card appears
   const place = floors > 0 ? placeOf(memory.scores(BOARD, ORDER), floors, ORDER) : -1;
   if (place < 0) return;
-  const initials = await askInitials(ui.dialog, { place, last: memory.initials() });
+  const initials = await askInitials(ui.dialog, { place, last: memory.initials(), grace: GRACE_MS });
   if (!initials) return;
   memory.addScore(BOARD, ORDER, { initials, value: floors });
   lastAdded = place;

@@ -25,6 +25,7 @@ All notable changes to this project are listed here, newest first. The format fo
 
 ### Fixed
 
+- A run that ends while you are still tapping no longer skips the high score or starts a new run: in Notch Up and Patch Night the buttons of the initials dialog and of the end and break cards wait 0.8 s. The initials dialog no longer opens the phone's keyboard until you tap the field, keeps your last initials from any game, and Enter in the field saves instead of skipping.
 - Lob no longer rescales when the turn changes: the status line is always two lines high, so a longer message cannot take room from the street.
 - Lob's wind smoke is visible on a phone: it rises from a small chimney at the inner edge of the rival's roof, clear of the billboard that used to hide it.
 - The Lob and Patch Night pages carry the build tag too, so the deploy stamp reaches every page and CI is green again

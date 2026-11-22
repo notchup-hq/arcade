@@ -526,6 +526,7 @@ body.game { height: 100dvh; min-height: 0; }
 
 .status { margin: 0; min-height: 1.5em; text-align: center; }
 .actions { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; }
+.held { opacity: 0.5; } /* js/grace.js: a control that ignores input for a moment after a run ends */
 
 /* Notch Up: the best so far in cyan, a tall picture of the tower, and one button over all of it
    that drops the floor. */
