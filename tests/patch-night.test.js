@@ -79,7 +79,7 @@ test('a wrong zap pushes the bug back, nudges the others closer, lowers the wort
   bug.d = 0.5;
   other.d = 0.5;
   rightBug(g).d = 1;
-  assert.deepEqual(zap(g, bug.dir), { type: 'wrong', penalty: 25, worth: 175 });
+  assert.deepEqual(zap(g, bug.dir), { type: 'wrong', penalty: 25, worth: 175, light: false });
   assert.equal(g.score, 100);
   assert.equal(g.streak, 0);
   assert.equal(g.lives, LIVES);
@@ -92,8 +92,67 @@ test('a wrong zap pushes the bug back, nudges the others closer, lowers the wort
 test('wrong zaps can take the worth down to nothing but not below', () => {
   const g = newGame('simple', seeded(1));
   rightBug(g).d = 0;
-  for (let k = 0; k < 8; k++) zap(g, wrongBug(g).dir);
+  for (let k = 0; k < 8; k++) { zap(g, wrongBug(g).dir); step(g, 500); }
   assert.equal(worth(g), 0);
+});
+
+test('each wrong zap in a wave costs more than the last and nudges the others harder', () => {
+  const g = newGame('medium', seeded(1));
+  rightBug(g).d = 1;
+  const [a, b, c] = g.wave.bugs.filter((x) => !x.right);
+  assert.equal(zap(g, a.dir).penalty, 25);
+  assert.equal(zap(g, b.dir).penalty, 50);
+  assert.equal(g.wave.penalty, 75);
+  assert.equal(c.ahead.toFixed(2), (0.07 * 3).toFixed(2), 'nudged once, then twice');
+});
+
+test('a third wrong zap in one wave puts out a light, and the last light ends the run', () => {
+  const g = newGame('medium', seeded(1));
+  const wrongs = g.wave.bugs.filter((x) => !x.right);
+  zap(g, wrongs[0].dir);
+  zap(g, wrongs[1].dir);
+  assert.equal(g.lives, LIVES);
+  const third = zap(g, wrongs[2].dir);
+  assert.equal(third.light, true);
+  assert.equal(g.lives, LIVES - 1);
+  assert.deepEqual(step(g, 10).filter((e) => e.type === 'light').map((e) => e.guess), [true]);
+  assert.equal(g.status, 'playing');
+  assert.equal(g.wave.done, null, 'the wave carries on after a guess light');
+});
+
+test('the last light can go to guessing', () => {
+  const g = newGame('medium', seeded(1));
+  g.lives = 1;
+  for (const b of g.wave.bugs.filter((x) => !x.right).slice(0, 3)) zap(g, b.dir);
+  assert.equal(g.status, 'over');
+  assert.ok(step(g, 10).some((e) => e.type === 'over'));
+});
+
+test('a double tap on a bug being pushed back is not a second guess', () => {
+  const g = newGame('medium', seeded(1));
+  const bug = wrongBug(g);
+  assert.ok(zap(g, bug.dir));
+  assert.equal(zap(g, bug.dir), null);
+  assert.equal(g.wave.wrongs, 1);
+  step(g, 1000);
+  assert.ok(zap(g, bug.dir), 'a considered second zap later counts');
+  assert.equal(g.wave.wrongs, 2);
+});
+
+test('a right zap after two wrong ones still scores', () => {
+  const g = newGame('medium', seeded(1));
+  rightBug(g).d = 1;
+  zap(g, g.wave.bugs.find((b) => !b.right).dir);
+  zap(g, g.wave.bugs.filter((b) => !b.right)[1].dir);
+  assert.ok(zap(g, rightBug(g).dir).points > 0);
+});
+
+test('a clean wave, or a wrong zap or two, costs no light', () => {
+  const g = newGame('simple', seeded(2));
+  zap(g, wrongBug(g).dir);
+  zap(g, wrongBug(g).dir);
+  next(g);
+  assert.equal(g.lives, LIVES);
 });
 
 test('the right bug reaching the logo puts out a light; three lights out end the run', () => {
