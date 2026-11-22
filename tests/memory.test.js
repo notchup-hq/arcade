@@ -45,7 +45,7 @@ test('a score is added to its board and the initials are remembered', () => {
 test('a score with bad initials or a bad board is not stored', () => {
   const s = fakeStorage();
   const m = createMemory(() => s);
-  m.addScore('fuse-box:easy', 'low', { initials: 'AB', value: 1 });
+  m.addScore('fuse-box:easy', 'low', { initials: 'A1', value: 1 });
   m.addScore('../x', 'low', { initials: 'ABC', value: 1 });
   assert.equal(s.data[STORAGE_KEY], undefined);
 });
@@ -85,4 +85,19 @@ test('missed facts work with blocked storage', () => {
   const m = createMemory(blocked);
   m.setWeak('patch-night:simple', ['3x4']);
   assert.deepEqual(m.weak('patch-night:simple'), ['3x4']);
+});
+
+test('initials with dots are stored and read back', () => {
+  const s = fakeStorage();
+  const m = createMemory(() => s);
+  const table = m.addScore('lob:solo', 'high', { initials: 'P.K', value: 12, date: 1 });
+  assert.equal(table[0].initials, 'P.K');
+  assert.equal(m.initials(), 'P.K');
+});
+
+test('a stored table of ten from before reads back as the best five', () => {
+  const old = Array.from({ length: 10 }, (_, i) => ({ initials: 'ABC', value: i, date: 1 }));
+  const s = fakeStorage({ [STORAGE_KEY]: JSON.stringify({ v: 1, scores: { 'lob:solo': old } }) });
+  const m = createMemory(() => s);
+  assert.deepEqual(m.scores('lob:solo', 'high').map((e) => e.value), [9, 8, 7, 6, 5]);
 });

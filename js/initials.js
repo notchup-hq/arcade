@@ -1,11 +1,11 @@
-// "New high score": the dialog that asks for three letters, shared by every game. The markup lives in
+// "New high score": the dialog that asks for initials, shared by every game. The markup lives in
 // each game page (#initials, a native <dialog> with a method="dialog" form); this module only fills
 // and reads it.
 
-import { cleanInitials } from './scores.js';
+import { cleanInitials, typedInitials } from './scores.js';
 
 /**
- * Ask for initials for a score that made place `place` (0-based). Resolves to three letters, or null
+ * Ask for initials for a score that made place `place` (0-based). Resolves to the initials, or null
  * when the visitor skips. `last` is offered again.
  */
 export function askInitials(dialog, { place, last }) {
@@ -18,8 +18,8 @@ export function askInitials(dialog, { place, last }) {
 
   return new Promise((resolve) => {
     function onInput() {
-      // Letters only, upper case, as the table will show them.
-      const v = input.value.toLocaleUpperCase('fi').replace(/[^A-ZÅÄÖ]/g, '').slice(0, 3);
+      // Upper case letters and dots, as the table will show them.
+      const v = typedInitials(input.value);
       if (v !== input.value) input.value = v;
       error.hidden = true;
     }
