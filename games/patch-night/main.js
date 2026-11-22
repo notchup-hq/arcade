@@ -3,6 +3,7 @@
 // the bug in it. Help and the hall of fame open in dialogs, and the game waits while one is open.
 // The level lives in the link (?level=medium).
 
+import { GRACE_MS, holdButton } from '../../js/grace.js';
 import { askInitials } from '../../js/initials.js';
 import { createLoop } from '../../js/loop.js';
 import { memory } from '../../js/memory.js';
@@ -201,7 +202,7 @@ function startBreak(summary) {
     button: 'Continue',
   });
   say(`Break. ${summary.right} of ${summary.total} right first time.`);
-  ui.go.focus();
+  holdButton(ui.go); // the player is often still tapping when the card appears
 }
 
 /** Set the turret on a lane without firing (the keyboard's way: aim, then Space). */
@@ -289,10 +290,10 @@ async function endRun() {
     facts,
   });
   say(`Lights out. Score ${g.score}.`);
-  ui.go.focus();
+  holdButton(ui.go); // the player is often still tapping when the card appears
   const place = g.score > 0 ? placeOf(memory.scores(board(), ORDER), g.score, ORDER) : -1;
   if (place < 0) return;
-  const initials = await askInitials(ui.dialog, { place, last: memory.initials() });
+  const initials = await askInitials(ui.dialog, { place, last: memory.initials(), grace: GRACE_MS });
   if (!initials) return;
   memory.addScore(board(), ORDER, { initials, value: g.score });
   lastAdded = place;

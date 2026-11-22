@@ -22,6 +22,7 @@
   <link rel="modulepreload" href="scene.js">
   <link rel="modulepreload" href="../../js/attract.js">
   <link rel="modulepreload" href="../../js/city.js">
+  <link rel="modulepreload" href="../../js/grace.js">
   <link rel="modulepreload" href="../../js/initials.js">
   <link rel="modulepreload" href="../../js/logo.js">
   <link rel="modulepreload" href="../../js/loop.js">
@@ -102,7 +103,7 @@
 
   <dialog id="initials" class="sheet initials" aria-labelledby="initials-title">
     <form method="dialog">
-      <h2 id="initials-title">New high score!</h2>
+      <h2 id="initials-title" tabindex="-1" autofocus>New high score!</h2>
       <label for="initials-input">Your initials, three letters</label>
       <input id="initials-input" name="initials" maxlength="3" autocomplete="off" autocapitalize="characters" spellcheck="false" enterkeyhint="done">
       <p class="initials-error" hidden>Three letters, please.</p>
