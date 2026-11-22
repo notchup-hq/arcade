@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#060b16">
+  <meta name="color-scheme" content="dark">
+  <meta name="build" content="dev">
+  <title>Notch Up: a tower stacker · Notchup Arcade</title>
+  <meta name="description" content="Drop each floor on the one below and build the Notchup tower into the night sky. A free tower stacker in the Notchup Arcade. No ads, no tracking.">
+  <link rel="canonical" href="https://arcade.notchup.fi/games/notch-up/">
+  <link rel="icon" href="../../assets/mark.svg" type="image/svg+xml">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Notchup Arcade">
+  <meta property="og:title" content="Notch Up: a tower stacker">
+  <meta property="og:description" content="Drop each floor on the one below and build the Notchup tower into the night sky.">
+  <meta property="og:url" content="https://arcade.notchup.fi/games/notch-up/">
+  <meta property="og:locale" content="en">
+  <link rel="stylesheet" href="../../styles.css">
+  <!-- Every module main.js pulls in, fetched at once (tests/preload.test.js keeps the list whole). -->
+  <link rel="modulepreload" href="rules.js">
+  <link rel="modulepreload" href="scene.js">
+  <link rel="modulepreload" href="../../js/attract.js">
+  <link rel="modulepreload" href="../../js/city.js">
+  <link rel="modulepreload" href="../../js/initials.js">
+  <link rel="modulepreload" href="../../js/logo.js">
+  <link rel="modulepreload" href="../../js/loop.js">
+  <link rel="modulepreload" href="../../js/memory.js">
+  <link rel="modulepreload" href="../../js/random.js">
+  <link rel="modulepreload" href="../../js/scores.js">
+  <link rel="modulepreload" href="../../js/settings.js">
+  <link rel="modulepreload" href="../../js/sound.js">
+  <link rel="modulepreload" href="../../js/sparks.js">
+  <link rel="modulepreload" href="../../js/version.js">
+  <script type="module" src="main.js"></script>
+</head>
+<body class="game" data-game="notch-up">
+  <header class="game-bar">
+    <a class="back" href="../../">←<span class="back-text"> Arcade</span></a>
+    <h1>Notch Up</h1>
+    <div class="tools">
+      <button type="button" id="help-open" class="icon" aria-label="How to play" title="How to play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9a3 3 0 1 1 4.5 2.6c-.9.5-1.5 1.2-1.5 2.4M12 17.5v.5"/></svg></button>
+      <button type="button" id="fame-open" class="icon" aria-label="Hall of fame" title="Hall of fame"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20h7"/></svg></button>
+      <button type="button" id="sound" class="icon sound" aria-pressed="true" aria-label="Sound" title="Sound"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10h3l4-4v12l-4-4H4z"/><path class="sound-on" d="M15 9a4 4 0 0 1 0 6M17.5 6.5a7.5 7.5 0 0 1 0 11"/><path class="sound-off" d="M15 9l6 6M21 9l-6 6"/></svg></button>
+    </div>
+  </header>
+
+  <main class="game-main">
+    <noscript><p class="note">Notch Up needs JavaScript to run.</p></noscript>
+
+    <div class="console">
+      <p class="readout"><span class="readout-label">Floors</span> <span id="floors" class="readout-value gold">0</span></p>
+      <div id="badge" class="badge-logo"><img src="../../assets/mark.svg" alt="" width="56" height="56"></div>
+      <p class="readout"><span class="readout-label">Best</span> <span id="best" class="readout-value cyan">0</span></p>
+    </div>
+
+    <div id="frame" class="panel-frame">
+      <div id="stage" class="stage tower" data-small-target>
+        <canvas id="board" aria-hidden="true"></canvas>
+        <button type="button" id="drop" class="drop-zone" aria-label="Drop the floor"></button>
+        <div id="card" class="card">
+          <h2 id="card-title">Notch Up</h2>
+          <p id="card-text">Drop each floor on the one below. Whatever hangs over is cut off.</p>
+          <button type="button" id="go" class="primary">Start</button>
+        </div>
+      </div>
+    </div>
+
+    <p id="status" class="status" role="status"></p>
+  </main>
+
+  <dialog id="help" class="sheet" aria-labelledby="help-title">
+    <form method="dialog">
+      <h2 id="help-title">How to play</h2>
+      <p>Build the Notchup tower as high as it goes. A new floor slides back and forth above the top; drop it on the floor below.</p>
+      <ul>
+        <li>Tap or click anywhere on the tower, or press Space or Enter, to drop the floor.</li>
+        <li>Whatever hangs over the edge is cut off, so the next floor is narrower.</li>
+        <li>A drop that lines up (almost) exactly is perfect and keeps the whole width. From the third perfect in a row, each perfect wins some width back.</li>
+        <li>A floor that misses the tower ends the run. The floors get a little faster as the tower grows.</li>
+        <li>Every tenth floor the logo notches up, and 10, 50 and 100 floors get a cheer and a helping hand: the crane builds that floor wider (at 100, back to full width), so the floors after it are wider too.</li>
+      </ul>
+      <p class="credit">Notch Up is made by <a href="https://www.notchup.fi">Notchup</a>. No ads, no cookies, no tracking. <span class="version">v0.1.0</span></p>
+      <div class="actions"><button type="submit" class="primary">Close</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="fame" class="sheet" aria-labelledby="fame-title">
+    <form method="dialog">
+      <h2 id="fame-title">Hall of fame</h2>
+      <table>
+        <caption>Most floors</caption>
+        <thead>
+          <tr><th scope="col">#</th><th scope="col">Who</th><th scope="col">Floors</th><th scope="col">Date</th></tr>
+        </thead>
+        <tbody id="scores"></tbody>
+      </table>
+      <p class="credit">Kept in this browser only.</p>
+      <div class="actions"><button type="submit" class="primary">Close</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="initials" class="sheet initials" aria-labelledby="initials-title">
+    <form method="dialog">
+      <h2 id="initials-title">New high score!</h2>
+      <label for="initials-input">Your initials, three letters</label>
+      <input id="initials-input" name="initials" maxlength="3" autocomplete="off" autocapitalize="characters" spellcheck="false" enterkeyhint="done">
+      <p class="initials-error" hidden>Three letters, please.</p>
+      <p class="credit">Kept in this browser only.</p>
+      <div class="actions">
+        <button type="submit" value="skip">Skip</button>
+        <button type="submit" value="save" class="primary">Save</button>
+      </div>
+    </form>
+  </dialog>
+</body>
+</html>

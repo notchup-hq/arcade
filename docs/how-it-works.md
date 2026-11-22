@@ -4,7 +4,7 @@
 
 | Path | What |
 |---|---|
-| `index.html`, `js/hall.js` | The hall: one arcade cabinet per game (below). A ready game plays itself on its screen; the rest say "Coming soon". Without JavaScript the cabinets are plain links. |
+| `index.html`, `js/hall.js` | The hall: one arcade cabinet per game (below). A ready game plays itself on its screen; the rest say "Coming soon". A demo's code is fetched only when its cabinet comes within 200 px of the screen, so the hall's first load stays small however many games there are. Without JavaScript the cabinets are plain links. |
 | `games/<game>/` | One folder per game: `index.html` (its page), `main.js` (the page's code), `rules.js` (the rules, no DOM, tested), `demo.js` (attract mode for the hall). |
 | `js/` | Shared by the hall and every game (below). |
 | `styles.css` | The one stylesheet. Colour tokens `--neon-*` are read by canvas code too. |
@@ -20,17 +20,18 @@
 | `logo.js` | The Notchup logo in parts (gear, compass, arrow), with the same shapes as `assets/mark.svg` (`tests/logo.test.js`), as inline SVG or on canvas. In the hall the logo is the plain mark, a link to notchup.fi (the demo screen also draws it); on a win the gear turns four teeth and the arrow rises. |
 | `sound.js` | Sound effects made with the Web Audio API, no files. The audio context starts on the first sound, which always follows a tap. |
 | `screens.js` | The two screens a demo ends with: the logo notching up under a line of text, and this browser's top 5. |
+| `city.js` | The night city of notchup.fi: a row of buildings with a few lit windows, seeded (Lob's street, Notch Up's skyline). |
+| `sparks.js` | A calm burst of sparks in the neon colours that drifts out and fades, no flash (Patch Night's right zap, Notch Up's cheers). |
 | `random.js` | A seedable random number generator, so rules and demos can replay in tests. |
 | `scores.js` | High score rules, the same for every game: top 5 per board, ordered by time (`low`) or points (`high`), initials of three characters, letters (A–Z and Å Ä Ö) or dots, at least one a letter (`PEK`, `P.K`). Pure. |
 | `memory.js` | The only code that uses `localStorage`: one key, `arcade:v1`, holding the sound setting, the last initials, the tables, and a short list per level of the times-table facts missed (Patch Night, at most 20, as keys like `7x8`). Nothing leaves the browser. Works without storage. |
-| `screens.js` | The two screens a demo ends with: the logo notching up under a line of text, and this browser's top 5. |
 | `initials.js` | The "New high score" dialog (native `<dialog>`), the same markup on every game page (`tests/site.test.js`); typing keeps only what can become valid initials. |
 | `settings.js` | The sound switch (an icon button) and the version. |
 
 ## Cabinets and the zoom into a game
 
 - Each cabinet is an arcade machine drawn in CSS only, no images: a lit marquee with the name, the screen in its bezel with a still glass sheen, a control panel that sticks out past the sides (a stick and three buttons, decoration hidden from screen readers), and the base with the pitch (wide screens only) and a lit Play plate. A game still coming has its marquee unlit, its screen off with a faint Notchup mark, and "Coming soon" on its base. Nothing on a cabinet moves on its own; only the demo on a ready screen does.
-- Phones: the ready game is one big cabinet, the coming ones share a row below it. From 768 px: three cabinets side by side.
+- Phones: each ready game is one big cabinet, one under another; games still coming share a row below them. From 768 px: two cabinets side by side, and from 1120 px all four in a row.
 - Opening a game, the cabinet's screen grows into the game's play area (`.game-main`) in 0.3 s, and going back it shrinks into the screen again. This is a cross-document view transition, pure CSS: `@view-transition` opts both pages in, the screen and the play area share a `view-transition-name` (one per game, since a name may be used once per page), and the growing box is a solid lit screen so the pages never show through each other. The demo's picture fades out in 0.12 s, before it is stretched much.
 - Browsers without cross-document view transitions get a normal page load. Under `prefers-reduced-motion: reduce` the `@view-transition` rule is off, so every visitor who asked for less motion gets a normal page load too. `tests/site.test.js` checks both the names and this.
 
@@ -68,13 +69,26 @@
 - Calm: bugs crawl, nothing shakes or flashes. With `prefers-reduced-motion` bugs step forward in ten still steps instead of gliding, the zap is a still line that disappears, and a frame is drawn only when something changed.
 - `rules.js` holds everything with no DOM (waves, wrong-answer choice, the review queue, scoring), seeded and tested; `scene.js` draws the board for both the page and the demo; `demo.js` has the logo zap the right bug about every 1.5 s on Simple for a few waves, then shows this browser's top 5.
 
+## Notch Up
+
+- A tower stacker. Build the Notchup tower floor by floor over the night city. A new floor slides back and forth above the top of the tower; drop it, and whatever hangs over the edge of the floor below is cut off and fades where it was (it does not fall), so the next floor is that much narrower. A floor that misses the tower completely ends the run.
+- A drop within 4 units of the floor below (the world is 200 units across, a floor starts 90 wide) is perfect: it snaps on exactly, keeps its width and leaves a gold seam that fades. From the third perfect in a row, every perfect wins 8 units of width back, up to the starting width. The sliding floor never goes past the edge of the picture (`swingOf`); it starts from the side opposite the one before and gets a little faster with every floor, up to a cap.
+- Score: floors built. Top 5 (board `notch-up:tower`, higher wins). The console shows the floors, the logo and this browser's best.
+- Every tenth floor has a magenta neon band and the logo in the console notches up (gear four teeth, arrow rises). Cheers, as on notchup.fi but calm: at 10, 50 and 100 floors and every hundredth after, and on the first floor past this browser's best when that best is 10 or more (the record wins over a round number on the same floor). A cheer shows the count ("10 FLOORS"), a big praise word and a dry building-site line under it, both picked at random from lists in `rules.js` that grow with the milestone and never repeat the line before; the words swell in and fade over 2.6 s while a few bursts of sparks drift out in the sky (3 for 10 floors, 5 for 50, 8 for 100 or a record). A milestone also helps: the crane builds that floor wider (20 units at 10 floors, 40 at 50, back to the full width at 100 and after), and the floors after it start from that width; a gold seam marks it. The status line says all this for screen readers. No BAM, flash or shake: a drop is a timing call, so nothing covers the tower.
+- Controls: tap or click anywhere on the tower, or press Space or Enter (they drop the moment the key goes down). One real button, "Drop the floor", lies over the whole picture for the keyboard and screen readers.
+- The picture (`scene.js`) is one canvas: sky and stars and the distant city (`js/city.js`) are drawn once off screen and copied; the city sinks slower than the tower as the camera rises, so the tower climbs out of it. Only the floors in view are drawn, and a window is lit or not by its floor and column, so a tall tower costs no more than a short one. The Notchup logo hangs over the lobby. The camera eases up so the sliding floor stays at about 60 % of the height.
+- Reduced motion: the camera jumps instead of easing, the sliding floor moves in steps of 3 units and is judged where it is drawn (`moverX`), the words show without swelling, there are no sparks, and a frame is drawn only when something changed.
+- Attract mode (`demo.js`) starts with four floors up and drops about once a second, most drops perfect and the rest a little off, past the tenth floor's cheer; then the logo notches up, this browser's top 5 shows, and it starts over.
+
 ## Adding a game
 
 1. `games/<name>/` with `rules.js` (pure, with tests in `tests/<name>.test.js`), `main.js`, `index.html` (copy the Fuse Box page's head, bar and dialogs) and `demo.js` (`{ step(dt), draw(ctx, w, h, colours) }`).
-2. Its cabinet in `index.html` with `data-game="<name>"` (copy a ready one), its demo in `DEMOS` in `js/hall.js`, `data-game="<name>"` on its page's `<body>`, and its line next to Fuse Box's `view-transition-name` rule in `styles.css` (`tests/site.test.js` says what is missing).
+2. Its cabinet in `index.html` with `data-game="<name>"` (copy a ready one), its demo in `DEMOS` in `js/hall.js` (a lazy `import()`, with its own budget in `tests/budget.test.js`), `data-game="<name>"` on its page's `<body>`, and its line next to Fuse Box's `view-transition-name` rule in `styles.css` (`tests/site.test.js` says what is missing).
 3. The `<meta name="build" content="dev">` tag, copied from another page, and its page in `sitemap.xml` and in `PAGES` in `scripts/check-layout.mjs`.
 4. Keep the preload lists whole (`tests/preload.test.js` says what is missing) and the budget green.
 5. Pick a name of our own and check it is not another game's: add the names you checked against to `tests/originality.test.js`.
+
+Ideas for the next games are in [next-games.md](next-games.md).
 
 ## Which version is live
 
