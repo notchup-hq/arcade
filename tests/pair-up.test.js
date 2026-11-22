@@ -120,6 +120,7 @@ test('running out of chances ends the run, and nothing turns after that', () => 
 
 test('every level has its own number of chances, more with more pairs', () => {
   assert.deepEqual(Object.values(LEVELS).map((l) => l.chances), [4, 5, 6]);
+  assert.deepEqual(Object.values(LEVELS).map((l) => l.clearBack), [1, 1, 2]);
   for (const level of Object.keys(LEVELS)) assert.equal(newGame(level, seeded(1)).chances, LEVELS[level].chances);
 });
 
@@ -153,8 +154,16 @@ test('every pair found clears the round; the bonus is the same total on every le
       const streak = Array.from({ length: g.pairs }, (_, k) => PAIR_POINTS + k * STREAK_POINTS).reduce((a, b) => a + b);
       assert.equal(g.score, streak + Math.round((SPARE_TOTAL * before) / g.maxChances), `${level} ${misses}`);
       assert.ok(PRAISE[size].includes(g.cheer.praise) && QUIPS[size].includes(g.cheer.quip), `${level} ${misses}`);
-      assert.equal(g.chances, Math.min(g.maxChances, before + 1));
+      assert.equal(g.chances, Math.min(g.maxChances, before + 1 + LEVELS[level].clearBack));
     }
+  }
+});
+
+test('clearing a deck never lights lamps above the level\'s number', () => {
+  for (const level of Object.keys(LEVELS)) {
+    const g = newGame(level, seeded(5));
+    clearRound(g);
+    assert.equal(g.chances, g.maxChances, level);
   }
 });
 

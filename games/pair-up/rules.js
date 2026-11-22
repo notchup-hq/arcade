@@ -1,6 +1,6 @@
 // Pair Up's rules, with no DOM: a deck of face-down cards, two of each face. Turn two cards; a pair
 // stays up, anything else turns back down and costs a chance, and every pair found lights one chance
-// back (up to the level's own number: 4, 5 or 6). A deck with every pair found is a round cleared: the
+// back (up to the level's own number: 4, 5 or 6), and a cleared deck lights a few more (clearBack). A deck with every pair found is a round cleared: the
 // next round deals a fresh deck and the run goes on with the chances it has, until they are all gone.
 // The deal is seeded, so tests and the hall's demo replay.
 
@@ -19,11 +19,11 @@ export const SPRITES = ['logo', 'bug', 'bulb', 'fuse', 'floor'];
 /** Letters that are hard to mix up with one another. */
 export const LETTERS = [...'ABDEFGHKLNPRSTUXZ'];
 
-// Pairs and chances per level (more pairs, more chances); the deck's shape follows the screen (a tall one for a phone held upright).
+// Pairs and chances per level (more pairs, more chances), and the chances a cleared deck lights back on top of its last pair's; the deck's shape follows the screen (a tall one for a phone held upright).
 export const LEVELS = {
-  easy: { pairs: 6, tall: [3, 4], wide: [4, 3], sprites: 3, chances: 4 },
-  medium: { pairs: 8, tall: [4, 4], wide: [4, 4], sprites: 4, chances: 5 },
-  hard: { pairs: 10, tall: [4, 5], wide: [5, 4], sprites: 5, chances: 6 },
+  easy: { pairs: 6, tall: [3, 4], wide: [4, 3], sprites: 3, chances: 4, clearBack: 1 },
+  medium: { pairs: 8, tall: [4, 4], wide: [4, 4], sprites: 4, chances: 5, clearBack: 1 },
+  hard: { pairs: 10, tall: [4, 5], wide: [5, 4], sprites: 5, chances: 6, clearBack: 2 },
 };
 
 // The cheers, by how many wrong pairs it took: none, a couple, more (relieved). Praise word, then a dry line.
@@ -146,7 +146,8 @@ export function flip(g, i) {
       g.score += Math.round((SPARE_TOTAL * g.chances) / g.maxChances);
       g.cheer = cheerOf(g);
     }
-    g.chances = Math.min(g.maxChances, g.chances + 1); // a pair found lights a chance back
+    const back = 1 + (g.status === 'cleared' ? LEVELS[g.level].clearBack : 0); // a pair found lights a chance back, a cleared deck more
+    g.chances = Math.min(g.maxChances, g.chances + back);
     return { type: g.status === 'cleared' ? 'cleared' : 'match' };
   }
   g.chances--;
