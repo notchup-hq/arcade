@@ -6,7 +6,7 @@ Neon arcade of tiny classic arcade games by Notchup. Plain HTML, CSS and JS: no 
 
 **Made by Notchup:** this arcade is a free side project of [Notchup](https://www.notchup.fi), a small Finnish software company. Come and see what else we make at **[www.notchup.fi](https://www.notchup.fi)**.
 
-Alpha (v0.1). Four games so far, more on the way.
+Alpha (v0.1). Five games so far, more on the way.
 
 ## The games
 
@@ -16,6 +16,7 @@ Alpha (v0.1). Four games so far, more on the way.
 | **Lob** | A rooftop duel at night. Lob glowing bulbs across the street at your rival's billboard, with the wind changing every throw. Three hits win. Play a run against computer rivals who get better one after another, or share one device with a friend. |
 | **Patch Night** | A times-table bug zapper. Bugs crawl in with answers on their backs; zap the one that is right before it reaches the logo. Three levels, and the facts you miss come back until you know them. |
 | **Notch Up** | A tower stacker. Drop each floor on the one below; whatever hangs over is cut off, so the tower gets narrower unless your drops are perfect. 10, 50 and 100 floors get a cheer. |
+| **Pair Up** | A memory game. Turn the cards and find every pair; three wrong guesses end the run. Faces are letters and little pictures from the other games, and a win gets a cheer. Three levels. |
 
 Inspired by the great arcade classics, every game here is our own take: the code, art and sounds are written from scratch, and the names, rules and levels are ours. The hall shows each game playing itself on its cabinet's screen, and each game keeps a top 5 with three-letter initials, in your browser only.
 

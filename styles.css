@@ -293,8 +293,10 @@ a.marquee-logo:hover, a.marquee-logo:focus-visible { background: radial-gradient
 @media (min-width: 48rem) {
   .marquee { padding: 2rem var(--gap) 1.5rem; }
   .marquee-logo { width: 4.5rem; height: 4.5rem; }
-  .cabinets { grid-template-columns: repeat(2, 1fr); gap: 2rem; padding-inline: 0.5rem; }
-  .cabinet:not(.soon) { grid-column: auto; }
+  /* Twice the columns, each cabinet two wide, so a last cabinet left alone in its row can stand in the middle. */
+  .cabinets { grid-template-columns: repeat(4, 1fr); gap: 2rem; padding-inline: 0.5rem; }
+  .cabinet:not(.soon) { grid-column: span 2; }
+  .cabinet:not(.soon):last-child:nth-child(odd) { grid-column: 2 / span 2; }
   .cabinet > a, .cabinet-body { --side: 10px; }
   .cabinet-marquee { padding: 0.6rem 0.5rem; }
   .cabinet-name, .soon .cabinet-name { font-size: 1.5rem; }
@@ -305,7 +307,11 @@ a.marquee-logo:hover, a.marquee-logo:focus-visible { background: radial-gradient
   .cabinet-pitch { display: block; flex: 1; }
 }
 @media (min-width: 70rem) {
-  .cabinets { grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
+  .cabinets { grid-template-columns: repeat(8, 1fr); gap: 1.5rem; }
+  .cabinet:not(.soon):last-child:nth-child(odd) { grid-column: span 2; }
+  .cabinet:not(.soon):nth-last-child(1):nth-child(4n + 1) { grid-column: 4 / span 2; }
+  .cabinet:not(.soon):nth-last-child(2):nth-child(4n + 1) { grid-column: 3 / span 2; }
+  .cabinet:not(.soon):nth-last-child(3):nth-child(4n + 1) { grid-column: 2 / span 2; }
 }
 
 /* ---------- Footer: one slim line ---------- */
@@ -594,6 +600,53 @@ body.game { height: 100dvh; min-height: 0; }
 .stepper-value { margin: 0; display: flex; flex-direction: column; align-items: center; min-width: 4.5rem; line-height: 1.15; }
 .readout-number { font: 800 1rem/1.15 var(--mono); color: var(--neon-gold); font-variant-numeric: tabular-nums; }
 
+/* Pair Up: a deck of cards, each a button with a back and a face that flip. A won run lights every face gold. */
+.pairs { position: relative; }
+.deck { gap: 6px; }
+.pair {
+  position: relative;
+  width: var(--cell);
+  height: var(--cell);
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  perspective: 500px;
+  -webkit-tap-highlight-color: transparent;
+}
+.pair:hover { border: 0; }
+.pair-inner { position: absolute; inset: 0; transform-style: preserve-3d; }
+.pair-back, .pair-front {
+  position: absolute;
+  inset: 0;
+  display: block;
+  border: 2px solid var(--neon-dim);
+  border-radius: 6px;
+  backface-visibility: hidden;
+}
+.pair-back { background: linear-gradient(to bottom, #14294a, #0b1730); }
+.pair:hover .pair-back { border-color: var(--neon-cyan); }
+.pair-back::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 28%;
+  height: 28%;
+  transform: translate(-50%, -50%);
+  background: var(--neon-gold);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+.pair-front { transform: rotateY(180deg); background: #0b1730; }
+.pair-front canvas { display: block; width: 100%; height: 100%; }
+.pair:is(.up, .matched, .shown) .pair-inner { transform: rotateY(180deg); }
+.pair.up .pair-front { border-color: var(--neon-cyan); }
+.pair.matched .pair-front { border-color: var(--neon-gold); }
+.pair.shown .pair-front { opacity: 0.55; }
+.pair.matched, .pair.shown { cursor: default; }
+.deck.won .pair-front { border-color: var(--neon-gold); box-shadow: var(--glow-gold); }
+
 /* Dialogs: help, hall of fame, initials. */
 .sheet {
   width: min(30rem, calc(100vw - 2 * var(--gap)));
@@ -650,6 +703,7 @@ body.game { height: 100dvh; min-height: 0; }
 .cabinet[data-game="lob"] .screen, .game[data-game="lob"] .game-main { view-transition-name: lob; }
 .cabinet[data-game="patch-night"] .screen, .game[data-game="patch-night"] .game-main { view-transition-name: patch-night; }
 .cabinet[data-game="notch-up"] .screen, .game[data-game="notch-up"] .game-main { view-transition-name: notch-up; }
+.cabinet[data-game="pair-up"] .screen, .game[data-game="pair-up"] .game-main { view-transition-name: pair-up; }
 
 /* ---------- Motion, only when the visitor has not asked for less ---------- */
 
@@ -673,6 +727,7 @@ body.game { height: 100dvh; min-height: 0; }
   .badge-logo.fixed .logo-arrow { animation: rise 0.6s cubic-bezier(0.3, 1.6, 0.5, 1) 0.3s 1 both; }
   .badge-logo.sparked .logo { animation: shake 0.3s linear 1; }
   .fuse.lit { animation: light-up 0.25s ease-out 1; }
+  .pair-inner { transition: transform 0.25s; }
   .stage.tower.pulse::after { animation: frame-pulse 0.45s ease-out 1; }
 }
 
