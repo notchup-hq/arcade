@@ -289,11 +289,11 @@ a.marquee-logo:hover, a.marquee-logo:focus-visible { background: radial-gradient
 .soon .cabinet-base { padding-inline: 0.25rem; }
 .soon .cabinet-play { padding: 0; border: 0; background: none; color: var(--neon-muted); text-shadow: none; box-shadow: none; letter-spacing: 0.02em; white-space: nowrap; }
 
-/* Wider screens: three cabinets side by side, each with its pitch on the base. */
+/* Wider screens: two cabinets side by side, each with its pitch on the base; four in a row on a laptop. */
 @media (min-width: 48rem) {
   .marquee { padding: 2rem var(--gap) 1.5rem; }
   .marquee-logo { width: 4.5rem; height: 4.5rem; }
-  .cabinets { grid-template-columns: repeat(3, 1fr); gap: 2rem; padding-inline: 0.5rem; }
+  .cabinets { grid-template-columns: repeat(2, 1fr); gap: 2rem; padding-inline: 0.5rem; }
   .cabinet:not(.soon) { grid-column: auto; }
   .cabinet > a, .cabinet-body { --side: 10px; }
   .cabinet-marquee { padding: 0.6rem 0.5rem; }
@@ -303,6 +303,9 @@ a.marquee-logo:hover, a.marquee-logo:focus-visible { background: radial-gradient
   .soon .cabinet-play { letter-spacing: 0.08em; }
   .cabinet-deck { height: 3.25rem; gap: 1.1rem; }
   .cabinet-pitch { display: block; flex: 1; }
+}
+@media (min-width: 70rem) {
+  .cabinets { grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
 }
 
 /* ---------- Footer: one slim line ---------- */
@@ -524,6 +527,25 @@ body.game { height: 100dvh; min-height: 0; }
 .status { margin: 0; min-height: 1.5em; text-align: center; }
 .actions { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; }
 
+/* Notch Up: the best so far in cyan, a tall picture of the tower, and one button over all of it
+   that drops the floor. */
+.readout-value.cyan { color: var(--neon-cyan); text-shadow: 0 0 8px rgb(94 242 255 / 0.6); }
+.stage.tower { width: var(--w, 240px); height: var(--h, 320px); }
+.drop-zone {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  cursor: pointer;
+}
+.drop-zone:hover { border: 0; }
+.drop-zone:focus-visible { outline-offset: -4px; }
+
 /* Test or Tag: one switch, both sides always visible, the active side lit in its colour. */
 .mode { display: inline-flex; }
 .mode button { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 0.75rem; box-shadow: none; }
@@ -609,6 +631,7 @@ body.game { height: 100dvh; min-height: 0; }
 .cabinet[data-game="fuse-box"] .screen, .game[data-game="fuse-box"] .game-main { view-transition-name: fuse-box; }
 .cabinet[data-game="lob"] .screen, .game[data-game="lob"] .game-main { view-transition-name: lob; }
 .cabinet[data-game="patch-night"] .screen, .game[data-game="patch-night"] .game-main { view-transition-name: patch-night; }
+.cabinet[data-game="notch-up"] .screen, .game[data-game="notch-up"] .game-main { view-transition-name: notch-up; }
 
 /* ---------- Motion, only when the visitor has not asked for less ---------- */
 

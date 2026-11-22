@@ -19,7 +19,7 @@ const { chromium } = require('playwright');
 
 // Phones and a tablet upright, a laptop on its side.
 const SCREENS = [[320, 568], [360, 780], [768, 1024], [1280, 800]];
-const PAGES = ['/', '/games/fuse-box/', '/games/fuse-box/?level=hard', '/games/lob/', '/games/patch-night/', '/games/patch-night/?level=hard'];
+const PAGES = ['/', '/games/fuse-box/', '/games/fuse-box/?level=hard', '/games/lob/', '/games/notch-up/', '/games/patch-night/', '/games/patch-night/?level=hard'];
 
 const [base, ...rest] = process.argv.slice(2);
 if (!base) {

@@ -50,6 +50,12 @@ export function resolve(dir, url) {
   return parts.join('/');
 }
 
+/** The modules a JS file fetches later, with import('./x.js'), resolved to repo paths. */
+export function lazyImportsOf(file) {
+  const dir = file.split('/').slice(0, -1);
+  return [...read(file).matchAll(/\bimport\(\s*['"](\.{1,2}\/[^'"]+)['"]\s*\)/g)].map((m) => resolve(dir, m[1]));
+}
+
 /** Every module a page's entry script pulls in, the entry itself left out. */
 export function moduleGraph(entry) {
   const seen = new Set();

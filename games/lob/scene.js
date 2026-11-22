@@ -6,6 +6,7 @@
 // The street itself never changes during a match, so it is drawn once into an off-screen canvas and
 // copied; what changes (smoke, signs, bulb, trails) is drawn over it.
 
+import { skyline } from '../../js/city.js';
 import { drawLogo } from '../../js/logo.js';
 import { WINS, seeded } from './rules.js';
 
@@ -31,24 +32,6 @@ function text(ctx, str, x, y, size, fill, align = 'center') {
   ctx.fillStyle = fill;
   ctx.fillText(str, 0, 0);
   ctx.restore();
-}
-
-function skyline(ctx, rand, from, to, { top, base, wall, windowOn, lit }) {
-  for (let x = from; x < to;) {
-    const bw = 8 + rand() * 9;
-    const bh = base + rand() * (top - base);
-    ctx.fillStyle = wall;
-    ctx.fillRect(x, 0, bw - 0.6, bh);
-    for (let wy = 4; wy < bh - 3; wy += 4.5) {
-      for (let wx = x + 1.6; wx < x + bw - 2.6; wx += 3.2) {
-        if (rand() < lit) {
-          ctx.fillStyle = windowOn[rand() < 0.7 ? 0 : 1];
-          ctx.fillRect(wx, wy, 1.2, 1.7);
-        }
-      }
-    }
-    x += bw;
-  }
 }
 
 /** A rooftop building with its lit windows; it runs off the edge of the picture. */

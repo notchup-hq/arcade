@@ -17,22 +17,12 @@
   <meta property="og:url" content="https://arcade.notchup.fi/">
   <meta property="og:locale" content="en">
   <link rel="stylesheet" href="styles.css">
-  <!-- Every module hall.js pulls in, fetched at once (tests/preload.test.js keeps the list whole). -->
-  <link rel="modulepreload" href="games/fuse-box/demo.js">
-  <link rel="modulepreload" href="games/fuse-box/rules.js">
-  <link rel="modulepreload" href="games/lob/demo.js">
-  <link rel="modulepreload" href="games/lob/rules.js">
-  <link rel="modulepreload" href="games/lob/scene.js">
-  <link rel="modulepreload" href="games/patch-night/demo.js">
-  <link rel="modulepreload" href="games/patch-night/rules.js">
-  <link rel="modulepreload" href="games/patch-night/scene.js">
+  <!-- Every module hall.js imports up front, fetched at once (tests/preload.test.js keeps the list whole). The
+       demos are fetched later, as their cabinets come near the screen. -->
   <link rel="modulepreload" href="js/attract.js">
-  <link rel="modulepreload" href="js/logo.js">
   <link rel="modulepreload" href="js/loop.js">
   <link rel="modulepreload" href="js/memory.js">
-  <link rel="modulepreload" href="js/random.js">
   <link rel="modulepreload" href="js/scores.js">
-  <link rel="modulepreload" href="js/screens.js">
   <link rel="modulepreload" href="js/settings.js">
   <link rel="modulepreload" href="js/sound.js">
   <link rel="modulepreload" href="js/version.js">
@@ -79,6 +69,17 @@
           <span class="cabinet-deck" aria-hidden="true"><span class="stick"></span><span class="knob"></span><span class="knob"></span><span class="knob"></span></span>
           <span class="cabinet-base">
             <span class="cabinet-pitch">Zap the bug with the right answer. A times-table bug zapper.</span>
+            <span class="cabinet-play">Play</span>
+          </span>
+        </a>
+      </li>
+      <li class="cabinet" data-game="notch-up">
+        <a href="games/notch-up/">
+          <span class="cabinet-marquee"><span class="cabinet-name">Notch Up</span></span>
+          <span class="cabinet-bezel"><span class="screen"><canvas class="screen-canvas" aria-hidden="true"></canvas></span></span>
+          <span class="cabinet-deck" aria-hidden="true"><span class="stick"></span><span class="knob"></span><span class="knob"></span><span class="knob"></span></span>
+          <span class="cabinet-base">
+            <span class="cabinet-pitch">Drop each floor on the last. Build the tower into the night sky.</span>
             <span class="cabinet-play">Play</span>
           </span>
         </a>

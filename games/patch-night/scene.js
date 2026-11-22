@@ -5,6 +5,7 @@
 // disappears.
 
 import { drawLogo } from '../../js/logo.js';
+import { drawSparks } from '../../js/sparks.js';
 import { BURST_MS, FADE_MS, ZAP_MS } from './rules.js';
 
 export const FONT = 'ui-monospace, Menlo, Consolas, monospace';
@@ -55,28 +56,11 @@ export function drawScene(ctx, w, h, c, { g, aim, aimDir = -1, still = false, mi
     const bugs = [...g.wave.bugs].sort((p, q) => q.d - p.d);
     for (const b of bugs) drawBug(ctx, geo, c, b, still);
   }
-  if (g?.burst && !still) drawBurst(ctx, geo, c, g.burst);
-  drawLogo(ctx, { x: geo.cx, y: geo.cy, size: geo.logo, aim });
-}
-
-const SPARKS = 14;
-
-/** The sparks of a right zap: a ring of dots drifting out of the bug, slowing down and fading. Calm: no flash. */
-function drawBurst(ctx, geo, c, burst) {
-  const t = burst.age / BURST_MS;
-  const { x, y } = bugPoint(geo, burst.dir, burst.d);
-  const colours = [c.gold, c.cyan, c.magenta];
-  ctx.save();
-  ctx.globalAlpha = Math.pow(1 - t, 1.5);
-  for (let i = 0; i < SPARKS; i++) {
-    const a = (i / SPARKS) * Math.PI * 2 + (i % 2) * 0.2;
-    const reach = geo.bug * (i % 2 ? 1.6 : 2.4) * (1 - (1 - t) * (1 - t));
-    ctx.fillStyle = colours[i % 3];
-    ctx.beginPath();
-    ctx.arc(x + Math.cos(a) * reach, y + Math.sin(a) * reach, Math.max(1.5, geo.bug * 0.2 * (1 - t * 0.5)), 0, Math.PI * 2);
-    ctx.fill();
+  if (g?.burst && !still) {
+    const { x, y } = bugPoint(geo, g.burst.dir, g.burst.d);
+    drawSparks(ctx, c, x, y, geo.bug, g.burst.age / BURST_MS);
   }
-  ctx.restore();
+  drawLogo(ctx, { x: geo.cx, y: geo.cy, size: geo.logo, aim });
 }
 
 /** The board: a ring around the logo, a trace along every lane ending in a pad. */
