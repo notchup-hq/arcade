@@ -8,4 +8,5 @@ export const GAMES = [
   { id: 'lob', demo: () => import('../games/lob/demo.js'), board: 'lob:solo', order: 'high' },
   { id: 'patch-night', demo: () => import('../games/patch-night/demo.js'), board: 'patch-night:simple', order: 'high' },
   { id: 'notch-up', demo: () => import('../games/notch-up/demo.js'), board: 'notch-up:tower', order: 'high' },
+  { id: 'pair-up', demo: () => import('../games/pair-up/demo.js'), board: 'pair-up:easy', order: 'high' },
 ];

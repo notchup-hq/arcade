@@ -6,6 +6,7 @@ All notable changes to this project are listed here, newest first. The format fo
 
 ### Added
 
+- Pair Up, a memory game: turn the cards and find every pair; three wrong guesses end the run. The faces are letters and little pictures from the other games (the logo, a bug, a bulb, a fuse, a floor of the tower). Three levels (6, 8 and 10 pairs), a score that rewards pairs in a row and chances left, a top 5 per level, and a cheer with the logo notching up when every pair is found.
 - Notch Up, a tower stacker: drop each floor on the one below and build the Notchup tower into the night sky. Whatever hangs over is cut off; a perfect drop keeps the width, and three perfects in a row start winning width back. 10, 50 and 100 floors, and beating your best, get a calm cheer: a big word and a dry building-site line picked at random, with a few drifting sparks. Milestones also help: the crane builds that floor wider (back to full width at 100). Every tenth floor the logo notches up. Tap, click, Space or Enter; top 5 in this browser. It takes the fourth cabinet.
 - Patch Night, a times-table bug zapper: each wave asks one question and a bug carrying a number crawls in along every lane; zap the right one before it reaches the logo. Three levels (four lanes with easy tables, eight lanes with close wrong answers, and up to 12 × 12 with missing factors), a streak multiplier, and a top 5 per level. Missed facts come back a few questions later and are listed at the end; this browser remembers up to 20 per level, nothing leaves it. Its cabinet plays itself, and it takes the third cabinet.
 - Lob, a rooftop duel: lob glowing bulbs across the street at your rival's billboard, with the wind changing every throw; three hits win. Solo is a run against computer rivals who aim a little better each time, scored by rivals beaten plus a bonus for few throws; two players can share one device. Drag back and let go, use the buttons, or use the keyboard. Its cabinet plays a duel between two computer players.
@@ -15,6 +16,7 @@ All notable changes to this project are listed here, newest first. The format fo
 
 ### Changed
 
+- The hall keeps a last cabinet that would stand alone in its row in the middle, now that there are five games.
 - Patch Night punishes guessing: each wrong zap in a wave takes more off the answer's worth than the last (25, 50, 75) and nudges the other bugs closer by more, and a third wrong zap in one wave puts out a light. One or two slips cost no light.
 - The hall of fame keeps one layout in every game but adds what each game counts: Lob the rivals beaten, Patch Night the share right first time and the average answer time, Notch Up the most perfect drops in a row. The new high score dialog shows your score beside your place. Dates are shorter ("21Nov26"), so the table fits a small phone.
 - High scores work the same in every game: a top 5 per board (was 10), and initials may have dots in them, so P.K works. Older tables keep their best 5.
