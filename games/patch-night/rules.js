@@ -28,6 +28,9 @@ export const PAUSE_MS = 800;   // between a finished wave and the next
 export const FADE_MS = 500;    // a bug curling up and fading
 export const ZAP_MS = 350;     // how long a zap line stays
 export const BURST_MS = 800;   // how long the sparks of a right zap drift
+export const BREAK_EVERY = 10; // answers between breaks
+export const MILESTONE_EVERY = 50; // answers between special cheers
+const SHOWN_HARD = 2;          // facts a break names as the hardest
 const PUSH_BACK = 0.18;        // share of the way a wrong bug is pushed back
 const PUSH_RATE = 0.6;         // ...at this many ways per second
 const NUDGE = 0.07;            // the other bugs creep this far closer after a wrong zap
@@ -158,6 +161,8 @@ export function newGame(level, rand, weak = []) {
     burst: null,         // { dir, d, age } while the sparks of a right zap drift
     queue: [],           // facts to ask again: { key, fact, due, need }
     missed: new Map(),   // key -> fact, in the order missed this run
+    answered: 0,         // answers in the whole run, for milestones
+    round: [],           // the answers since the last break: { fact, right, ms }
     rightKeys: new Set(),
     last: '',
   };
@@ -183,6 +188,7 @@ function startWave(g) {
   g.last = fact.key;
   g.asked += 1;
   g.pause = 0;
+  g.wave.age = 0;        // ms since the wave began, to time the answer
 }
 
 /** Note a miss: the fact comes back in two to four questions, and needs two right answers. */
@@ -198,6 +204,8 @@ function miss(g) {
 
 function finishWave(g, how) {
   g.wave.done = how;
+  g.answered += 1;
+  g.round.push({ fact: g.wave.fact, right: how === 'zapped' && !g.wave.missed, ms: g.wave.age });
   g.pause = PAUSE_MS;
   for (const b of g.wave.bugs) if (b.fade < 0) b.fade = 0;
 }
@@ -257,9 +265,10 @@ function answeredRight(g) {
   else entry.due = g.asked - 1 + pick(g.rand, LATER_GAP);
 }
 
-/** Advance by dt ms. Returns the events: 'light' (a light went out), 'over', 'wave'. */
+/** Advance by dt ms. Returns the events: 'light' (a light went out), 'over', 'wave', 'break' (time for a pause card; call resume). */
 export function step(g, dt) {
   const events = [];
+  if (g.status === 'break') return events;
   if (g.zap) {
     g.zap.age += dt;
     if (g.zap.age >= ZAP_MS) g.zap = null;
@@ -269,6 +278,7 @@ export function step(g, dt) {
     if (g.burst.age >= BURST_MS) g.burst = null;
   }
   const w = g.wave;
+  if (!w.done) w.age += dt;
   for (const b of w.bugs) {
     if (b.fade >= 0) { b.fade += dt; continue; }
     if (b.back > 0) {
@@ -300,11 +310,36 @@ export function step(g, dt) {
   if (g.status === 'playing' && w.done) {
     g.pause -= dt;
     if (g.pause <= 0) {
-      startWave(g);
-      events.push({ type: 'wave' });
+      if (g.round.length >= BREAK_EVERY) {
+        g.status = 'break';
+        events.push({ type: 'break', summary: { ...summarise(g.round), answered: g.answered } });
+      } else {
+        startWave(g);
+        events.push({ type: 'wave' });
+      }
     }
   }
   return events;
+}
+
+/** After a break card: the next wave starts and a fresh set of answers is counted. */
+export function resume(g) {
+  if (g.status !== 'break') return;
+  g.status = 'playing';
+  g.round = [];
+  startWave(g);
+}
+
+/**
+ * What a break shows: how many answers were right first time, the average time of those, and up to
+ * two hardest facts (the misses first, then the slowest right ones), as equations.
+ */
+export function summarise(round) {
+  const right = round.filter((a) => a.right);
+  const slow = right.slice().sort((p, q) => q.ms - p.ms);
+  const hardest = [...new Set([...round.filter((a) => !a.right), ...slow].map((a) => equation(a.fact)))].slice(0, SHOWN_HARD);
+  const avgMs = right.length ? Math.round(right.reduce((sum, a) => sum + a.ms, 0) / right.length) : 0;
+  return { total: round.length, right: right.length, avgMs, hardest };
 }
 
 /** True while something on the board is still moving (a run that is over still fades its last bugs). */
@@ -363,4 +398,24 @@ export function nearestDir(angle, dirs) {
     if (gap < bestGap) { bestGap = gap; best = d; }
   }
   return best;
+}
+
+const CHEERS = {
+  flawless: ['Clean sweep.', 'Zero bugs left.', 'Not one got past.', 'Ten for ten.'],
+  great: ['Sharp work.', 'Bugs are running out of places to hide.', 'Steady hands.', 'Nearly spotless.'],
+  good: ['Decent set.', 'The tables are sinking in.', 'Solid. Keep going.', 'More than half down.'],
+  practice: ['Tough set. They stick eventually.', 'The bugs won that one.', 'Rough patch. Next set is yours.', 'Learning the hard ones.'],
+  milestone: ['Fifty answers. The bugs have noticed you.', 'Fifty down. Still no mercy.', 'Fifty. Time to ask for a raise.', 'Half a hundred. Not bad for one evening.', 'Fifty. The server room is yours.'],
+};
+
+/**
+ * The cheer for a break: by how many were right first time, or a special one on every 50th answer.
+ * A random line from its pool that is not `previous`, so it stays fresh.
+ * @param {() => number} rand a number in [0, 1)
+ */
+export function cheerFor({ right, total, answered = 0 }, rand, previous = '') {
+  const milestone = answered > 0 && answered % MILESTONE_EVERY === 0;
+  const pool = CHEERS[milestone ? 'milestone' : right === total ? 'flawless' : right >= total * 0.8 ? 'great' : right >= total * 0.5 ? 'good' : 'practice'];
+  const options = pool.filter((c) => c !== previous);
+  return options[Math.floor(rand() * options.length)];
 }

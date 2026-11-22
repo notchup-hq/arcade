@@ -2,14 +2,14 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createMemory } from '../js/memory.js';
 import {
-  LEVELS, LIVES, PAUSE_MS, dirOfKey, factsOf, keyOf, makeWave, mergeWeak, multiplier, nearestDir, newGame,
-  practiseList, seeded, step, worth, zap, dirOfArrows,
+  BREAK_EVERY, LEVELS, cheerFor, LIVES, PAUSE_MS, dirOfKey, factsOf, keyOf, makeWave, mergeWeak, multiplier, nearestDir, newGame,
+  practiseList, resume, seeded, step, summarise, worth, zap, dirOfArrows,
 } from '../games/patch-night/rules.js';
 
 const rightBug = (g) => g.wave.bugs.find((b) => b.right);
 const wrongBug = (g) => g.wave.bugs.find((b) => !b.right);
-/** Let the current wave finish and the next one start. */
-const next = (g) => { zap(g, rightBug(g).dir); step(g, PAUSE_MS + 1); };
+/** Let the current wave finish and the next one start, carrying on through any break. */
+const next = (g) => { zap(g, rightBug(g).dir); step(g, PAUSE_MS + 1); resume(g); };
 
 test('7 × 8 and 8 × 7 are one fact', () => {
   assert.equal(keyOf(7, 8), keyOf(8, 7));
@@ -201,4 +201,73 @@ test('held arrow keys aim at a lane, two at right angles at the corner between t
   assert.equal(dirOfArrows(['ArrowUp', 'ArrowDown'], all), -1);
   assert.equal(dirOfArrows(['ArrowUp', 'ArrowRight'], LEVELS.simple.dirs), -1);
   assert.equal(dirOfArrows([], all), -1);
+});
+
+test('after ten answers the game pauses for a break with a summary, and resume carries on', () => {
+  const g = newGame('simple', seeded(4));
+  for (let k = 0; k < BREAK_EVERY - 1; k++) {
+    zap(g, rightBug(g).dir);
+    step(g, PAUSE_MS + 1);
+    assert.equal(g.status, 'playing');
+  }
+  step(g, 1500);
+  zap(g, wrongBug(g).dir);
+  step(g, 500);
+  zap(g, rightBug(g).dir);
+  const missed = g.wave.fact;
+  const events = step(g, PAUSE_MS + 1);
+  const brk = events.find((e) => e.type === 'break');
+  assert.equal(g.status, 'break');
+  assert.equal(brk.summary.total, BREAK_EVERY);
+  assert.equal(brk.summary.right, BREAK_EVERY - 1);
+  assert.equal(brk.summary.hardest[0], `${missed.a} × ${missed.b} = ${missed.a * missed.b}`);
+  assert.deepEqual(step(g, 5000), [], 'nothing moves during a break');
+  const asked = g.asked;
+  resume(g);
+  assert.equal(g.status, 'playing');
+  assert.equal(g.asked, asked + 1);
+  assert.equal(g.round.length, 0);
+  assert.equal(g.wave.age, 0);
+});
+
+test('a break summary counts right-first-time answers, their average time, and the two hardest facts', () => {
+  const f = (a, b) => ({ key: keyOf(a, b), a, b });
+  const s = summarise([
+    { fact: f(2, 3), right: true, ms: 1000 },
+    { fact: f(7, 8), right: true, ms: 5000 },
+    { fact: f(4, 6), right: false, ms: 9000 },
+    { fact: f(5, 5), right: true, ms: 3000 },
+  ]);
+  assert.deepEqual(s, { total: 4, right: 3, avgMs: 3000, hardest: ['4 × 6 = 24', '7 × 8 = 56'] });
+  assert.deepEqual(summarise([{ fact: f(2, 3), right: false, ms: 1 }]).hardest, ['2 × 3 = 6']);
+  assert.equal(summarise([{ fact: f(2, 3), right: false, ms: 1 }]).avgMs, 0);
+});
+
+test('a light going out on the tenth answer still counts it, and three lights out ends the run, not a break', () => {
+  const g = newGame('simple', seeded(2));
+  g.lives = 1;
+  g.round.length = 0;
+  for (let k = 0; k < BREAK_EVERY - 1; k++) g.round.push({ fact: g.wave.fact, right: true, ms: 1 });
+  const events = step(g, 120000);
+  assert.ok(events.some((e) => e.type === 'over'));
+  assert.ok(!events.some((e) => e.type === 'break'));
+});
+
+test('cheers follow the score, never repeat the last one, and every 50th answer gets a special cheer', () => {
+  const rand = seeded(9);
+  const seen = new Set();
+  let last = '';
+  for (let k = 0; k < 40; k++) {
+    const c = cheerFor({ right: 10, total: 10, answered: 10 }, rand, last);
+    assert.notEqual(c, last);
+    seen.add(c);
+    last = c;
+  }
+  assert.ok(seen.size > 1, 'the cheer varies');
+  const special = new Set();
+  for (let k = 0; k < 40; k++) special.add(cheerFor({ right: 2, total: 10, answered: 50 }, rand));
+  const normal = new Set();
+  for (let k = 0; k < 40; k++) normal.add(cheerFor({ right: 2, total: 10, answered: 40 }, rand));
+  assert.ok([...special].every((c) => /fifty|hundred/i.test(c)));
+  assert.ok([...normal].every((c) => !/fifty|hundred/i.test(c)));
 });
