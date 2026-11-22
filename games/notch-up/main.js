@@ -1,8 +1,8 @@
 // Notch Up on its own page. The tower is a canvas (scene.js) with one real button over it, "Drop the
-// floor", so a keyboard and a screen reader can play too; a tap anywhere on the tower drops, and so do
-// Space and Enter. Every tenth floor the logo in the console notches up; round numbers of floors get a
-// cheer on the canvas and in the status line. Help and the hall of fame open in dialogs, and the game
-// waits while one is open.
+// floor", so a keyboard and a screen reader can play too; a tap anywhere on the tower drops, the frame
+// lights up softly and the windows of the floor just built glow for a moment; so do Space and Enter. Every tenth floor the logo in the console
+// notches up; round numbers of floors get a cheer on the canvas and in the status line. Help and the
+// hall of fame open in dialogs, and the game waits while one is open.
 
 import { neonColours } from '../../js/attract.js';
 import { GRACE_MS, holdButton } from '../../js/grace.js';
@@ -67,6 +67,14 @@ function notchUp() {
   ui.badge.className = 'badge-logo fixed';
 }
 
+/** The frame lights up softly for a drop, gold when it was perfect (styles.css; none with reduced motion). */
+function pulse(perfect) {
+  ui.stage.classList.remove('pulse', 'perfect');
+  void ui.stage.offsetWidth; // so the animation starts over
+  ui.stage.classList.add('pulse');
+  ui.stage.classList.toggle('perfect', perfect);
+}
+
 function draw() {
   const [w, h] = size;
   if (!w) return;
@@ -82,7 +90,7 @@ function draw() {
 /** With reduced motion a frame is drawn only when something visible changed. */
 function signature() {
   if (!g) return `idle|${camera}`;
-  return `${g.floors.length}|${g.status}|${moverX(g, true)}|${!!g.cut}|${!!g.seam}|${!!g.cheer}|${camera}`;
+  return `${g.floors.length}|${g.status}|${moverX(g, true)}|${!!g.cut}|${!!g.seam}|${!!g.lit}|${!!g.cheer}|${camera}`;
 }
 
 function frame() {
@@ -111,6 +119,7 @@ function dropFloor() {
   if (result.type === 'over') { endRun(); return; }
   if (result.type === 'perfect') sfx.notch();
   else sfx.blip();
+  pulse(result.type === 'perfect');
   if (result.floors % 10 === 0) notchUp();
   if (result.cheer) {
     sfx.win();
@@ -127,7 +136,7 @@ function startRun() {
   camera = 0;
   lastSignature = '';
   ui.badge.className = 'badge-logo';
-  ui.stage.classList.remove('dark');
+  ui.stage.classList.remove('dark', 'pulse', 'perfect');
   ui.card.hidden = true;
   ui.drop.inert = false;
   paintCounters();

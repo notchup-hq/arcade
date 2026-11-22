@@ -26,6 +26,7 @@ All notable changes to this project are listed here, newest first. The format fo
 
 ### Fixed
 
+- Notch Up no longer flashes the whole tower on a phone at every tap; the frame lights up softly instead (gold for a perfect drop), and the windows of the floor you just built glow for a moment.
 - A run that ends while you are still tapping no longer skips the high score or starts a new run: in Notch Up and Patch Night the buttons of the initials dialog and of the end and break cards wait 0.8 s. The initials dialog no longer opens the phone's keyboard until you tap the field, keeps your last initials from any game, and Enter in the field saves instead of skipping.
 - Coming back to the hall, by the phone's back button or a game's Arcade link, centres the cabinet of the game you just played instead of leaving another game in view. The Arcade link goes back like the back button, so the hall does not open at its top and scroll down; opened from elsewhere, it goes to the top of the hall.
 - Lob no longer rescales when the turn changes: the status line is always two lines high, so a longer message cannot take room from the street.

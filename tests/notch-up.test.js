@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  PERFECT, PRAISE, QUIPS, START_WIDTH, STILL_STEP, WORLD, built, drop, milestoneAt, moverX, moving, newGame, pickLine,
+  LIT_MS, PERFECT, PRAISE, QUIPS, START_WIDTH, STILL_STEP, WORLD, built, drop, milestoneAt, moverX, moving, newGame, pickLine,
   recordAt, seeded, step, swingOf,
 } from '../games/notch-up/rules.js';
 
@@ -176,4 +176,12 @@ test('a finished run keeps drawing until its last piece has faded', () => {
   assert.equal(moving(g), true);
   step(g, 1000);
   assert.equal(moving(g), false);
+});
+
+test('the floor just built has its windows lit for a moment', () => {
+  const g = newGame(seeded(1));
+  stack(g, 1);
+  assert.deepEqual(g.lit, { floor: 1, age: 0 });
+  step(g, LIT_MS);
+  assert.equal(g.lit, null);
 });
