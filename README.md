@@ -37,6 +37,12 @@ Do not open `index.html` straight from disk: browsers block ES modules on `file:
 
 ## Licence
 
-MIT, see [LICENSE](LICENSE). This project does not take issues or pull requests; fork it freely. The Notchup name and logo (`assets/mark.svg`) are © Notchup Oy, all rights reserved. They are not covered by the MIT licence, so replace them in a fork.
+MIT, see [LICENSE](LICENSE). This project does not take issues or pull requests; fork it freely.
+
+## Name and logo
+
+The code is MIT, but the Notchup name and logo (`assets/mark.svg`) are © Notchup Oy, all rights reserved, and are not licensed for reuse. Forks are welcome; please give yours its own name and branding, and remove ours. If you build on this, a small credit like "based on arcade by Notchup" is always appreciated.
+
+A fork or modified version is not made, endorsed or supported by Notchup Oy, must not suggest otherwise, and Notchup is not responsible for it or for how it is used.
 
 Made by [Notchup](https://www.notchup.fi) · *Knock it up a notch!*
