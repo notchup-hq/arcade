@@ -33,7 +33,7 @@ test('pages have no inline scripts, inline styles or event handler attributes', 
 
 test('every ready cabinet zooms into its own game with a view transition name of its own', () => {
   const css = read('styles.css');
-  const games = [...read('index.html').matchAll(/class="cabinet" data-game="([a-z-]+)"/g)].map((m) => m[1]);
+  const games = [...read('index.html').matchAll(/class="cabinet"[^>]* data-game="([a-z-]+)"/g)].map((m) => m[1]);
   assert.ok(games.length > 0);
   for (const game of games) {
     assert.match(read(`games/${game}/index.html`), new RegExp(`<body class="game" data-game="${game}">`), `${game}: body data-game`);
@@ -55,4 +55,13 @@ test('every game asks for initials with the same dialog', () => {
   const first = dialogOf(games[0]);
   assert.ok(first);
   for (const page of games) assert.equal(dialogOf(page), first, page);
+});
+
+test('the Arcade link of a game opens the hall, and the hall knows each game by name', () => {
+  const hall = read('index.html');
+  for (const page of pages().filter((p) => p !== 'index.html')) {
+    const game = page.split('/')[1];
+    assert.match(read(page), /<a class="back" href="\.\.\/\.\.\/">/, page);
+    assert.match(hall, new RegExp(`<li class="cabinet" data-game="${game}">`), game);
+  }
 });

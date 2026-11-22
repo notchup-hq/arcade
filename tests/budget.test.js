@@ -32,7 +32,7 @@ for (const page of pages()) {
 }
 
 test('every ready cabinet in the hall has a demo', () => {
-  const games = [...read('index.html').matchAll(/class="cabinet" data-game="([a-z-]+)"/g)].map((m) => `games/${m[1]}/demo.js`);
+  const games = [...read('index.html').matchAll(/class="cabinet"[^>]* data-game="([a-z-]+)"/g)].map((m) => `games/${m[1]}/demo.js`);
   assert.ok(games.length > 0);
   assert.deepEqual([...demos].sort(), games.sort());
 });
