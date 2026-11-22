@@ -15,6 +15,7 @@ All notable changes to this project are listed here, newest first. The format fo
 
 ### Changed
 
+- The hall of fame keeps one layout in every game but adds what each game counts: Lob the rivals beaten, Patch Night the share right first time and the average answer time, Notch Up the most perfect drops in a row. The new high score dialog shows your score beside your place. Dates are shorter ("21Nov26"), so the table fits a small phone.
 - High scores work the same in every game: a top 5 per board (was 10), and initials may have dots in them, so P.K works. Older tables keep their best 5.
 - The hall fits four cabinets: two side by side from 768 px, all four in a row from 1120 px. Each cabinet's demo is fetched only when the cabinet comes into view, so the hall's first load stays small as games are added.
 - The order of the games in the hall is one list, `js/games.js`; `./dev order` puts the cabinets in `index.html` in that order.

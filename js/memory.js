@@ -5,7 +5,7 @@
 // storage is blocked, full or empty (a private window): settings fall back to the defaults and a new
 // high score lasts until the page is closed.
 
-import { cleanInitials, cleanTable, insertScore } from './scores.js';
+import { cleanExtra, cleanInitials, cleanTable, insertScore } from './scores.js';
 
 export const STORAGE_KEY = 'arcade:v1';
 const PREF_VALUES = { sound: ['off'] };
@@ -83,12 +83,14 @@ export function createMemory(getStorage = browserStorage) {
     initials: () => read().initials,
     /** The table of one board ('game:level'), best first. */
     scores: (board, order) => cleanTable(read().scores[board], order),
-    /** Add a score made just now; returns the new table. Remembers the initials too. */
-    addScore(board, order, { initials, value, date = Date.now() }) {
+    /** Add a score made just now, with the game's own numbers (`extra`, optional); returns the new table. Remembers the initials too. */
+    addScore(board, order, { initials, value, extra, date = Date.now() }) {
       const d = read();
       const clean = cleanInitials(initials);
       if (!BOARD_ID.test(board) || !clean) return cleanTable(d.scores[board], order);
-      const table = insertScore(cleanTable(d.scores[board], order), { initials: clean, value, date }, order);
+      const more = cleanExtra(extra);
+      const entry = more ? { initials: clean, value, date, extra: more } : { initials: clean, value, date };
+      const table = insertScore(cleanTable(d.scores[board], order), entry, order);
       write({ ...d, initials: clean, scores: { ...d.scores, [board]: table } });
       return table;
     },

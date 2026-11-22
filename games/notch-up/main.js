@@ -6,11 +6,12 @@
 
 import { neonColours } from '../../js/attract.js';
 import { GRACE_MS, holdButton } from '../../js/grace.js';
+import { renderFame } from '../../js/fame.js';
 import { askInitials } from '../../js/initials.js';
 import { createLoop } from '../../js/loop.js';
 import { logoSvg } from '../../js/logo.js';
 import { memory } from '../../js/memory.js';
-import { formatDate, placeOf } from '../../js/scores.js';
+import { placeOf } from '../../js/scores.js';
 import { initSettings } from '../../js/settings.js';
 import { sfx } from '../../js/sound.js';
 import { built, drop, moverX, moving, newGame, seeded, step } from './rules.js';
@@ -159,14 +160,15 @@ async function endRun() {
   ui.stage.classList.add('dark');
   const floors = built(g);
   const streak = g.bestPerfect ? ` Most perfects in a row: ${g.bestPerfect}.` : '';
-  showCard('Topped out', `${floors === 1 ? '1 floor' : `${floors} floors`}.${streak}`);
+  const count = floors === 1 ? '1 floor' : `${floors} floors`;
+  showCard('Topped out', `${count}.${streak}`);
   say(`Topped out at ${floors} floors.`);
   holdButton(ui.go); // the player is often still tapping when the card appears
   const place = floors > 0 ? placeOf(memory.scores(BOARD, ORDER), floors, ORDER) : -1;
   if (place < 0) return;
-  const initials = await askInitials(ui.dialog, { place, last: memory.initials(), grace: GRACE_MS });
+  const initials = await askInitials(ui.dialog, { place, score: count, last: memory.initials(), grace: GRACE_MS });
   if (!initials) return;
-  memory.addScore(BOARD, ORDER, { initials, value: floors });
+  memory.addScore(BOARD, ORDER, { initials, value: floors, extra: { perfect: g.bestPerfect } });
   lastAdded = place;
   renderScores();
   lastAdded = -1;
@@ -175,25 +177,11 @@ async function endRun() {
 }
 
 function renderScores() {
-  const rows = memory.scores(BOARD, ORDER).map((e, k) => {
-    const tr = document.createElement('tr');
-    if (k === lastAdded) tr.className = 'new';
-    for (const v of [String(k + 1), e.initials, String(e.value), formatDate(e.date)]) {
-      const td = document.createElement('td');
-      td.textContent = v;
-      tr.append(td);
-    }
-    return tr;
+  renderFame(ui.scores, memory.scores(BOARD, ORDER), {
+    score: { head: 'Floors', cell: String },
+    columns: [{ key: 'perfect', head: 'Perfect', cell: String }],
+    fresh: lastAdded,
   });
-  if (!rows.length) {
-    const tr = document.createElement('tr');
-    const td = document.createElement('td');
-    td.colSpan = 4;
-    td.textContent = 'No scores on this browser yet. Be the first.';
-    tr.append(td);
-    rows.push(tr);
-  }
-  ui.scores.replaceChildren(...rows);
 }
 
 // A tap or click anywhere on the tower drops. The button's own click is for the keyboard and screen

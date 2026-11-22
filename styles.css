@@ -598,7 +598,7 @@ body.game { height: 100dvh; min-height: 0; }
 .sheet {
   width: min(30rem, calc(100vw - 2 * var(--gap)));
   max-height: calc(100dvh - 2 * var(--gap));
-  padding: 1.25rem;
+  padding: clamp(0.5rem, 3vw, 1.25rem); /* a hall of fame with game columns needs the room on a small phone */
   border: 2px solid var(--neon-cyan);
   border-radius: var(--radius);
   background: var(--surface);
@@ -612,7 +612,9 @@ body.game { height: 100dvh; min-height: 0; }
 .credit { color: var(--neon-muted); }
 .sheet table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-variant-numeric: tabular-nums; }
 .sheet caption { color: var(--neon-muted); padding-bottom: 0.25rem; }
-.sheet th, .sheet td { padding: 0.3rem 0.4rem; text-align: left; border-bottom: 1px solid var(--line); }
+.sheet th, .sheet td { padding: 0.3rem 0.2rem; text-align: left; border-bottom: 1px solid var(--line); }
+.sheet :is(th, td):first-child { padding-left: 0; }
+.sheet :is(th, td):last-child { padding-right: 0; }
 .sheet th { color: var(--neon-muted); font-weight: 400; }
 .sheet tbody tr:first-child td { color: var(--neon-gold); }
 .sheet tbody tr.new td { color: var(--neon-magenta); }
@@ -632,6 +634,7 @@ body.game { height: 100dvh; min-height: 0; }
   text-transform: uppercase;
   letter-spacing: 0.15em;
 }
+.initials-score { margin: -0.25rem 0 0.75rem; color: var(--neon-cyan); font-size: 1.25rem; font-weight: 700; }
 .initials-error { color: var(--neon-red); margin: 0.5rem 0 0; }
 
 .note { text-align: center; color: var(--neon-muted); }

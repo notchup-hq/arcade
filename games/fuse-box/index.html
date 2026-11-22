@@ -19,6 +19,7 @@
   <link rel="stylesheet" href="../../styles.css">
   <!-- Every module main.js pulls in, fetched at once (tests/preload.test.js keeps the list whole). -->
   <link rel="modulepreload" href="rules.js">
+  <link rel="modulepreload" href="../../js/fame.js">
   <link rel="modulepreload" href="../../js/grace.js">
   <link rel="modulepreload" href="../../js/initials.js">
   <link rel="modulepreload" href="../../js/logo.js">
@@ -90,12 +91,10 @@
   <dialog id="fame" class="sheet" aria-labelledby="fame-title">
     <form method="dialog">
       <h2 id="fame-title">Hall of fame</h2>
-      <table>
+      <table id="scores">
         <caption id="scores-caption">Easy</caption>
-        <thead>
-          <tr><th scope="col">#</th><th scope="col">Who</th><th scope="col">Time (s)</th><th scope="col">Date</th></tr>
-        </thead>
-        <tbody id="scores"></tbody>
+        <thead></thead>
+        <tbody></tbody>
       </table>
       <p class="credit">Kept in this browser only.</p>
       <div class="actions"><button type="submit" class="primary">Close</button></div>
@@ -105,6 +104,7 @@
   <dialog id="initials" class="sheet initials" aria-labelledby="initials-title">
     <form method="dialog">
       <h2 id="initials-title" tabindex="-1" autofocus>New high score!</h2>
+      <p class="initials-score"></p>
       <label for="initials-input">Your initials, three letters</label>
       <input id="initials-input" name="initials" maxlength="3" autocomplete="off" autocapitalize="characters" spellcheck="false" enterkeyhint="done">
       <p class="initials-error" hidden>Three letters, please.</p>

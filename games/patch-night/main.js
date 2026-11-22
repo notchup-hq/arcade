@@ -4,14 +4,15 @@
 // The level lives in the link (?level=medium).
 
 import { GRACE_MS, holdButton } from '../../js/grace.js';
+import { renderFame } from '../../js/fame.js';
 import { askInitials } from '../../js/initials.js';
 import { createLoop } from '../../js/loop.js';
 import { memory } from '../../js/memory.js';
-import { formatDate, placeOf } from '../../js/scores.js';
+import { placeOf } from '../../js/scores.js';
 import { initSettings } from '../../js/settings.js';
 import { sfx } from '../../js/sound.js';
 import { neonColours } from '../../js/attract.js';
-import { DIR_NAMES, LEVELS, cheerFor, LIVES, bugIn, dirOfArrows, dirOfKey, mergeWeak, moving, multiplier, nearestDir, newGame, practiseList, resume, seeded, step, worth, zap } from './rules.js';
+import { DIR_NAMES, LEVELS, cheerFor, LIVES, bugIn, dirOfArrows, dirOfKey, fameOf, mergeWeak, moving, multiplier, nearestDir, newGame, practiseList, resume, seeded, step, worth, zap } from './rules.js';
 import { aimFor, bugPoint, drawScene, geometry, STEPS, turnToward } from './scene.js';
 
 const GAME = 'patch-night';
@@ -293,9 +294,9 @@ async function endRun() {
   holdButton(ui.go); // the player is often still tapping when the card appears
   const place = g.score > 0 ? placeOf(memory.scores(board(), ORDER), g.score, ORDER) : -1;
   if (place < 0) return;
-  const initials = await askInitials(ui.dialog, { place, last: memory.initials(), grace: GRACE_MS });
+  const initials = await askInitials(ui.dialog, { place, score: `${g.score} points`, last: memory.initials(), grace: GRACE_MS });
   if (!initials) return;
-  memory.addScore(board(), ORDER, { initials, value: g.score });
+  memory.addScore(board(), ORDER, { initials, value: g.score, extra: fameOf(g) });
   lastAdded = place;
   renderScores();
   lastAdded = -1;
@@ -303,27 +304,15 @@ async function endRun() {
 }
 
 function renderScores() {
-  const table = memory.scores(board(), ORDER);
   ui.scoresCaption.textContent = LEVELS[level].label;
-  const rows = table.map((e, k) => {
-    const tr = document.createElement('tr');
-    if (k === lastAdded) tr.className = 'new';
-    for (const v of [String(k + 1), e.initials, String(e.value), formatDate(e.date)]) {
-      const td = document.createElement('td');
-      td.textContent = v;
-      tr.append(td);
-    }
-    return tr;
+  renderFame(ui.scores, memory.scores(board(), ORDER), {
+    score: { head: 'Score', cell: String },
+    columns: [
+      { key: 'right', head: 'Right', cell: (v) => `${v}%` },
+      { key: 'avg', head: 'Avg', cell: (v) => `${(v / 1000).toFixed(1)}s` },
+    ],
+    fresh: lastAdded,
   });
-  if (!rows.length) {
-    const tr = document.createElement('tr');
-    const td = document.createElement('td');
-    td.colSpan = 4;
-    td.textContent = 'No scores on this browser yet. Be the first.';
-    tr.append(td);
-    rows.push(tr);
-  }
-  ui.scores.replaceChildren(...rows);
 }
 
 /** Back to the start card for the current level. */
