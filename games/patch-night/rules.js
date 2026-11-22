@@ -1,7 +1,7 @@
 // Patch Night rules, with no DOM: the game page and the hall's attract mode both play by them.
 //
 // One question per wave. A bug crawls in along each lane, each carrying a number; exactly one is the
-// answer. Zap the right bug and the next wave comes; zap a wrong one and it is pushed back. If the
+// answer. Zap the right bug and the next wave comes; zap a wrong one and it is pushed back, which costs more each time, and a third wrong zap in a wave puts out a light. If the
 // right bug reaches the logo in the middle, a light goes out; three lights out ends the run. A fact
 // that was missed comes back a few questions later, until it has been answered right twice.
 
@@ -33,8 +33,10 @@ export const MILESTONE_EVERY = 50; // answers between special cheers
 const SHOWN_HARD = 2;          // facts a break names as the hardest
 const PUSH_BACK = 0.18;        // share of the way a wrong bug is pushed back
 const PUSH_RATE = 0.6;         // ...at this many ways per second
-const NUDGE = 0.07;            // the other bugs creep this far closer after a wrong zap
-const PENALTY = 25;            // what a wrong zap takes off the wave's worth
+const COOL_MS = 400;           // a wrong bug ignores zaps this long, so a double tap is one guess
+const NUDGE = 0.07;            // the other bugs creep this far closer after a wrong zap, times the wave's wrong zaps so far
+const PENALTY = 25;            // the first wrong zap of a wave takes this off its worth, the next two, three times...
+const GUESS_LIMIT = 3;         // the wrong zap that puts out a light: a third in one wave is guessing, not slipping
 const SPEED_UP = 0.004;        // after a right answer
 const SPEED_DOWN = 0.01;       // after a missed wave
 const MAX_BONUS = 100;         // for answering as the bug comes in, falling as it crawls closer
@@ -135,8 +137,8 @@ export function makeWave(cfg, fact, kind, rand) {
     text = `${x} × ${y}`;
   }
   const values = shuffle([answer, ...wrong], rand);
-  const bugs = cfg.dirs.map((dir, i) => ({ dir, value: values[i], right: values[i] === answer, d: 1, back: 0, ahead: 0, fade: -1 }));
-  return { fact, kind, text, answer, bugs, done: null, missed: false, penalty: 0 };
+  const bugs = cfg.dirs.map((dir, i) => ({ dir, value: values[i], right: values[i] === answer, d: 1, back: 0, ahead: 0, cool: 0, fade: -1 }));
+  return { fact, kind, text, answer, bugs, done: null, missed: false, penalty: 0, wrongs: 0 };
 }
 
 /** The streak multiplier: x2 at 3 in a row, x3 at 6, x4 at 10. */
@@ -164,6 +166,7 @@ export function newGame(level, rand, weak = []) {
     answered: 0,         // answers in the whole run, for milestones
     rightFirst: 0,       // of them right first time, and the time all of them took, for the hall of fame
     answerMs: 0,
+    pending: [],         // events from a zap, handed out by the next step
     round: [],           // the answers since the last break: { fact, right, ms }
     rightKeys: new Set(),
     last: '',
@@ -204,6 +207,16 @@ function miss(g) {
   g.queue.push({ key: w.fact.key, fact: w.fact, due: g.asked - 1 + pick(g.rand, REVIEW_GAP), need: 2 });
 }
 
+/** The third wrong zap in one wave puts out a light, so guessing through the lanes stops paying. */
+function loseLightForGuessing(g) {
+  g.lives -= 1;
+  g.pending.push({ type: 'light', lives: g.lives, guess: true });
+  if (g.lives > 0) return;
+  g.status = 'over';
+  finishWave(g, 'arrived');
+  g.pending.push({ type: 'over' });
+}
+
 function finishWave(g, how) {
   g.wave.done = how;
   const right = how === 'zapped' && !g.wave.missed;
@@ -217,7 +230,7 @@ function finishWave(g, how) {
 
 /**
  * What the right answer is worth right now, before the streak multiplier: 100, plus up to MAX_BONUS
- * while the right bug is still far out, less PENALTY for each wrong zap this wave. It counts down as
+ * while the right bug is still far out, less PENALTY for the first wrong zap this wave, twice that for the second, and so on. It counts down as
  * the bug crawls in, so the page can show it.
  */
 export function worth(g) {
@@ -230,20 +243,26 @@ export function worth(g) {
 export const bugIn = (g, dir) => g.wave?.bugs.find((b) => b.dir === dir && b.fade < 0) ?? null;
 
 /**
- * Zap a lane. Returns what happened: { type: 'right', points, worth, mult }, { type: 'wrong', penalty, worth } or null
- * when there was nothing to zap.
+ * Zap a lane. Returns what happened: { type: 'right', points, worth, mult }, { type: 'wrong', penalty, worth, light } or null
+ * when there was nothing to zap or the bug was just zapped wrong.
  */
 export function zap(g, dir) {
   if (g.status !== 'playing' || g.wave.done) return null;
   const bug = bugIn(g, dir);
   if (!bug) return null;
+  if (!bug.right && bug.cool > 0) return null; // still being pushed back: a double tap is not a second guess
   g.zap = { dir, age: 0, right: bug.right };
   if (!bug.right) {
     bug.back = Math.min(PUSH_BACK, 1 - bug.d);
-    for (const other of g.wave.bugs) if (other !== bug && other.fade < 0) other.ahead += NUDGE;
-    g.wave.penalty += PENALTY;
+    bug.cool = COOL_MS;
+    const wrongs = (g.wave.wrongs += 1);
+    const penalty = PENALTY * wrongs;
+    for (const other of g.wave.bugs) if (other !== bug && other.fade < 0) other.ahead += NUDGE * wrongs;
+    g.wave.penalty += penalty;
     miss(g);
-    return { type: 'wrong', penalty: PENALTY, worth: worth(g) };
+    const light = wrongs === GUESS_LIMIT;
+    if (light) loseLightForGuessing(g);
+    return { type: 'wrong', penalty, worth: worth(g), light };
   }
   const now = worth(g);
   g.streak += 1;
@@ -272,7 +291,7 @@ function answeredRight(g) {
 
 /** Advance by dt ms. Returns the events: 'light' (a light went out), 'over', 'wave', 'break' (time for a pause card; call resume). */
 export function step(g, dt) {
-  const events = [];
+  const events = g.pending.splice(0);
   if (g.status === 'break') return events;
   if (g.zap) {
     g.zap.age += dt;
@@ -286,6 +305,7 @@ export function step(g, dt) {
   if (!w.done) w.age += dt;
   for (const b of w.bugs) {
     if (b.fade >= 0) { b.fade += dt; continue; }
+    if (b.cool > 0) b.cool -= dt;
     if (b.back > 0) {
       const m = Math.min(b.back, (PUSH_RATE * dt) / 1000);
       b.d += m;

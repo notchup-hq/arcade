@@ -181,7 +181,8 @@ function onEvent(e) {
     paintCounters();
     const left = e.lives === 1 ? '1 light left' : `${e.lives} lights left`;
     const fact = g.wave.fact;
-    say(`That one got through: ${fact.a} × ${fact.b} = ${fact.a * fact.b}. ${left}.`);
+    if (e.guess) say(`Too many wrong zaps in one wave: the answer was ${fact.a * fact.b}. ${left}.`);
+    else say(`That one got through: ${fact.a} × ${fact.b} = ${fact.a * fact.b}. ${left}.`);
   } else if (e.type === 'break') {
     startBreak(e.summary);
   } else if (e.type === 'over') {
@@ -228,7 +229,7 @@ function zapLane(dir) {
     say(`Right! +${result.points}${result.mult > 1 ? ` (streak ×${result.mult})` : ''}`);
   } else {
     sfx.buzz();
-    say(`Not that one. Pushed back, and the answer is worth ${result.worth} now.`);
+    if (!result.light) say(`Not that one. Pushed back, and the answer is worth ${result.worth} now.`);
   }
   paintCounters();
   if (still.matches) frame();
