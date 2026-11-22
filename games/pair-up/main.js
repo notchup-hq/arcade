@@ -6,6 +6,7 @@
 
 import { neonColours } from '../../js/attract.js';
 import { renderFame } from '../../js/fame.js';
+import { GRACE_MS } from '../../js/grace.js';
 import { askInitials } from '../../js/initials.js';
 import { logoSvg } from '../../js/logo.js';
 import { memory } from '../../js/memory.js';
@@ -174,7 +175,7 @@ async function endRun(won) {
     say(`Out of chances. ${g.found} of ${g.pairs} pairs found.`);
   }
   if (place < 0) return;
-  const initials = await askInitials(ui.dialog, { place, score: `${score} points`, last: memory.initials() });
+  const initials = await askInitials(ui.dialog, { place, score: `${score} points`, last: memory.initials(), grace: GRACE_MS });
   if (!initials) return;
   memory.addScore(board(), ORDER, { initials, value: score, extra: { pairs: g.found } });
   lastAdded = place;
@@ -246,9 +247,14 @@ ui.deck.addEventListener('keydown', (e) => {
   };
   if (!(e.key in moves)) return;
   e.preventDefault();
-  b.tabIndex = -1;
-  buttons[moves[e.key]].tabIndex = 0;
   buttons[moves[e.key]].focus();
+});
+
+// The one tab stop follows the focus, so Tab out and back returns to the card last used.
+ui.deck.addEventListener('focusin', (e) => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  for (const other of buttons) other.tabIndex = other === b ? 0 : -1;
 });
 
 function restart() {
