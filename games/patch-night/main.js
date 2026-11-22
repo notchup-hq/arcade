@@ -10,7 +10,7 @@ import { formatDate, placeOf } from '../../js/scores.js';
 import { initSettings } from '../../js/settings.js';
 import { sfx } from '../../js/sound.js';
 import { neonColours } from '../../js/attract.js';
-import { DIR_NAMES, LEVELS, LIVES, bugIn, dirOfArrows, dirOfKey, mergeWeak, moving, multiplier, nearestDir, newGame, practiseList, seeded, step, worth, zap } from './rules.js';
+import { DIR_NAMES, LEVELS, cheerFor, LIVES, bugIn, dirOfArrows, dirOfKey, mergeWeak, moving, multiplier, nearestDir, newGame, practiseList, resume, seeded, step, worth, zap } from './rules.js';
 import { aimFor, bugPoint, drawScene, geometry, STEPS, turnToward } from './scene.js';
 
 const GAME = 'patch-night';
@@ -65,6 +65,7 @@ let side = 0;        // the board's size in CSS pixels
 let labelled = null; // the wave the lane labels were written for
 let lastSignature = '';
 let lastAdded = -1;
+let lastCheer = ''; // so a break never repeats the cheer before it
 
 function levelFromUrl() {
   const l = new URLSearchParams(location.search).get('level');
@@ -179,9 +180,28 @@ function onEvent(e) {
     const left = e.lives === 1 ? '1 light left' : `${e.lives} lights left`;
     const fact = g.wave.fact;
     say(`That one got through: ${fact.a} × ${fact.b} = ${fact.a * fact.b}. ${left}.`);
+  } else if (e.type === 'break') {
+    startBreak(e.summary);
   } else if (e.type === 'over') {
     endRun();
   }
+}
+
+/** After every ten answers the game waits on a short card; Continue starts the next wave. */
+function startBreak(summary) {
+  loop.stop();
+  saveWeak();
+  const seconds = (summary.avgMs / 1000).toFixed(1);
+  const speed = summary.right ? ` Average when right: ${seconds} s.` : '';
+  const label = summary.right === summary.total ? ' Slowest:' : ' Hardest:';
+  showCard({
+    title: lastCheer = cheerFor(summary, Math.random, lastCheer),
+    text: `${summary.right} of ${summary.total} right first time.${speed}${summary.hardest.length ? label : ''}`,
+    facts: summary.hardest,
+    button: 'Continue',
+  });
+  say(`Break. ${summary.right} of ${summary.total} right first time.`);
+  ui.go.focus();
 }
 
 /** Set the turret on a lane without firing (the keyboard's way: aim, then Space). */
@@ -233,7 +253,7 @@ function startRun() {
 }
 
 /** Show the card over the board: the start card, or the end of a run. */
-function showCard({ title, text, facts = [] }) {
+function showCard({ title, text, facts = [], button = g ? 'Play again' : 'Start' }) {
   ui.cardTitle.textContent = title;
   ui.cardText.textContent = text;
   const lines = facts.slice(0, SHOWN).map((f) => {
@@ -248,7 +268,7 @@ function showCard({ title, text, facts = [] }) {
   }
   ui.practise.replaceChildren(...lines);
   ui.practise.hidden = !lines.length;
-  ui.go.textContent = g ? 'Play again' : 'Start';
+  ui.go.textContent = button;
   ui.card.hidden = false;
   ui.lanes.inert = true;
 }
@@ -368,7 +388,19 @@ document.addEventListener('keydown', (e) => {
 document.addEventListener('keyup', (e) => held.delete(e.code));
 addEventListener('blur', () => held.clear());
 
-ui.go.addEventListener('click', startRun);
+ui.go.addEventListener('click', () => {
+  if (g?.status !== 'break') { startRun(); return; }
+  resume(g);
+  ui.card.hidden = true;
+  ui.lanes.inert = false;
+  ui.question.textContent = g.wave.text;
+  labelled = null;
+  label();
+  say('Zap the bug with the right answer.');
+  frame();
+  loop.start();
+  document.activeElement?.blur();
+});
 
 for (const r of ui.levels) {
   r.checked = r.value === level;
