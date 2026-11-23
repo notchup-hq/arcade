@@ -3,6 +3,10 @@
 // the wind, and a billboard that takes three hits is out. Coordinates are in world units with y up;
 // the left rooftop belongs to the first player (the visitor in a solo run), the right one to the rival.
 
+import { seeded } from '../../js/random.js';
+
+export { seeded };
+
 export const WINS = 3;                 // hits that put a billboard out
 export const MIN_ANGLE = 5;
 export const MAX_ANGLE = 85;
@@ -21,18 +25,6 @@ const GUIDE_SECONDS = 0.5;             // the dotted guide shows only the start 
 
 const other = (side) => (side === 'left' ? 'right' : 'left');
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
-
-/** A small seeded random generator (mulberry32), so tests and demos can repeat. Returns numbers in [0, 1). */
-export function seeded(seed) {
-  let a = seed >>> 0;
-  return () => {
-    a = (a + 0x6d2b79f5) >>> 0;
-    let t = a;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
 
 // ---------- Streets: each rival has a stretch of its own ----------
 

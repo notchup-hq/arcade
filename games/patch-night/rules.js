@@ -6,7 +6,7 @@
 // that was missed comes back a few questions later, until it has been answered right twice.
 
 import { MAX_WEAK } from '../../js/memory.js';
-import { seeded } from '../../js/random.js';
+import { pickLine, seeded } from '../../js/random.js';
 
 export { seeded };
 
@@ -441,8 +441,7 @@ const CHEERS = {
 export function cheerFor({ right, total, answered = 0 }, rand, previous = '') {
   const milestone = answered > 0 && answered % MILESTONE_EVERY === 0;
   const pool = CHEERS[milestone ? 'milestone' : right === total ? 'flawless' : right >= total * 0.8 ? 'great' : right >= total * 0.5 ? 'good' : 'practice'];
-  const options = pool.filter((c) => c !== previous);
-  return options[Math.floor(rand() * options.length)];
+  return pickLine(pool, rand, previous);
 }
 
 /** What the hall of fame shows beside a run's score: the share right first time (%) and the average answer time (ms). */
