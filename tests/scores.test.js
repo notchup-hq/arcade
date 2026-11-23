@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { MAX_ENTRIES, cleanExtra, cleanInitials, cleanTable, formatDate, formatTime, weekOf, whereMade, insertScore, placeOf, typedInitials } from '../js/scores.js';
+import { DAY_MS, MAX_ENTRIES, addChallenger, challengersOf, cleanChallengers, cleanExtra, cleanInitials, cleanTable, formatDate, lead, formatTime, weekOf, whereMade, insertScore, placeOf, typedInitials } from '../js/scores.js';
 
 const entry = (value, date = 1, initials = 'ABC') => ({ initials, value, date });
 
@@ -93,4 +93,43 @@ test('a new score shows on the all-time table when it made that, else on the wee
   assert.deepEqual(whereMade(2, 0), { place: 2, view: 'all' });
   assert.deepEqual(whereMade(-1, 3), { place: 3, view: 'week' });
   assert.equal(whereMade(-1, -1), null);
+});
+
+// Challengers: friends' scores, kept few and short-lived.
+
+const NOW = Date.UTC(2026, 11, 1);
+const challenger = (initials, value, saved = NOW, board = 'lob:solo') => ({ board, initials, value, date: saved, saved });
+
+test('challengers: a saved list keeps only valid, recent entries, newest first, at most 50', () => {
+  const list = [challenger('ABC', 5), { ...challenger('ABC', 5), value: 0 }, { ...challenger('A1C', 5) }, challenger('OLD', 5, NOW - 29 * DAY_MS), null, 'x'];
+  assert.deepEqual(cleanChallengers(list, NOW).map((e) => e.initials), ['ABC']);
+  assert.deepEqual(cleanChallengers('nope', NOW), []);
+  const many = Array.from({ length: 60 }, (_, k) => challenger('ABC', k + 1, NOW - k, `g${k}:x`));
+  assert.equal(cleanChallengers(many, NOW).length, 50);
+});
+
+test('challengers: the best come first, five per board', () => {
+  let list = [];
+  for (const [who, v] of [['AAA', 10], ['BBB', 30], ['CCC', 20], ['DDD', 50], ['EEE', 40], ['FFF', 5]]) list = addChallenger(list, challenger(who, v), 'high', NOW);
+  assert.deepEqual(challengersOf(list, 'lob:solo', 'high').map((e) => e.initials), ['DDD', 'EEE', 'BBB', 'CCC', 'AAA']);
+  assert.equal(list.filter((e) => e.initials === 'FFF').length, 0);
+  assert.equal(challengersOf(list, 'lob:solo', 'low')[0].initials, 'AAA');
+});
+
+test('challengers: the same initials on a board keep only the better score', () => {
+  let list = addChallenger([], challenger('PEK', 100), 'high', NOW);
+  assert.equal(addChallenger(list, challenger('PEK', 100), 'high', NOW), list);
+  assert.equal(addChallenger(list, challenger('PEK', 50), 'high', NOW), list);
+  list = addChallenger(list, challenger('PEK', 150), 'high', NOW);
+  assert.deepEqual(list.map((e) => e.value), [150]);
+  list = addChallenger(list, challenger('PEK', 90, NOW, 'fuse-box:easy'), 'low', NOW);
+  assert.equal(list.length, 2);
+});
+
+test('lead: positive when you are ahead, on either end of the scale, and nothing without a score of yours', () => {
+  assert.equal(lead('high', 1950, 1840), 110);
+  assert.equal(lead('high', 1200, 1840), -640);
+  assert.equal(lead('low', 41_000, 42_300), 1300);
+  assert.equal(lead('low', 45_000, 42_300), -2700);
+  assert.equal(lead('high', undefined, 1840), undefined);
 });

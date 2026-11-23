@@ -8,7 +8,7 @@
 // that list only ever grows at the end (tests/challenge.test.js pins it).
 
 import { GAMES } from './games.js';
-import { cleanInitials } from './scores.js';
+import { DAY_MS, cleanInitials } from './scores.js';
 
 export const BOARDS = GAMES.flatMap((game) => game.boards.map((board) => board.id));
 
@@ -16,7 +16,6 @@ export const BOARDS = GAMES.flatMap((game) => game.boards.map((board) => board.i
 const DIGITS = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ.';
 const EPOCH = Date.UTC(2026, 0, 1);
-const DAY = 86_400_000;
 const MAX_VALUE = 2 ** 24 - 1;
 const MAX_DAYS = 2 ** 12 - 1;
 const CODE_LENGTH = 13;
@@ -36,7 +35,7 @@ function checksum(body) {
 export function packChallenge({ board, value, initials, date }) {
   const b = BOARDS.indexOf(board);
   const clean = cleanInitials(initials);
-  const days = Math.floor((date - EPOCH) / DAY);
+  const days = Math.floor((date - EPOCH) / DAY_MS);
   if (b < 0 || !clean || !Number.isInteger(value) || value < 1 || value > MAX_VALUE || !(days >= 0 && days <= MAX_DAYS)) return null;
   let body = BigInt(b);
   body = (body << 24n) | BigInt(value);
@@ -70,8 +69,8 @@ export function unpackChallenge(raw, now = Date.now()) {
   const value = Number((body >> 27n) & 0xffffffn);
   const board = BOARDS[Number(body >> 51n)];
   const initials = cleanInitials([10, 5, 0].map((s) => LETTERS[(letters >> s) & 31]).join(''));
-  const date = EPOCH + days * DAY;
-  if (!board || !initials || value < 1 || date > now + DAY || date < now - MAX_AGE_DAYS * DAY) return null;
+  const date = EPOCH + days * DAY_MS;
+  if (!board || !initials || value < 1 || date > now + DAY_MS || date < now - MAX_AGE_DAYS * DAY_MS) return null;
   return { board, value, initials, date };
 }
 

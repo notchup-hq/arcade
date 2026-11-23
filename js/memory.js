@@ -1,16 +1,16 @@
 // The only code in the arcade that touches browser storage. One versioned key holds the visitor's
 // sound setting, the initials they typed last, the high score tables of this browser (all time, and the
-// current week's, which is dropped when a new week starts), and the few facts
+// current week's, which is dropped when a new week starts), the challengers saved from friends' links
+// (a few per board, dropped after four weeks), and the few facts
 // a times-table game saw them miss (a short list per level, so a new run can ask them again).
 // Nothing is sent anywhere. Every access is wrapped in try/catch, so the arcade works the same when
 // storage is blocked, full or empty (a private window): settings fall back to the defaults and a new
 // high score lasts until the page is closed.
 
-import { cleanExtra, cleanInitials, cleanTable, insertScore, weekOf } from './scores.js';
+import { BOARD_ID, addChallenger, challengersOf, cleanChallengers, cleanExtra, cleanInitials, cleanTable, insertScore, weekOf } from './scores.js';
 
 export const STORAGE_KEY = 'arcade:v1';
 const PREF_VALUES = { sound: ['off'] };
-const BOARD_ID = /^[a-z0-9-]+:[a-z0-9-]+$/;
 const WEEK_ID = /^\d{4}-\d{2}-\d{2}$/;
 const FACT_KEY = /^\d{1,2}x\d{1,2}$/;
 export const MAX_WEAK = 20;
@@ -19,7 +19,7 @@ const cleanFacts = (raw) => (Array.isArray(raw) ? [...new Set(raw.filter((k) => 
 
 /** Stored data made safe: only known settings, valid initials and valid tables survive. */
 export function cleanData(raw) {
-  const out = { prefs: {}, initials: null, scores: {}, week: {}, weak: {} };
+  const out = { prefs: {}, initials: null, scores: {}, week: {}, weak: {}, challengers: [] };
   if (!raw || typeof raw !== 'object' || raw.v !== 1) return out;
   const prefs = raw.prefs && typeof raw.prefs === 'object' ? raw.prefs : {};
   for (const [k, values] of Object.entries(PREF_VALUES)) if (values.includes(prefs[k])) out.prefs[k] = prefs[k];
@@ -35,6 +35,7 @@ export function cleanData(raw) {
       if (BOARD_ID.test(board) && WEEK_ID.test(week) && Array.isArray(table)) out.week[board] = { week, table };
     }
   }
+  out.challengers = cleanChallengers(raw.challengers);
   if (raw.weak && typeof raw.weak === 'object') {
     for (const [board, facts] of Object.entries(raw.weak)) {
       if (BOARD_ID.test(board) && cleanFacts(facts).length) out.weak[board] = cleanFacts(facts);
@@ -111,6 +112,23 @@ export function createMemory(getStorage = browserStorage) {
       const weekTable = insertScore(thisWeek, entry, order);
       write({ ...d, initials: clean, scores: { ...d.scores, [board]: table }, week: { ...d.week, [board]: { week, table: weekTable } } });
       return table;
+    },
+    /** The challengers saved for a board ('game:level'), best first: scores from friends' links, not verified. */
+    challengers: (board, order) => challengersOf(read().challengers, board, order),
+    /** Save a challenger ({ board, initials, value, date }) from a friend's link. True when it was stored. */
+    addChallenger(order, challenge) {
+      const d = read();
+      return write({ ...d, challengers: addChallenger(d.challengers, challenge, order) });
+    },
+    /** Delete one saved challenger. */
+    removeChallenger(board, initials, value) {
+      const d = read();
+      return write({ ...d, challengers: d.challengers.filter((e) => !(e.board === board && e.initials === initials && e.value === value)) });
+    },
+    /** Delete every challenger saved for a board. */
+    clearChallengers(board) {
+      const d = read();
+      return write({ ...d, challengers: d.challengers.filter((e) => e.board !== board) });
     },
     /** The facts missed on a board ('game:level'), as 'AxB' keys, most urgent first. */
     weak: (board) => [...(read().weak[board] ?? [])],

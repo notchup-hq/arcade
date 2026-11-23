@@ -21,10 +21,14 @@ export function whereWords(gameName, board) {
   return /^(solo|tower)$/.test(level) ? gameName : `${gameName}, ${level}`;
 }
 
-/** The words of the card for a link's `hash`, or null when it carries no good challenge for `game`. */
-export function challengeLine({ hash, game, gameName, score, rand = Math.random }) {
+/** The challenge in a link's `hash`, or null when it carries no good one for `game` (its id, 'lob'). */
+export function readChallenge(hash, game) {
   const challenge = unpackChallenge(codeInHash(hash));
-  if (!challenge || challenge.board.split(':')[0] !== game) return null;
+  return challenge?.board.split(':')[0] === game ? challenge : null;
+}
+
+/** The words of the card for a challenge, in the game's own words for its score. */
+export function challengeLine(challenge, { gameName, score, rand = Math.random }) {
   return pickLine(LINES, rand)(challenge.initials, score(challenge.value), whereWords(gameName, challenge.board));
 }
 
@@ -33,7 +37,7 @@ export const shareText = (entry, shown, gameName, board) =>
   `${entry.initials} scored ${shown} in ${whereWords(gameName, board)} on the Notchup Arcade. Can you beat it?`;
 
 /** The card itself, a native modal built when a link arrives: there is nothing to keep in every page. */
-function card(line) {
+function card(line, canSave) {
   const dialog = document.createElement('dialog');
   dialog.className = 'sheet challenge';
   dialog.setAttribute('aria-labelledby', 'challenge-title');
@@ -52,11 +56,15 @@ function card(line) {
   credit.textContent = 'Challengers are not verified.';
   const actions = document.createElement('div');
   actions.className = 'actions';
+  const save = document.createElement('button');
+  save.type = 'submit';
+  save.value = 'save';
+  save.textContent = 'Save challenger';
   const play = document.createElement('button');
   play.type = 'submit';
   play.className = 'primary';
   play.textContent = 'Play';
-  actions.append(play);
+  actions.append(...(canSave ? [save, play] : [play]));
   form.append(heading, text, credit, actions);
   dialog.append(form);
   return dialog;
@@ -64,16 +72,25 @@ function card(line) {
 
 /**
  * Greet a visitor who opened a challenge link, if the page's address (`hash`) carries a good one for
- * this game. `score(value)` words a score the way the game's tables do. Returns true when the card shows.
+ * this game. A challenge made on the table this page shows (`board`) can be saved: `onSave(challenge)`
+ * runs when the visitor taps Save challenger, and only then. One from another level of the game only
+ * says so. `score(value)` words a score the way the game's tables do. Returns true when the card shows.
  */
-export function greetChallenger(options) {
-  const line = challengeLine(options);
-  if (!line) return false;
+export function greetChallenger({ hash, game, board, gameName, score, rand, onSave }) {
+  const challenge = readChallenge(hash, game);
+  if (!challenge) return false;
+  const here = challenge.board === board;
+  const line = here
+    ? challengeLine(challenge, { gameName, score, rand })
+    : `This challenge was made in ${whereWords(gameName, challenge.board)}. Switch to that level to take it on.`;
   history.replaceState(null, '', location.pathname + location.search); // a reload does not greet twice
-  const dialog = card(line);
+  const dialog = card(line, here);
   document.body.append(dialog);
-  dialog.addEventListener('close', () => dialog.remove());
-  dialog.showModal(); // no game is running yet at page load, so there is nothing to pause
+  dialog.addEventListener('close', () => {
+    if (here && dialog.returnValue === 'save') onSave(challenge);
+    dialog.remove();
+  });
+  dialog.showModal(); // greeted at page load only, before any run, so there is nothing to pause
   return true;
 }
 

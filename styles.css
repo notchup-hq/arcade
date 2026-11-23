@@ -709,7 +709,7 @@ html:has(body.game), body.game { overflow: hidden; overscroll-behavior: none; }
 .credit.stack { display: grid; }
 .credit.stack > span { grid-area: 1 / 1; }
 .credit.stack > .off { visibility: hidden; }
-.board-tabs { display: flex; justify-content: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+.board-tabs { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; margin-bottom: 0.5rem; }
 .board-tabs button {
   min-height: 44px;
   padding: 0 0.8rem;
@@ -833,3 +833,9 @@ html:has(body.game), body.game { overflow: hidden; overscroll-behavior: none; }
 .challenge h2 { color: var(--neon-gold); text-shadow: var(--glow-gold); }
 .challenge-text { margin: 0 0 0.75rem; font-size: 1.125rem; }
 .share-note { margin: 0.5rem 0 0; color: var(--neon-cyan); text-align: center; }
+.challenger-tools { margin: 0.5rem 0 0; }
+.challenger-tools.off { visibility: hidden; }
+/* A row of a table you can pick: its initials are the button, as tall as the row (44 px, in every table, so the dialog is as tall in all of them). */
+.sheet tbody tr { height: 2.75rem; }
+.sheet .pick { display: block; width: 100%; min-height: 2.75rem; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; box-shadow: none; cursor: pointer; }
+.sheet tbody tr.picked td { background: rgb(94 242 255 / 0.12); }

@@ -135,3 +135,27 @@ test('a score that beats nothing all time can still make this week', () => {
   assert.deepEqual(m.weekScores('lob:solo', 'high', t).map((e) => e.initials), ['NEW']);
   assert.equal(m.scores('lob:solo', 'high').some((e) => e.initials === 'NEW'), false);
 });
+
+test('challengers are saved apart from the player\'s own scores, and can be deleted one by one or all', () => {
+  const s = fakeStorage();
+  const m = createMemory(() => s);
+  const made = Date.now();
+  assert.ok(m.addChallenger('high', { board: 'lob:solo', initials: 'PEK', value: 1840, date: made }));
+  m.addChallenger('high', { board: 'lob:solo', initials: 'ABC', value: 900, date: made });
+  assert.deepEqual(m.challengers('lob:solo', 'high').map((e) => e.initials), ['PEK', 'ABC']);
+  assert.deepEqual(m.scores('lob:solo', 'high'), []);
+  const again = createMemory(() => s);
+  assert.equal(again.challengers('lob:solo', 'high').length, 2);
+  again.removeChallenger('lob:solo', 'PEK', 1840);
+  assert.deepEqual(again.challengers('lob:solo', 'high').map((e) => e.initials), ['ABC']);
+  again.addChallenger('low', { board: 'fuse-box:easy', initials: 'XYZ', value: 99, date: made });
+  again.clearChallengers('lob:solo');
+  assert.deepEqual(again.challengers('lob:solo', 'high'), []);
+  assert.equal(again.challengers('fuse-box:easy', 'low').length, 1);
+});
+
+test('challengers work when storage is blocked: they last until the page closes', () => {
+  const m = createMemory(blocked);
+  m.addChallenger('high', { board: 'lob:solo', initials: 'PEK', value: 5, date: Date.now() });
+  assert.equal(m.challengers('lob:solo', 'high').length, 1);
+});
