@@ -31,3 +31,16 @@ export function wireDialogs({ help, fame, pause = () => {}, resume }) {
   });
   if (resume) for (const dialog of document.querySelectorAll('dialog')) dialog.addEventListener('close', resume);
 }
+
+/**
+ * Ask whether to leave a run in progress, in `dialog`: a sheet whose form has a button with value
+ * "leave" and one that keeps playing. Resolves true only for "leave"; Escape and every other way out
+ * keep the run, so a stray tap never ends it.
+ */
+export function confirmLeave(dialog) {
+  return new Promise((resolve) => {
+    dialog.returnValue = '';
+    dialog.addEventListener('close', () => resolve(dialog.returnValue === 'leave'), { once: true });
+    dialog.showModal();
+  });
+}
