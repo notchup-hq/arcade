@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { MAX_ENTRIES, cleanExtra, cleanInitials, cleanTable, formatDate, formatTime, insertScore, placeOf, typedInitials } from '../js/scores.js';
+import { MAX_ENTRIES, cleanExtra, cleanInitials, cleanTable, formatDate, formatTime, weekOf, whereMade, insertScore, placeOf, typedInitials } from '../js/scores.js';
 
 const entry = (value, date = 1, initials = 'ABC') => ({ initials, value, date });
 
@@ -77,4 +77,20 @@ test("an entry keeps the few numbers only its game counts, made safe", () => {
   const [kept, plain] = cleanTable([{ ...entry(5), extra: { perfect: 7, x: 'no' } }, entry(3)], 'high');
   assert.deepEqual(kept.extra, { perfect: 7 });
   assert.equal('extra' in plain, false);
+});
+
+test('a week runs from Monday 00:00 to Sunday 23:59 in Helsinki, summer and winter time alike', () => {
+  const week = (iso) => weekOf(Date.parse(iso));
+  assert.equal(week('2026-11-22T21:59:59Z'), '2026-11-16', 'Sunday 23:59 in Helsinki');
+  assert.equal(week('2026-11-22T22:00:00Z'), '2026-11-23', 'Monday 00:00 in Helsinki');
+  assert.equal(week('2026-11-29T21:59:59Z'), '2026-11-23');
+  assert.equal(week('2027-03-28T20:59:59Z'), '2027-03-22', 'before the clocks go forward');
+  assert.equal(week('2027-03-28T21:00:00Z'), '2027-03-29', 'after they go forward');
+  assert.equal(week('2026-12-31T23:00:00Z'), '2026-12-28', 'across New Year');
+});
+
+test('a new score shows on the all-time table when it made that, else on the week, else nowhere', () => {
+  assert.deepEqual(whereMade(2, 0), { place: 2, view: 'all' });
+  assert.deepEqual(whereMade(-1, 3), { place: 3, view: 'week' });
+  assert.equal(whereMade(-1, -1), null);
 });

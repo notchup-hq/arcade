@@ -2,7 +2,8 @@
 // top MAX_ENTRIES of one board (a game and its level), the earlier score first among equal ones. An
 // entry is { initials, value, date, extra }: initials, the score (a time in ms or points), when it was
 // made, and the few numbers only that game counts (extra, optional; js/fame.js shows them).
-// Every game uses these rules and the same initials dialog (js/initials.js).
+// Every game uses these rules and the same initials dialog (js/initials.js). Each board has two tables:
+// all time, and this week's, which starts empty on Monday (Helsinki time, whatever the visitor's clock).
 
 export const MAX_ENTRIES = 5;
 const INITIALS = /^(?=.*[A-ZÅÄÖ])[A-ZÅÄÖ.]{3}$/;
@@ -82,4 +83,25 @@ export function formatTime(ms) {
   const frac = tenths % 10;
   if (s < 60) return `${s}.${frac}`;
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}.${frac}`;
+}
+
+const HELSINKI = { timeZone: 'Europe/Helsinki', year: 'numeric', month: 'numeric', day: 'numeric', weekday: 'short' };
+const DAYS_SINCE_MONDAY = { Mon: 0, Tue: 1, Wed: 2, Thu: 3, Fri: 4, Sat: 5, Sun: 6 };
+let helsinki = null;
+
+/**
+ * The week a moment (ms) falls in, named by its Monday in Helsinki: "2026-11-23". A week runs from
+ * Monday 00:00 to Sunday 23:59 there, the same for everyone, so the tables turn over together.
+ */
+export function weekOf(ms) {
+  helsinki ??= new Intl.DateTimeFormat('en-US', HELSINKI);
+  const p = Object.fromEntries(helsinki.formatToParts(ms).map(({ type, value }) => [type, value]));
+  const monday = Date.UTC(Number(p.year), Number(p.month) - 1, Number(p.day) - DAYS_SINCE_MONDAY[p.weekday]);
+  return new Date(monday).toISOString().slice(0, 10);
+}
+
+/** Where a new score is shown: the all-time place when it made that table, else this week's; null when neither. */
+export function whereMade(allPlace, weekPlace) {
+  if (allPlace >= 0) return { place: allPlace, view: 'all' };
+  return weekPlace >= 0 ? { place: weekPlace, view: 'week' } : null;
 }

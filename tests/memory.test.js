@@ -109,3 +109,29 @@ test('a score is saved with the numbers its game counts', () => {
   m.addScore('notch-up:tower', 'high', { initials: 'PEK', value: 20 });
   assert.deepEqual(m.scores('notch-up:tower', 'high').map((e) => e.extra), [{ perfect: 6 }, undefined]);
 });
+
+test('a score also goes on this week\'s table, which starts over on Monday', () => {
+  const s = fakeStorage();
+  const m = createMemory(() => s);
+  const tue = Date.parse('2026-11-24T10:00:00Z');
+  m.addScore('lob:solo', 'high', { initials: 'AAA', value: 500, date: tue });
+  m.addScore('lob:solo', 'high', { initials: 'BBB', value: 200, date: tue + 1000 });
+  const again = createMemory(() => s);
+  assert.deepEqual(again.weekScores('lob:solo', 'high', tue).map((e) => e.initials), ['AAA', 'BBB']);
+  const nextMon = Date.parse('2026-11-29T22:00:00Z');
+  assert.deepEqual(again.weekScores('lob:solo', 'high', nextMon), [], 'a new week is empty');
+  assert.deepEqual(again.scores('lob:solo', 'high').map((e) => e.initials), ['AAA', 'BBB'], 'all time is kept');
+  again.addScore('lob:solo', 'high', { initials: 'CCC', value: 100, date: nextMon });
+  assert.deepEqual(again.weekScores('lob:solo', 'high', nextMon).map((e) => e.initials), ['CCC']);
+});
+
+test('a score that beats nothing all time can still make this week', () => {
+  const s = fakeStorage();
+  const m = createMemory(() => s);
+  const t = Date.parse('2026-11-24T10:00:00Z');
+  for (let i = 0; i < 5; i++) m.addScore('lob:solo', 'high', { initials: 'OLD', value: 1000 + i, date: t - 14 * 864e5 });
+  assert.equal(m.weekScores('lob:solo', 'high', t).length, 0);
+  m.addScore('lob:solo', 'high', { initials: 'NEW', value: 10, date: t });
+  assert.deepEqual(m.weekScores('lob:solo', 'high', t).map((e) => e.initials), ['NEW']);
+  assert.equal(m.scores('lob:solo', 'high').some((e) => e.initials === 'NEW'), false);
+});

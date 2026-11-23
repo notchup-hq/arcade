@@ -699,6 +699,18 @@ body.game { height: 100dvh; min-height: 0; }
 .sheet ul { padding-left: 1.25rem; }
 .sheet .actions { margin-top: 1rem; }
 .credit { color: var(--neon-muted); }
+.board-tabs { display: flex; justify-content: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+.board-tabs button {
+  min-height: 44px;
+  padding: 0 0.8rem;
+  border: 2px solid var(--neon-dim);
+  border-radius: var(--radius);
+  background: none;
+  color: var(--neon-ink);
+  font: inherit;
+  cursor: pointer;
+}
+.board-tabs button[aria-pressed="true"] { border-color: var(--neon-cyan); box-shadow: var(--glow-cyan); }
 .sheet table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-variant-numeric: tabular-nums; }
 .sheet caption { color: var(--neon-muted); padding-bottom: 0.25rem; }
 .sheet th, .sheet td { padding: 0.3rem 0.2rem; text-align: left; border-bottom: 1px solid var(--line); }

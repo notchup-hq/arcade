@@ -1,15 +1,17 @@
 // The only code in the arcade that touches browser storage. One versioned key holds the visitor's
-// sound setting, the initials they typed last, the high score tables of this browser, and the few facts
+// sound setting, the initials they typed last, the high score tables of this browser (all time, and the
+// current week's, which is dropped when a new week starts), and the few facts
 // a times-table game saw them miss (a short list per level, so a new run can ask them again).
 // Nothing is sent anywhere. Every access is wrapped in try/catch, so the arcade works the same when
 // storage is blocked, full or empty (a private window): settings fall back to the defaults and a new
 // high score lasts until the page is closed.
 
-import { cleanExtra, cleanInitials, cleanTable, insertScore } from './scores.js';
+import { cleanExtra, cleanInitials, cleanTable, insertScore, weekOf } from './scores.js';
 
 export const STORAGE_KEY = 'arcade:v1';
 const PREF_VALUES = { sound: ['off'] };
 const BOARD_ID = /^[a-z0-9-]+:[a-z0-9-]+$/;
+const WEEK_ID = /^\d{4}-\d{2}-\d{2}$/;
 const FACT_KEY = /^\d{1,2}x\d{1,2}$/;
 export const MAX_WEAK = 20;
 
@@ -17,7 +19,7 @@ const cleanFacts = (raw) => (Array.isArray(raw) ? [...new Set(raw.filter((k) => 
 
 /** Stored data made safe: only known settings, valid initials and valid tables survive. */
 export function cleanData(raw) {
-  const out = { prefs: {}, initials: null, scores: {}, weak: {} };
+  const out = { prefs: {}, initials: null, scores: {}, week: {}, weak: {} };
   if (!raw || typeof raw !== 'object' || raw.v !== 1) return out;
   const prefs = raw.prefs && typeof raw.prefs === 'object' ? raw.prefs : {};
   for (const [k, values] of Object.entries(PREF_VALUES)) if (values.includes(prefs[k])) out.prefs[k] = prefs[k];
@@ -26,6 +28,11 @@ export function cleanData(raw) {
     for (const [board, table] of Object.entries(raw.scores)) {
       // The order is checked again on read; here only the shape.
       if (BOARD_ID.test(board) && Array.isArray(table)) out.scores[board] = table;
+    }
+  }
+  if (raw.week && typeof raw.week === 'object') {
+    for (const [board, { week, table } = {}] of Object.entries(raw.week)) {
+      if (BOARD_ID.test(board) && WEEK_ID.test(week) && Array.isArray(table)) out.week[board] = { week, table };
     }
   }
   if (raw.weak && typeof raw.weak === 'object') {
@@ -83,7 +90,15 @@ export function createMemory(getStorage = browserStorage) {
     initials: () => read().initials,
     /** The table of one board ('game:level'), best first. */
     scores: (board, order) => cleanTable(read().scores[board], order),
-    /** Add a score made just now, with the game's own numbers (`extra`, optional); returns the new table. Remembers the initials too. */
+    /** This week's table of one board, best first; empty when its last score is from an earlier week. */
+    weekScores(board, order, now = Date.now()) {
+      const kept = read().week[board];
+      return kept?.week === weekOf(now) ? cleanTable(kept.table, order) : [];
+    },
+    /**
+     * Add a score made just now, with the game's own numbers (`extra`, optional), to the all-time table
+     * and to this week's; returns the new all-time table. Remembers the initials too.
+     */
     addScore(board, order, { initials, value, extra, date = Date.now() }) {
       const d = read();
       const clean = cleanInitials(initials);
@@ -91,7 +106,10 @@ export function createMemory(getStorage = browserStorage) {
       const more = cleanExtra(extra);
       const entry = more ? { initials: clean, value, date, extra: more } : { initials: clean, value, date };
       const table = insertScore(cleanTable(d.scores[board], order), entry, order);
-      write({ ...d, initials: clean, scores: { ...d.scores, [board]: table } });
+      const week = weekOf(date);
+      const thisWeek = d.week[board]?.week === week ? cleanTable(d.week[board].table, order) : [];
+      const weekTable = insertScore(thisWeek, entry, order);
+      write({ ...d, initials: clean, scores: { ...d.scores, [board]: table }, week: { ...d.week, [board]: { week, table: weekTable } } });
       return table;
     },
     /** The facts missed on a board ('game:level'), as 'AxB' keys, most urgent first. */

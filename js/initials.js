@@ -8,16 +8,17 @@ import { cleanInitials, typedInitials } from './scores.js';
 
 /**
  * Ask for initials for a score that made place `place` (0-based), shown with `score`, the score in
- * the game's own words ("34 floors"). Resolves to the initials, or null when the visitor skips.
+ * the game's own words ("34 floors"). `weekly` says it made only this week's table, not the
+ * all-time one. Resolves to the initials, or null when the visitor skips.
  * `last` is offered again. With `grace` (ms), for games played by fast
  * tapping, Skip, Save and Escape do nothing until it has passed.
  */
-export function askInitials(dialog, { place, score, last, grace = 0 }) {
+export function askInitials(dialog, { place, weekly = false, score, last, grace = 0 }) {
   const input = dialog.querySelector('input');
   const heading = dialog.querySelector('h2');
   const error = dialog.querySelector('.initials-error');
   const actions = dialog.querySelector('.actions');
-  heading.textContent = `New high score: #${place + 1}!`;
+  heading.textContent = `New ${weekly ? 'weekly ' : ''}high score: #${place + 1}!`;
   dialog.querySelector('.initials-score').textContent = score;
   input.value = last ?? '';
   error.hidden = true;
