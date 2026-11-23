@@ -6,6 +6,7 @@ All notable changes to this project are listed here, newest first. The format fo
 
 ### Fixed
 
+- The hall of fame dialog keeps its size when you switch between All time and This week, on every phone width. Both tables always show five rows, with `---` for places not played yet, and an empty table no longer shows a sentence.
 - A game page no longer moves under a finger: the page does not scroll, rubber-band or pull to refresh, and a drag on the play area (`data-play`) never scrolls the page. `./dev layout` now checks this at four more phone sizes.
 
 ### Added
