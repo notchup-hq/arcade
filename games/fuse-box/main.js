@@ -173,8 +173,7 @@ function lose() {
 async function win() {
   stopClock();
   const ms = Math.round(elapsed());
-  sfx.win();
-  for (let k = 1; k <= 4; k++) sfx.notch(0.4 + k * 0.25);
+  sfx.fanfare();
   paintAll();
   paintCounters();
   ui.badge.className = 'badge-logo fixed';

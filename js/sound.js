@@ -63,6 +63,11 @@ export const sfx = {
   /** The gear clicking up one notch. */
   notch: (delay = 0) => tone(1320, 0.03, { delay, volume: 0.05 }),
   win: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.12, { delay: i * 0.09 })),
+  /** A win with the gear notching up four times under it, as the logo does. */
+  fanfare() {
+    sfx.win();
+    for (let k = 1; k <= 4; k++) sfx.notch(0.4 + k * 0.25);
+  },
   start: () => tone([330, 660], 0.12, { type: 'triangle' }),
   /** A bulb leaving a hand, a soft pop where it hits, a dull thud where it does not. */
   lob: () => tone([300, 620], 0.16, { type: 'triangle' }),
