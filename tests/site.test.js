@@ -42,6 +42,14 @@ test('every ready cabinet zooms into its own game with a view transition name of
   }
 });
 
+test('a game page holds its first frame until its script has built the board', () => {
+  // The zoom photographs the game's first frame. Without this the photograph shows an empty board,
+  // which then jumps to full size once the script has run.
+  for (const page of pages().filter((p) => p !== 'index.html')) {
+    assert.match(read(page), /<script type="module" src="main\.js" blocking="render"><\/script>/, page);
+  }
+});
+
 test('the zoom between pages runs only when the visitor has not asked for less motion', () => {
   const css = read('styles.css');
   const motion = css.slice(css.indexOf('@media (prefers-reduced-motion: no-preference)'));
