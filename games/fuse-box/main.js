@@ -3,7 +3,7 @@
 // room the panel has, and help and the hall of fame open in dialogs. Tap or click to test a fuse; tag one with a right click, a long press,
 // the T key, or the Tag button. The level lives in the link (?level=medium).
 
-import { wireDialogs } from '../../js/dialogs.js';
+import { confirmLeave, wireDialogs } from '../../js/dialogs.js';
 import { createFame } from '../../js/fame.js';
 import { gridKeys } from '../../js/grid.js';
 import { pickLevel } from '../../js/levels.js';
@@ -32,6 +32,7 @@ const ui = {
   frame: $('frame'),
   help: $('help'),
   fame: $('fame'),
+  leave: $('leave'),
   scores: $('scores'),
   scoresCaption: $('scores-caption'),
   dialog: $('initials'),
@@ -39,7 +40,9 @@ const ui = {
 };
 const badge = consoleLogo(ui.badge);
 
-let level = pickLevel(ui.levels, Object.keys(LEVELS), (next) => { level = next; build(); });
+// Starting over drops a run in progress, so a stray tap on a level or New panel asks first.
+const mayLeave = () => p.status !== 'playing' || confirmLeave(ui.leave);
+let level = pickLevel(ui.levels, Object.keys(LEVELS), (next) => { level = next; build(); }, mayLeave);
 let p;
 let buttons = [];
 let started = 0;
@@ -238,7 +241,8 @@ function setTagging(on) {
 ui.modeTest.addEventListener('click', () => setTagging(false));
 ui.modeTag.addEventListener('click', () => setTagging(true));
 
-ui.again.addEventListener('click', () => {
+ui.again.addEventListener('click', async () => {
+  if (!(await mayLeave())) return;
   sfx.start();
   build();
   buttons[0].focus();

@@ -7,6 +7,7 @@ All notable changes to this project are listed here, newest first. The format fo
 ### Fixed
 
 - Fuse Box on a short phone: the Hard panel no longer scrolls inside its frame. It takes a squarer shape with the same 180 fuses and 40 blown (12×15 instead of 10×18 on a 360×640 screen), so cells stay at least 24 px.
+- Fuse Box asks "Leave this panel?" before New panel or a level change drops a run in progress, so a stray tap does not end it.
 
 ### Changed
 
