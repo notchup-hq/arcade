@@ -3,6 +3,7 @@
 // only when needed. Opening a link saves nothing; the card is read-only text (textContent, never HTML).
 
 import { codeInHash, packChallenge, unpackChallenge } from './challenge.js';
+import { el } from './logo.js';
 import { pickLine } from './random.js';
 
 const LINES = [
@@ -36,38 +37,48 @@ export function challengeLine(challenge, { gameName, score, rand = Math.random }
 export const shareText = (entry, shown, gameName, board) =>
   `${entry.initials} scored ${shown} in ${whereWords(gameName, board)} on the Notchup Arcade. Can you beat it?`;
 
-/** The card itself, a native modal built when a link arrives: there is nothing to keep in every page. */
-function card(line, canSave) {
+/**
+ * A native modal for a heading, a body (a paragraph or a picture), the small print and its buttons, built
+ * when it is needed: there is nothing to keep in every page.
+ */
+function sheet({ id, title, body, buttons }) {
   const dialog = document.createElement('dialog');
   dialog.className = 'sheet challenge';
-  dialog.setAttribute('aria-labelledby', 'challenge-title');
+  dialog.setAttribute('aria-labelledby', id);
   const form = document.createElement('form');
   form.method = 'dialog';
   const heading = document.createElement('h2');
-  heading.id = 'challenge-title';
+  heading.id = id;
   heading.tabIndex = -1;
   heading.autofocus = true;
-  heading.textContent = 'A challenger!';
-  const text = document.createElement('p');
-  text.className = 'challenge-text';
-  text.textContent = line;
+  heading.textContent = title;
   const credit = document.createElement('p');
   credit.className = 'credit';
   credit.textContent = 'Challengers are not verified.';
   const actions = document.createElement('div');
   actions.className = 'actions';
-  const save = document.createElement('button');
-  save.type = 'submit';
-  save.value = 'save';
-  save.textContent = 'Save challenger';
-  const play = document.createElement('button');
-  play.type = 'submit';
-  play.className = 'primary';
-  play.textContent = 'Play';
-  actions.append(...(canSave ? [save, play] : [play]));
-  form.append(heading, text, credit, actions);
+  actions.append(...buttons);
+  form.append(heading, body, credit, actions);
   dialog.append(form);
   return dialog;
+}
+
+function submit(text, { value, primary } = {}) {
+  const b = document.createElement('button');
+  b.type = 'submit';
+  if (value) b.value = value;
+  if (primary) b.className = 'primary';
+  b.textContent = text;
+  return b;
+}
+
+/** The card that greets a visitor: what the challenge is, with Save challenger when it can be kept. */
+function card(line, canSave) {
+  const text = document.createElement('p');
+  text.className = 'challenge-text';
+  text.textContent = line;
+  const play = submit('Play', { primary: true });
+  return sheet({ id: 'challenge-title', title: 'A challenger!', body: text, buttons: canSave ? [submit('Save challenger', { value: 'save' }), play] : [play] });
 }
 
 /**
@@ -94,24 +105,53 @@ export function greetChallenger({ hash, game, board, gameName, score, rand, onSa
   return true;
 }
 
+/** The link to this page that carries `entry` (a table row: initials, value, date) on `board`, or null when it cannot be packed. */
+function challengeUrl(board, entry) {
+  const code = packChallenge({ board, ...entry });
+  if (!code) return null;
+  const url = new URL(location.href);
+  url.hash = `c=${code}`;
+  return url.href;
+}
+
 /**
  * Share a score as a link to this page. `entry` is a table row ({ initials, value, date }). Uses the
  * phone's share sheet when there is one, else copies the link. Resolves to 'shared', 'copied',
  * 'cancelled' or 'failed'.
  */
 export async function shareChallenge(board, entry, { text }) {
-  const code = packChallenge({ board, ...entry });
-  if (!code) return 'failed';
-  const url = new URL(location.href);
-  url.hash = `c=${code}`;
+  const url = challengeUrl(board, entry);
+  if (!url) return 'failed';
   try {
     if (navigator.share) {
-      await navigator.share({ title: 'Notchup Arcade', text, url: url.href });
+      await navigator.share({ title: 'Notchup Arcade', text, url });
       return 'shared';
     }
-    await navigator.clipboard.writeText(url.href);
+    await navigator.clipboard.writeText(url);
     return 'copied';
   } catch (e) {
     return e?.name === 'AbortError' ? 'cancelled' : 'failed';
+  }
+}
+
+/** The card with the QR code of the same link, for a friend standing next to you. The encoder loads only now. Resolves to 'shown' or 'failed'. */
+export async function showChallengeQr(board, entry) {
+  const url = challengeUrl(board, entry);
+  if (!url) return 'failed';
+  try {
+    const { qrModules, qrPath } = await import('./qr.js');
+    const modules = qrModules(url);
+    if (!modules) return 'failed';
+    const size = modules.length + 8; // the code plus a quiet zone of 4 modules on each side
+    const svg = el('svg', { viewBox: `0 0 ${size} ${size}`, role: 'img', 'aria-label': 'QR code with your challenge link', 'shape-rendering': 'crispEdges' });
+    el('rect', { width: size, height: size, fill: '#fff' }, svg); // a scanner needs dark on light, whatever the theme
+    el('path', { d: qrPath(modules), fill: '#000' }, svg);
+    const dialog = sheet({ id: 'qr-title', title: 'Scan to play', body: svg, buttons: [submit('Done', { primary: true })] });
+    dialog.addEventListener('close', () => dialog.remove());
+    document.body.append(dialog);
+    dialog.showModal();
+    return 'shown';
+  } catch {
+    return 'failed';
   }
 }

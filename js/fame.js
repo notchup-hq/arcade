@@ -101,17 +101,26 @@ export function createFame({ dialog, table, caption, initials, board, order, lab
 
   const gameName = () => document.querySelector('h1')?.textContent ?? 'the arcade';
   const share = button('Challenge a friend', shareBest);
+  const qr = button('Show QR', showQr);
   const shared = document.createElement('p');
   shared.className = 'share-note';
   shared.setAttribute('role', 'status');
+  const bestScore = () => memory.scores(board(), order)[0];
   async function shareBest() {
-    const best = memory.scores(board(), order)[0];
+    const best = bestScore();
     if (!best) return;
     const { shareChallenge, shareText } = await import('./challenge-ui.js');
     const result = await shareChallenge(board(), best, { text: shareText(best, score.cell(best.value), gameName(), board()) });
     shared.textContent = { copied: 'Link copied. Send it to a friend.', failed: 'Could not share. Try again.' }[result] ?? '';
   }
-  dialog.querySelector('.actions')?.prepend(share);
+  async function showQr() {
+    const best = bestScore();
+    if (!best) return;
+    const { showChallengeQr } = await import('./challenge-ui.js');
+    const result = await showChallengeQr(board(), best);
+    shared.textContent = result === 'failed' ? 'Could not make a QR code. Try again.' : '';
+  }
+  dialog.querySelector('.actions')?.prepend(share, qr);
   dialog.querySelector('.credit')?.after(shared);
 
   // A link to this page and this level greets at load, before any run; nothing is saved until Save.
@@ -193,7 +202,7 @@ export function createFame({ dialog, table, caption, initials, board, order, lab
     compareButton.setAttribute('aria-pressed', String(compare));
     deleteButton.disabled = picked < 0;
     clearButton.disabled = list.length === 0;
-    share.disabled = memory.scores(board(), order).length === 0;
+    share.disabled = qr.disabled = !bestScore();
     shared.textContent = '';
     buttons.forEach((b, k) => b.setAttribute('aria-pressed', String(VIEWS[k].id === view)));
     prints.forEach((p, k) => { p.classList.toggle('off', VIEWS[k].id !== view); });

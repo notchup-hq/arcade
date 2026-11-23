@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { packChallenge } from '../js/challenge.js';
-import { challengeLine, greetChallenger, readChallenge, shareText, whereWords } from '../js/challenge-ui.js';
+import { challengeLine, greetChallenger, readChallenge, shareText, showChallengeQr, whereWords } from '../js/challenge-ui.js';
 
 const code = packChallenge({ board: 'lob:solo', value: 1840, initials: 'PEK', date: Date.now() });
 const args = (extra) => ({ hash: `#c=${code}`, game: 'lob', board: 'lob:solo', gameName: 'Lob', score: String, rand: () => 0, ...extra });
@@ -76,4 +76,14 @@ test('the level is named only when a game has more than one', () => {
 
 test('the shared text names who, the score and where', () => {
   assert.equal(shareText({ initials: 'PEK' }, '1840', 'Lob', 'lob:solo'), 'PEK scored 1840 in Lob on the Notchup Arcade. Can you beat it?');
+});
+
+test('Show QR builds a dialog with a code of the link, and nothing is stored or sent', async () => {
+  const dialogs = [];
+  const made = (tag) => ({ tag, attrs: {}, kids: [], append(...k) { this.kids.push(...k); }, setAttribute(n, v) { this.attrs[n] = v; }, addEventListener() {}, remove() {}, showModal() { this.open = true; } });
+  globalThis.document = { body: { append() {} }, createElement: (tag) => { const el = made(tag); if (tag === 'dialog') dialogs.push(el); return el; }, createElementNS: (ns, tag) => made(tag) };
+  globalThis.location = { href: 'https://arcade.notchup.fi/games/lob/' };
+  assert.equal(await showChallengeQr('lob:solo', { initials: 'PEK', value: 1840, date: Date.now() }), 'shown');
+  assert.equal(dialogs[0].open, true);
+  assert.equal(await showChallengeQr('nope:solo', { initials: 'PEK', value: 1840, date: Date.now() }), 'failed');
 });
