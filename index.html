@@ -17,7 +17,7 @@
   <meta property="og:url" content="https://arcade.notchup.fi/">
   <meta property="og:locale" content="en">
   <link rel="stylesheet" href="styles.css">
-  <!-- Every module hall.js imports up front, fetched at once (tests/preload.test.js keeps the list whole). The
+  <!-- Every module hall.js imports up front, fetched at once (./dev sync writes the list, tests/preload.test.js checks it). The
        demos are fetched later, as their cabinets come near the screen. -->
   <link rel="modulepreload" href="js/attract.js">
   <link rel="modulepreload" href="js/canvas.js">

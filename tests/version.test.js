@@ -13,6 +13,6 @@ test('version matches the newest CHANGELOG heading', () => {
   assert.equal(heading[1], VERSION, `js/version.js says ${VERSION}, CHANGELOG.md says ${heading[1]}`);
 });
 
-test('every page shows the same version before its script runs', () => {
-  for (const page of pages()) assert.match(read(page), new RegExp(`class="version">v${VERSION.replace(/\./g, '\\.')}<`), page);
+test('every page, and the template a new game starts from, shows the same version before its script runs', () => {
+  for (const page of [...pages(), 'scripts/templates/game/index.html']) assert.match(read(page), new RegExp(`class="version">v${VERSION.replace(/\./g, '\\.')}<`), page);
 });

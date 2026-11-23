@@ -34,6 +34,7 @@ git clone https://github.com/notchup-hq/arcade.git && cd arcade
 ./dev check             # tests, plus a check that every page loads
 ./dev layout            # every page in a real browser at phone, tablet and laptop widths
 ./dev bench             # how much work the hall and each game make on a slow phone
+./dev sync              # after changing the shared page HTML or a game's imports
 ```
 
 Do not open `index.html` straight from disk: browsers block ES modules on `file://`. How the hall and the games work, and how to add a game: [docs/how-it-works.md](docs/how-it-works.md).
