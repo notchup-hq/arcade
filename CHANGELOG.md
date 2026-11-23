@@ -10,6 +10,7 @@ All notable changes to this project are listed here, newest first. The format fo
 - Behind the scenes: every game ends a run through one shared hall of fame (ask for initials, save, show the table), so a fix there reaches all five.
 - Behind the scenes: the help and hall of fame buttons, pausing while a dialog is open, the level picker and the console logo come from shared code too.
 - Behind the scenes: canvases and the grid keys of Fuse Box and Pair Up are shared too, and a test stops a game from copying shared code again. In Fuse Box, Tab back into the panel now returns to the fuse last used, as in Pair Up.
+- Behind the scenes: the HTML every game page shares (the head's first lines, the bar's buttons, the initials dialog) and the preload lists are written from one template by `./dev sync`, so a fix there is made once.
 
 ## 0.1.0 – 2026-11-23
 

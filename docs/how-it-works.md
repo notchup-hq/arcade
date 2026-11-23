@@ -7,6 +7,7 @@
 | `js/games.js` | The games in the hall, in the order their cabinets stand, each with its demo and the high-score tables (one per level) the demo shows. To change the order, move a line and run `./dev order` (`scripts/order-hall.mjs`), which puts the cabinets in `index.html` in the same order; the hall stays plain HTML, so nothing moves after the first paint. `tests/site.test.js` fails while the two differ. |
 | `index.html`, `js/hall.js` | The hall: one arcade cabinet per game (below). A ready game plays itself on its screen; the rest say "Coming soon". A demo's code is fetched only when its cabinet comes within 200 px of the screen, so the hall's first load stays small however many games there are. Without JavaScript the cabinets are plain links. |
 | `games/<game>/` | One folder per game: `index.html` (its page), `main.js` (the page's code), `rules.js` (the rules, no DOM, tested), `demo.js` (attract mode for the hall). |
+| `scripts/templates/game/index.html` | The game page the others share their HTML with: the head's first lines (charset to build stamp), the bar's Arcade link and buttons, and the initials dialog. Change them there and run `./dev sync` (`scripts/sync-pages.mjs`), which copies them into every page (the head into the hall too) and writes each page's `modulepreload` list from the imports of its script. The pages stay plain HTML. The title, help, hall-of-fame caption and the game itself stay in each page. `tests/sync.test.js` fails while a page differs from what `./dev sync` writes. |
 | `js/` | Shared by the hall and every game (below). |
 | `styles.css` | The one stylesheet. Colour tokens `--neon-*` are read by canvas code too. |
 | `_headers` | Security headers for Cloudflare Pages (strict CSP). |
@@ -101,10 +102,10 @@
 
 ## Adding a game
 
-1. `games/<name>/` with `rules.js` (pure, with tests in `tests/<name>.test.js`), `main.js`, `index.html` (copy the Fuse Box page's head, bar and dialogs) and `demo.js` (`{ step(dt), draw(ctx, w, h, colours) }`).
+1. `games/<name>/` with `rules.js` (pure, with tests in `tests/<name>.test.js`), `main.js`, `index.html` (copy `scripts/templates/game/index.html` and fill in its `{{...}}` parts) and `demo.js` (`{ step(dt), draw(ctx, w, h, colours) }`).
 2. Its cabinet in `index.html` with `data-game="<name>"` (copy a ready one), its line in `GAMES` in `js/games.js` where it should stand (a lazy `import()` of its demo, with its own budget in `tests/budget.test.js`), then `./dev order`, `data-game="<name>"` on its page's `<body>`, and its line next to Fuse Box's `view-transition-name` rule in `styles.css` (`tests/site.test.js` says what is missing).
-3. The `<meta name="build" content="dev">` tag, copied from another page, and its page in `sitemap.xml` and in `PAGES` in `scripts/check-layout.mjs`.
-4. Keep the preload lists whole (`tests/preload.test.js` says what is missing) and the budget green.
+3. Its page in `sitemap.xml` and in `PAGES` in `scripts/check-layout.mjs`.
+4. `./dev sync` writes its preload list (run it again after a change to its imports), and the budget stays green.
 5. Pick a name of our own and check it is not another game's: add the names you checked against to `tests/originality.test.js`.
 
 Ideas for the next games are in [next-games.md](next-games.md).
@@ -115,7 +116,7 @@ Every page has `<meta name="build" content="dev">`. On a Cloudflare deploy, the 
 
 ## Checks
 
-- `./dev test`: rules, scores, memory, a privacy scan of every shipped file, the originality scan, the kit scan (`tests/kit.test.js`: neither a game nor another shared module may do again what a kit module does, such as sizing a canvas or asking for initials), the size budget, preload lists, the sitemap and the security headers.
+- `./dev test`: rules, scores, memory, a privacy scan of every shipped file, the originality scan, the kit scan (`tests/kit.test.js`: neither a game nor another shared module may do again what a kit module does, such as sizing a canvas or asking for initials), the size budget, preload lists and the shared page HTML (`./dev sync`), the sitemap and the security headers.
 - `./dev check`: the tests, then every page, its links and every module over HTTP.
 - `./dev layout`: every page in Chromium at 320×568, 360×780, 768×1024 and 1280×800. It fails on sideways scroll, a game page that scrolls at all, text under 16 px, tap targets under 44 px (24 px on a game board), not exactly one `h1`, unlabelled fields, requests to other origins and console errors. The first run installs Playwright into `.local/tools`.
 - `./dev bench`: what the hall and each game cost the main thread at 360 px (the hall also at 1280 px), with the CPU slowed 4x and a phone's pixel ratio, as a table to paste into a pull request (`scripts/bench.mjs`). A change meant to be faster, or one to shared code, shows the table from before and after, run on the same machine. Runs differ by up to about 20 %; less than that is noise. Headless Chromium draws in software, so the "task" column is much higher than on a phone; the "script" column is the games' own code.

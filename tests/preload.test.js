@@ -1,5 +1,6 @@
 // Each page preloads every module its script pulls in, so the browser fetches them in one round trip
-// instead of one per import level. A new import without a preload, or a stale preload, fails here.
+// instead of one per import level. ./dev sync writes the lists; a new import without a preload, or a
+// stale preload, fails here.
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

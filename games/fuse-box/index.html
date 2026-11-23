@@ -17,7 +17,7 @@
   <meta property="og:url" content="https://arcade.notchup.fi/games/fuse-box/">
   <meta property="og:locale" content="en">
   <link rel="stylesheet" href="../../styles.css">
-  <!-- Every module main.js pulls in, fetched at once (tests/preload.test.js keeps the list whole). -->
+  <!-- Every module main.js pulls in, fetched at once (./dev sync writes the list, tests/preload.test.js checks it). -->
   <link rel="modulepreload" href="rules.js">
   <link rel="modulepreload" href="../../js/dialogs.js">
   <link rel="modulepreload" href="../../js/fame.js">
