@@ -7,6 +7,7 @@ All notable changes to this project are listed here, newest first. The format fo
 ### Changed
 
 - Behind the scenes: `./dev bench` measures how much work the hall and each game make on a slow phone, and the games share one random line picker, one seeded random generator and one win fanfare instead of their own copies.
+- Behind the scenes: every game ends a run through one shared hall of fame (ask for initials, save, show the table), so a fix there reaches all five.
 
 ## 0.1.0 – 2026-11-23
 

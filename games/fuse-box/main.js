@@ -3,11 +3,9 @@
 // room the panel has, and help and the hall of fame open in dialogs. Tap or click to test a fuse; tag one with a right click, a long press,
 // the T key, or the Tag button. The level lives in the link (?level=medium).
 
-import { renderFame } from '../../js/fame.js';
-import { askInitials } from '../../js/initials.js';
+import { createFame } from '../../js/fame.js';
 import { logoSvg } from '../../js/logo.js';
-import { memory } from '../../js/memory.js';
-import { formatTime, placeOf } from '../../js/scores.js';
+import { formatTime } from '../../js/scores.js';
 import { initSettings } from '../../js/settings.js';
 import { sfx } from '../../js/sound.js';
 import { LEVELS, TAGGED, TESTED, fusesLeft, newPanel, shaped, testFuse, toggleTag } from './rules.js';
@@ -43,7 +41,6 @@ let buttons = [];
 let started = 0;
 let finished = 0;
 let clock = 0;
-let lastAdded = -1;
 let tagging = false; // what a tap does: test a fuse, or tag it
 
 function levelFromUrl() {
@@ -51,7 +48,17 @@ function levelFromUrl() {
   return l in LEVELS ? l : 'easy';
 }
 
-const board = () => `${GAME}:${level}`;
+const fame = createFame({
+  dialog: ui.fame,
+  table: ui.scores,
+  caption: ui.scoresCaption,
+  initials: ui.dialog,
+  board: () => `${GAME}:${level}`,
+  order: ORDER,
+  label: () => ({ easy: 'Easy', medium: 'Medium', hard: 'Hard' })[level],
+  score: { head: 'Time (s)', cell: formatTime },
+  empty: 'No scores on this browser yet. Fix a panel to be the first.',
+});
 const elapsed = () => (started ? (finished || performance.now()) - started : 0);
 
 /** The text a screen reader hears for fuse `i`. */
@@ -128,7 +135,7 @@ function build() {
   paintCounters();
   setTagging(false); // a new panel starts with testing, since the first tap must test
   say('Tap any fuse. The first is always safe.');
-  renderScores();
+  fame.render();
 }
 
 function act(i, tag) {
@@ -178,28 +185,7 @@ async function win() {
   paintCounters();
   ui.badge.className = 'badge-logo fixed';
   say(`Fixed in ${formatTime(ms)} s. Notch up!`);
-  const place = placeOf(memory.scores(board(), ORDER), ms, ORDER);
-  if (place >= 0) {
-    const initials = await askInitials(ui.dialog, { place, score: `${formatTime(ms)} s`, last: memory.initials() });
-    if (initials) {
-      memory.addScore(board(), ORDER, { initials, value: ms });
-      lastAdded = place;
-      renderScores();
-      lastAdded = -1;
-      ui.fame.showModal();
-      return;
-    }
-  }
-  ui.again.focus();
-}
-
-function renderScores() {
-  ui.scoresCaption.textContent = { easy: 'Easy', medium: 'Medium', hard: 'Hard' }[level];
-  renderFame(ui.scores, memory.scores(board(), ORDER), {
-    score: { head: 'Time (s)', cell: formatTime },
-    fresh: lastAdded,
-    empty: 'No scores on this browser yet. Fix a panel to be the first.',
-  });
+  if (!(await fame.offer({ value: ms, shown: `${formatTime(ms)} s` }))) ui.again.focus();
 }
 
 // Pointer: click tests (or tags in tag mode), a right click or a long press tags.
@@ -299,7 +285,7 @@ function fit() {
 new ResizeObserver(fit).observe(ui.frame);
 
 $('help-open').addEventListener('click', () => ui.help.showModal());
-$('fame-open').addEventListener('click', () => { renderScores(); ui.fame.showModal(); });
+$('fame-open').addEventListener('click', () => { fame.render(); ui.fame.showModal(); });
 
 ui.badge.replaceChildren(logoSvg('logo badge-mark'));
 initSettings();
