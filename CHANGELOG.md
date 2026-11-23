@@ -2,23 +2,15 @@
 
 All notable changes to this project are listed here, newest first. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/).
 
-## Unreleased
+## 0.2.0 – 2026-11-23
 
-### Fixed
-
-- The hall of fame dialog keeps its size when you switch between All time and This week, on every phone width. Both tables always show five rows, with `---` for places not played yet, and an empty table no longer shows a sentence. On phones narrower than 400 px the date column is left out, so a long score or Patch Night's extra columns cannot wrap a row or widen the table.
-- A game page no longer moves under a finger: the page does not scroll, rubber-band or pull to refresh, and a drag on the play area (`data-play`) never scrolls the page. `./dev layout` now checks this at four more phone sizes.
+The game kit, a weekly hall of fame, and a round of polish.
 
 ### Added
 
 - Every game's hall of fame has a second table, This week, beside All time. The week runs Monday to Sunday in Helsinki time and starts empty, so a score that cannot beat an old record can still top the board. A score that makes only the week's top 5 asks for initials too ("New weekly high score"). The cabinets in the hall keep showing all-time scores.
 - The "CLICK TO PLAY" / "TAP TO PLAY" plate on each cabinet is now solid, with a border in the cabinet's colour, so it no longer blends into the demo behind it. It swells gently instead of fading.
 - Lob has a chimney in the middle of the street, with slow smoke that leans with the wind. A flat throw at full power now hits it, so you have to lob over it. It gets taller with each rival, and the computer lifts its aim when it hits the chimney. The smoke used to come from a small chimney on the rival's roof; it comes from this one now.
-
-### Fixed
-
-- Fuse Box on a short phone: the Hard panel no longer scrolls inside its frame. It takes a squarer shape with the same 180 fuses and 40 blown (12×15 instead of 10×18 on a 360×640 screen), so cells stay at least 24 px.
-- Fuse Box asks "Leave this panel?" before New panel or a level change drops a run in progress, so a stray tap does not end it.
 
 ### Changed
 
@@ -28,6 +20,13 @@ All notable changes to this project are listed here, newest first. The format fo
 - Behind the scenes: canvases and the grid keys of Fuse Box and Pair Up are shared too, and a test stops a game from copying shared code again. In Fuse Box, Tab back into the panel now returns to the fuse last used, as in Pair Up.
 - Behind the scenes: the HTML every game page shares (the head's first lines, the bar's buttons, the initials dialog) and the preload lists are written from one template by `./dev sync`, so a fix there is made once.
 - Behind the scenes: `./dev new-game` starts a small working game and adds it to every list, the layout check takes its pages from `js/games.js`, and `docs/adding-a-game.md` walks through adding a game.
+
+### Fixed
+
+- The hall of fame dialog keeps its size when you switch between All time and This week, on every phone width. Both tables always show five rows, with `---` for places not played yet, and an empty table no longer shows a sentence. On phones narrower than 400 px the date column is left out, so a long score or Patch Night's extra columns cannot wrap a row or widen the table.
+- A game page no longer moves under a finger: the page does not scroll, rubber-band or pull to refresh, and a drag on the play area (`data-play`) never scrolls the page. `./dev layout` now checks this at four more phone sizes.
+- Fuse Box on a short phone: the Hard panel no longer scrolls inside its frame. It takes a squarer shape with the same 180 fuses and 40 blown (12×15 instead of 10×18 on a 360×640 screen), so cells stay at least 24 px.
+- Fuse Box asks "Leave this panel?" before New panel or a level change drops a run in progress, so a stray tap does not end it.
 
 ## 0.1.0 – 2026-11-23
 
