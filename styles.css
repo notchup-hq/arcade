@@ -727,6 +727,11 @@ html:has(body.game), body.game { overflow: hidden; overscroll-behavior: none; }
 .sheet :is(th, td):first-child { padding-left: 0; }
 .sheet :is(th, td):last-child { padding-right: 0; }
 .sheet th { color: var(--neon-muted); font-weight: 400; }
+/* On a narrow phone the date goes, so a long score or Patch Night's extra columns never wrap a row
+   (the dialog keeps its height) or push the table wider than the dialog. */
+@media (max-width: 24.99rem) {
+  .sheet table :is(th, td):last-child { display: none; }
+}
 .sheet tbody tr:first-child td { color: var(--neon-gold); }
 .sheet tbody tr.new td { color: var(--neon-magenta); }
 
