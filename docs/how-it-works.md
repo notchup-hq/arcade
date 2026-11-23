@@ -18,6 +18,7 @@
 |---|---|
 | `loop.js` | `requestAnimationFrame` loop with a fixed timestep; stops in hidden tabs. |
 | `attract.js` | Runs a game's demo on a cabinet canvas: sharp at any pixel ratio, paused off screen, one still frame with reduced motion, redrawn only when the demo says something changed. |
+| `canvas.js` | `sharpCanvas`: a canvas drawn sharp at the screen's pixel ratio, at most 2x (more costs time on a phone and shows nothing), resized only when its size or the ratio changed. `stillFrames`: with reduced motion, a game that moves on its own draws a frame only when what is visible changed. |
 | `logo.js` | The Notchup logo in parts (gear, compass, arrow), with the same shapes as `assets/mark.svg` (`tests/logo.test.js`), as inline SVG or on canvas. In the hall the logo is the plain mark, a link to notchup.fi (the demo screen also draws it); on a win the gear turns four teeth and the arrow rises. In a game's console, `consoleLogo` draws it and notches it up, sparks it or resets it. |
 | `sound.js` | Sound effects made with the Web Audio API, no files. The audio context starts on the first sound, which always follows a tap. A won game plays `fanfare`: the win tune with the gear notching up four times under it. |
 | `screens.js` | The screens a demo ends with: the logo notching up under a line of text, then this browser's top 5 for each level that has a score (4 s a page, the level named in magenta; "no scores yet" when none has). `createTail` runs that for every demo. |

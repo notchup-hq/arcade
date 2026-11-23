@@ -6,6 +6,7 @@
 import { wireDialogs } from '../../js/dialogs.js';
 import { createFame } from '../../js/fame.js';
 import { neonColours } from '../../js/attract.js';
+import { sharpCanvas } from '../../js/canvas.js';
 import { createLoop } from '../../js/loop.js';
 import { consoleLogo } from '../../js/logo.js';
 import { initSettings } from '../../js/settings.js';
@@ -48,7 +49,6 @@ const ui = {
   dialog: $('initials'),
 };
 const badge = consoleLogo(ui.badge);
-const ctx = ui.canvas.getContext('2d');
 const colours = neonColours();
 const still = window.matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -79,8 +79,7 @@ function render() {
   const w = ui.canvas.clientWidth;
   const h = ui.canvas.clientHeight;
   if (!w || !stage) return;
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const ctx = sharpCanvas(ui.canvas, w, h);
   const a = aim[match.turn];
   let bulb = null;
   let pop = null;
@@ -107,14 +106,8 @@ function render() {
   });
 }
 
-function sizeCanvas() {
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  ui.canvas.width = Math.round(ui.canvas.clientWidth * dpr);
-  ui.canvas.height = Math.round(ui.canvas.clientHeight * dpr);
-  render();
-}
-sizeCanvas(); // now, so the first frame is already sharp; a view transition photographs that frame
-new ResizeObserver(sizeCanvas).observe(ui.canvas);
+render(); // now, so the first frame is already sharp; a view transition photographs that frame
+new ResizeObserver(render).observe(ui.canvas);
 
 // ---------- The readouts and the controls ----------
 

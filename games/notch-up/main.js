@@ -5,6 +5,7 @@
 // hall of fame open in dialogs, and the game waits while one is open.
 
 import { neonColours } from '../../js/attract.js';
+import { sharpCanvas, stillFrames } from '../../js/canvas.js';
 import { dialogOpen, wireDialogs } from '../../js/dialogs.js';
 import { GRACE_MS, holdButton } from '../../js/grace.js';
 import { createFame } from '../../js/fame.js';
@@ -42,14 +43,12 @@ const ui = {
 };
 const badge = consoleLogo(ui.badge);
 
-const ctx = ui.canvas.getContext('2d');
 const colours = neonColours();
 const still = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 let g = null;          // the run, or null before the first start
 let camera = 0;        // world y at the bottom of the picture
 let size = [0, 0];     // the canvas in CSS pixels
-let lastSignature = '';
 let keyDropAt = -Infinity;
 
 const fame = createFame({
@@ -81,13 +80,7 @@ function pulse(perfect) {
 function draw() {
   const [w, h] = size;
   if (!w) return;
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  if (ui.canvas.width !== Math.round(w * dpr) || ui.canvas.height !== Math.round(h * dpr)) {
-    ui.canvas.width = Math.round(w * dpr);
-    ui.canvas.height = Math.round(h * dpr);
-  }
-  ctx.setTransform(ui.canvas.width / w, 0, 0, ui.canvas.height / h, 0, 0);
-  drawScene(ctx, w, h, colours, { g, camera, still: still.matches });
+  drawScene(sharpCanvas(ui.canvas, w, h), w, h, colours, { g, camera, still: still.matches });
 }
 
 /** With reduced motion a frame is drawn only when something visible changed. */
@@ -96,14 +89,7 @@ function signature() {
   return `${g.floors.length}|${g.status}|${moverX(g, true)}|${!!g.cut}|${!!g.seam}|${!!g.lit}|${!!g.cheer}|${camera}`;
 }
 
-function frame() {
-  if (still.matches) {
-    const sig = signature();
-    if (sig === lastSignature) return;
-    lastSignature = sig;
-  }
-  draw();
-}
+const frames = stillFrames(still, signature, draw);
 
 const loop = createLoop({
   step(dt) {
@@ -112,7 +98,7 @@ const loop = createLoop({
     camera = easeCamera(camera, cameraFor(g, size[1], size[0]), dt, still.matches);
     if (g.status === 'over' && !moving(g)) loop.stop();
   },
-  draw: frame,
+  draw: frames.draw,
 });
 
 function dropFloor() {
@@ -130,14 +116,14 @@ function dropFloor() {
   } else if (result.floors % 10 === 0) {
     say(`${result.floors} floors.`);
   }
-  if (still.matches) frame();
+  if (still.matches) frames.draw();
 }
 
 function startRun() {
   sfx.start();
   g = newGame(seeded(Math.floor(Math.random() * 2 ** 32)), bestSoFar());
   camera = 0;
-  lastSignature = '';
+  frames.forget();
   badge.reset();
   ui.stage.classList.remove('dark', 'pulse', 'perfect');
   ui.card.hidden = true;
@@ -145,7 +131,7 @@ function startRun() {
   paintCounters();
   say('Drop the floor on the one below.');
   ui.drop.focus();
-  frame();
+  frames.draw();
   loop.start();
 }
 
@@ -204,7 +190,7 @@ function fit() {
   ui.stage.style.setProperty('--h', `${Math.floor(fh)}px`);
   size = [w - 4, Math.floor(fh) - 4]; // the stage's border
   if (!g) camera = 0;
-  lastSignature = '';
+  frames.forget();
   draw();
 }
 fit(); // now, so the first frame already has its size; a view transition photographs that frame
@@ -212,7 +198,7 @@ new ResizeObserver(fit).observe(ui.frame);
 
 // The game waits while a dialog is open.
 wireDialogs({ help: ui.help, fame, pause: () => loop.stop(), resume: () => { if (g?.status === 'playing') loop.start(); } });
-still.addEventListener('change', () => { lastSignature = ''; frame(); });
+still.addEventListener('change', () => { frames.forget(); frames.draw(); });
 
 initSettings();
 fame.render();

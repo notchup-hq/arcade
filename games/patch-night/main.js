@@ -12,6 +12,7 @@ import { memory } from '../../js/memory.js';
 import { initSettings } from '../../js/settings.js';
 import { sfx } from '../../js/sound.js';
 import { neonColours } from '../../js/attract.js';
+import { sharpCanvas, stillFrames } from '../../js/canvas.js';
 import { DIR_NAMES, LEVELS, cheerFor, LIVES, bugIn, dirOfArrows, dirOfKey, fameOf, mergeWeak, moving, multiplier, nearestDir, newGame, practiseList, resume, seeded, step, worth, zap } from './rules.js';
 import { aimFor, bugPoint, drawScene, geometry, STEPS, turnToward } from './scene.js';
 
@@ -52,7 +53,6 @@ const ui = {
   levels: [...document.querySelectorAll('input[name="level"]')],
 };
 
-const ctx = ui.canvas.getContext('2d');
 const colours = neonColours();
 const still = window.matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -65,7 +65,6 @@ const held = new Set(); // arrow keys held down
 let buttons = [];
 let side = 0;        // the board's size in CSS pixels
 let labelled = null; // the wave the lane labels were written for
-let lastSignature = '';
 let lastCheer = ''; // so a break never repeats the cheer before it
 
 const board = () => `${GAME}:${level}`;
@@ -123,13 +122,7 @@ function paintCounters() {
 function draw() {
   const inner = side - 4; // the stage's border
   if (!inner) return;
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  if (ui.canvas.width !== Math.round(inner * dpr)) {
-    ui.canvas.width = Math.round(inner * dpr);
-    ui.canvas.height = Math.round(inner * dpr);
-  }
-  ctx.setTransform(ui.canvas.width / inner, 0, 0, ui.canvas.height / inner, 0, 0);
-  drawScene(ctx, inner, inner, colours, { g, aim, aimDir: g?.status === 'playing' ? aimDir : -1, still: still.matches, minBug: MIN_BUG });
+  drawScene(sharpCanvas(ui.canvas, inner, inner), inner, inner, colours, { g, aim, aimDir: g?.status === 'playing' ? aimDir : -1, still: still.matches, minBug: MIN_BUG });
   placeLanes(inner);
   paintWorth();
 }
@@ -161,14 +154,7 @@ function signature() {
   return `${g.asked}|${bugs}|${g.zap ? g.zap.dir : ''}|${aim}|${aimDir}`;
 }
 
-function frame() {
-  if (still.matches) {
-    const sig = signature();
-    if (sig === lastSignature) return;
-    lastSignature = sig;
-  }
-  draw();
-}
+const frames = stillFrames(still, signature, draw);
 
 const loop = createLoop({
   step(dt) {
@@ -177,7 +163,7 @@ const loop = createLoop({
     for (const e of step(g, dt)) onEvent(e);
     if (g.status === 'over' && !moving(g)) loop.stop();
   },
-  draw: frame,
+  draw: frames.draw,
 });
 
 function onEvent(e) {
@@ -222,7 +208,7 @@ function aimAt(dir) {
   aimTo = aimFor(dir);
   const bug = g && bugIn(g, dir);
   say(`Aiming ${DIR_NAMES[dir].toLowerCase()}${bug ? `: ${bug.value}` : ''}.`);
-  if (still.matches) frame();
+  if (still.matches) frames.draw();
 }
 
 function zapLane(dir) {
@@ -240,7 +226,7 @@ function zapLane(dir) {
     if (!result.light) say(`Not that one. Pushed back, and the answer is worth ${result.worth} now.`);
   }
   paintCounters();
-  if (still.matches) frame();
+  if (still.matches) frames.draw();
 }
 
 function startRun() {
@@ -250,7 +236,7 @@ function startRun() {
   aimTo = aim = aimFor(aimDir);
   held.clear();
   labelled = null;
-  lastSignature = '';
+  frames.forget();
   ui.card.hidden = true;
   ui.lanes.inert = false;
   ui.stage.classList.remove('dark');
@@ -258,7 +244,7 @@ function startRun() {
   label();
   paintCounters();
   say('Zap the bug with the right answer.');
-  frame();
+  frames.draw();
   loop.start();
   document.activeElement?.blur();
 }
@@ -310,14 +296,14 @@ function toStart() {
   loop.stop();
   g = null;
   aimTo = aim = aimFor(1);
-  lastSignature = '';
+  frames.forget();
   ui.stage.classList.remove('dark');
   ui.question.textContent = '';
   buildLanes();
   paintCounters();
   showCard({ title: LEVELS[level].label, text: `Zap the bug that carries the right answer. ${HINTS[level]}` });
   say('');
-  frame();
+  frames.draw();
 }
 
 // A tap or click anywhere in a lane zaps the bug in it. The button's own click is for the keyboard
@@ -376,7 +362,7 @@ ui.go.addEventListener('click', () => {
   labelled = null;
   label();
   say('Zap the bug with the right answer.');
-  frame();
+  frames.draw();
   loop.start();
   document.activeElement?.blur();
 });
@@ -385,7 +371,7 @@ ui.go.addEventListener('click', () => {
 function fit() {
   side = Math.floor(Math.min(ui.frame.clientWidth, ui.frame.clientHeight));
   ui.stage.style.setProperty('--size', `${side}px`);
-  lastSignature = '';
+  frames.forget();
   draw();
 }
 fit(); // now, so the first frame already has its size; a view transition photographs that frame
@@ -393,7 +379,7 @@ new ResizeObserver(fit).observe(ui.frame);
 
 // The game waits while a dialog is open.
 wireDialogs({ help: ui.help, fame, pause: () => loop.stop(), resume: () => { if (g?.status === 'playing') loop.start(); } });
-still.addEventListener('change', () => { lastSignature = ''; frame(); });
+still.addEventListener('change', () => { frames.forget(); frames.draw(); });
 addEventListener('pagehide', saveWeak);
 
 initSettings();
