@@ -4,11 +4,9 @@
 // The level lives in the link (?level=medium).
 
 import { GRACE_MS, holdButton } from '../../js/grace.js';
-import { renderFame } from '../../js/fame.js';
-import { askInitials } from '../../js/initials.js';
+import { createFame } from '../../js/fame.js';
 import { createLoop } from '../../js/loop.js';
 import { memory } from '../../js/memory.js';
-import { placeOf } from '../../js/scores.js';
 import { initSettings } from '../../js/settings.js';
 import { sfx } from '../../js/sound.js';
 import { neonColours } from '../../js/attract.js';
@@ -66,7 +64,6 @@ let buttons = [];
 let side = 0;        // the board's size in CSS pixels
 let labelled = null; // the wave the lane labels were written for
 let lastSignature = '';
-let lastAdded = -1;
 let lastCheer = ''; // so a break never repeats the cheer before it
 
 function levelFromUrl() {
@@ -75,6 +72,20 @@ function levelFromUrl() {
 }
 
 const board = () => `${GAME}:${level}`;
+const fame = createFame({
+  dialog: ui.fame,
+  table: ui.scores,
+  caption: ui.scoresCaption,
+  initials: ui.dialog,
+  board,
+  order: ORDER,
+  label: () => LEVELS[level].label,
+  score: { head: 'Score', cell: String },
+  columns: [
+    { key: 'right', head: 'Right', cell: (v) => `${v}%` },
+    { key: 'avg', head: 'Avg', cell: (v) => `${(v / 1000).toFixed(1)}s` },
+  ],
+});
 const say = (text) => { ui.status.textContent = text; };
 
 /** The lane buttons for the current level: a ring, one per lane. */
@@ -280,7 +291,7 @@ function saveWeak() {
   if (g) memory.setWeak(board(), mergeWeak(memory.weak(board()), g));
 }
 
-async function endRun() {
+function endRun() {
   saveWeak();
   sfx.lampOut();
   ui.stage.classList.add('dark');
@@ -293,27 +304,7 @@ async function endRun() {
   });
   say(`Lights out. Score ${g.score}.`);
   holdButton(ui.go); // the player is often still tapping when the card appears
-  const place = g.score > 0 ? placeOf(memory.scores(board(), ORDER), g.score, ORDER) : -1;
-  if (place < 0) return;
-  const initials = await askInitials(ui.dialog, { place, score: `${g.score} points`, last: memory.initials(), grace: GRACE_MS });
-  if (!initials) return;
-  memory.addScore(board(), ORDER, { initials, value: g.score, extra: fameOf(g) });
-  lastAdded = place;
-  renderScores();
-  lastAdded = -1;
-  ui.fame.showModal();
-}
-
-function renderScores() {
-  ui.scoresCaption.textContent = LEVELS[level].label;
-  renderFame(ui.scores, memory.scores(board(), ORDER), {
-    score: { head: 'Score', cell: String },
-    columns: [
-      { key: 'right', head: 'Right', cell: (v) => `${v}%` },
-      { key: 'avg', head: 'Avg', cell: (v) => `${(v / 1000).toFixed(1)}s` },
-    ],
-    fresh: lastAdded,
-  });
+  fame.offer({ value: g.score, shown: `${g.score} points`, extra: fameOf(g), grace: GRACE_MS });
 }
 
 /** Back to the start card for the current level. */
@@ -424,10 +415,10 @@ function openDialog(dialog) {
   dialog.showModal();
 }
 $('help-open').addEventListener('click', () => openDialog(ui.help));
-$('fame-open').addEventListener('click', () => { renderScores(); openDialog(ui.fame); });
+$('fame-open').addEventListener('click', () => { fame.render(); openDialog(ui.fame); });
 still.addEventListener('change', () => { lastSignature = ''; frame(); });
 addEventListener('pagehide', saveWeak);
 
 initSettings();
-renderScores();
+fame.render();
 toStart();
