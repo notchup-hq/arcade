@@ -11,6 +11,12 @@ const INITIALS = /^(?=.*[A-ZÅÄÖ])[A-ZÅÄÖ.]{3}$/;
 /** 'low' when a smaller value wins (a time), 'high' when a bigger one does (points). */
 const better = (order) => (order === 'low' ? (a, b) => a < b : (a, b) => a > b);
 
+/** Best first; among equal scores the smaller `tie` field (the earlier date) goes first. */
+const byBest = (order, tie) => {
+  const wins = better(order);
+  return (a, b) => (a.value === b.value ? a[tie] - b[tie] : wins(a.value, b.value) ? -1 : 1);
+};
+
 /** Initials as typed so far: upper case letters (A–Z and Å, Ä, Ö) and dots, at most three. */
 export function typedInitials(raw) {
   return String(raw).toLocaleUpperCase('fi').replace(/[^A-ZÅÄÖ.]/g, '').slice(0, 3);
@@ -45,12 +51,7 @@ function cleanEntry(raw) {
 /** A table made safe: valid entries only, best first (an earlier date wins a tie), at most MAX_ENTRIES. */
 export function cleanTable(raw, order) {
   if (!Array.isArray(raw)) return [];
-  const wins = better(order);
-  return raw
-    .map(cleanEntry)
-    .filter(Boolean)
-    .sort((a, b) => (a.value === b.value ? a.date - b.date : wins(a.value, b.value) ? -1 : 1))
-    .slice(0, MAX_ENTRIES);
+  return raw.map(cleanEntry).filter(Boolean).sort(byBest(order, 'date')).slice(0, MAX_ENTRIES);
 }
 
 /** The place (0-based) a new score would take, or -1 when it does not make the table. */
@@ -104,4 +105,57 @@ export function weekOf(ms) {
 export function whereMade(allPlace, weekPlace) {
   if (allPlace >= 0) return { place: allPlace, view: 'all' };
   return weekPlace >= 0 ? { place: weekPlace, view: 'week' } : null;
+}
+
+// Challengers: scores from friends' links, kept apart from a player's own tables. Not verified, so they
+// are small: the best few per board, a total cap, and they expire. An entry is { board, initials, value,
+// date, saved }: when it was made and when the visitor saved it.
+
+export const MAX_CHALLENGERS = 5;
+export const MAX_CHALLENGERS_ALL = 50;
+export const CHALLENGER_DAYS = 28;
+/** A board's name: its game and level, 'fuse-box:easy'. */
+export const BOARD_ID = /^[a-z0-9-]+:[a-z0-9-]+$/;
+export const DAY_MS = 86_400_000;
+
+function cleanChallenger(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+  const { board, value, date, saved } = raw;
+  const initials = cleanInitials(raw.initials);
+  if (typeof board !== 'string' || !BOARD_ID.test(board) || !initials) return null;
+  if (![value, date, saved].every(Number.isFinite) || value < 1) return null;
+  return { board, initials, value, date, saved };
+}
+
+/** A saved list made safe: valid entries only, none saved over CHALLENGER_DAYS ago, the newest MAX_CHALLENGERS_ALL. */
+export function cleanChallengers(raw, now = Date.now()) {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map(cleanChallenger)
+    .filter((e) => e && e.saved > now - CHALLENGER_DAYS * DAY_MS)
+    .sort((a, b) => b.saved - a.saved)
+    .slice(0, MAX_CHALLENGERS_ALL);
+}
+
+/** The challengers of one board, best first, at most MAX_CHALLENGERS. */
+export function challengersOf(list, board, order) {
+  return list.filter((e) => e.board === board).sort(byBest(order, 'saved')).slice(0, MAX_CHALLENGERS);
+}
+
+/** How far ahead of `theirs` your `mine` is: positive when you are ahead, whichever end of the scale is best; undefined without a score of yours. */
+export function lead(order, mine, theirs) {
+  if (mine === undefined) return undefined;
+  return order === 'high' ? mine - theirs : theirs - mine;
+}
+
+/**
+ * `list` with `entry` added. The same initials on the same board keep only the better score, so a
+ * link opened twice changes nothing; a board keeps its best MAX_CHALLENGERS.
+ */
+export function addChallenger(list, entry, order, now = Date.now()) {
+  const same = list.find((e) => e.board === entry.board && e.initials === entry.initials);
+  if (same && !better(order)(entry.value, same.value)) return list;
+  const added = [...list.filter((e) => e !== same), { ...entry, saved: now }];
+  const top = new Set(challengersOf(added, entry.board, order));
+  return cleanChallengers(added.filter((e) => e.board !== entry.board || top.has(e)), now);
 }
