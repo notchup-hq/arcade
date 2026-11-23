@@ -218,20 +218,29 @@ a.marquee-logo:hover, a.marquee-logo:focus-visible { background: radial-gradient
 .soon .screen::before { content: ""; position: absolute; inset: 0; background: rgb(6 11 22 / 0.88); }
 
 /* The teaser on a ready screen is always on, so it is seen however far into its cycle the demo is: a
-   small plate at the foot of the picture that breathes slowly (see the motion block below). Fingers
-   tap, so a touch screen says so. */
+   solid plate at the foot of the picture, like a sticker on the glass, so it reads the same over any
+   demo. Its border takes the cabinet's colour (--plate) and it breathes slowly (see the motion block
+   below). Fingers tap, so a touch screen says so. */
+.cabinet[data-game] { --plate: var(--neon-gold); }
+.cabinet[data-game="fuse-box"] { --plate: var(--neon-red); }
+.cabinet[data-game="lob"] { --plate: var(--neon-cyan); }
+.cabinet[data-game="patch-night"] { --plate: var(--neon-green); }
+.cabinet[data-game="pair-up"] { --plate: var(--neon-magenta); }
 .cabinet[data-game] .screen::before {
   content: "CLICK TO PLAY";
   position: absolute;
   bottom: 0.5rem;
   left: 50%;
   z-index: 1;
-  padding: 0.1rem 0.6rem;
+  padding: 0.2rem 0.75rem;
+  border: 2px solid var(--plate);
   border-radius: 6px;
-  background: rgb(6 11 22 / 0.8);
-  color: var(--neon-gold);
+  background: var(--neon-bg);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.7);
+  color: var(--neon-ink);
   font: 800 1rem/1.4 var(--mono);
   letter-spacing: 0.08em;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.9);
   white-space: nowrap;
   transform: translateX(-50%);
   pointer-events: none;
@@ -739,7 +748,10 @@ body.game { height: 100dvh; min-height: 0; }
   inset: 0;
   width: auto;
   padding: 0;
+  border: 0;
   border-radius: 0;
+  box-shadow: none;
+  text-shadow: none;
   background: rgb(6 11 22 / 0.85);
   transform: none;
   animation: none;
@@ -781,7 +793,7 @@ body.game { height: 100dvh; min-height: 0; }
   .stage.tower.pulse::after { animation: frame-pulse 0.45s ease-out 1; }
 }
 
-@keyframes breathe { 50% { opacity: 0.5; } }
+@keyframes breathe { 50% { transform: translateX(-50%) scale(1.06); } }
 @keyframes spin-notches { to { transform: rotate(360deg); } }
 @keyframes four-notches { to { transform: rotate(120deg); } }
 @keyframes rise { to { transform: translate(10px, -10px); } }

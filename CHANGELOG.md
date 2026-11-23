@@ -6,6 +6,7 @@ All notable changes to this project are listed here, newest first. The format fo
 
 ### Added
 
+- The "CLICK TO PLAY" / "TAP TO PLAY" plate on each cabinet is now solid, with a border in the cabinet's colour, so it no longer blends into the demo behind it. It swells gently instead of fading.
 - Lob has a chimney in the middle of the street, with slow smoke that leans with the wind. A flat throw at full power now hits it, so you have to lob over it. It gets taller with each rival, and the computer lifts its aim when it hits the chimney. The smoke used to come from a small chimney on the rival's roof; it comes from this one now.
 
 ### Fixed
