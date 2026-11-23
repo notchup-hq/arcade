@@ -3,6 +3,7 @@
 // mouse), with the − and + buttons and Throw, or with the arrow keys and Space. The page fits the screen
 // without scrolling; help and the hall of fame open in dialogs.
 
+import { wireDialogs } from '../../js/dialogs.js';
 import { createFame } from '../../js/fame.js';
 import { neonColours } from '../../js/attract.js';
 import { createLoop } from '../../js/loop.js';
@@ -412,8 +413,7 @@ const fame = createFame({
   empty: 'No runs on this browser yet. Beat a rival to be the first.',
 });
 
-$('help-open').addEventListener('click', () => ui.help.showModal());
-$('fame-open').addEventListener('click', () => { fame.render(); ui.fame.showModal(); });
+wireDialogs({ help: ui.help, fame });
 
 ui.badge.replaceChildren(logoSvg('logo badge-mark'));
 initSettings();

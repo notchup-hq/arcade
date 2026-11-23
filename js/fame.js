@@ -58,6 +58,7 @@ export function createFame({ dialog, table, caption, initials, board, order, lab
   }
 
   return {
+    dialog,
     render,
     /**
      * A run just ended with `value`. If it makes the top 5, ask for initials (the dialog says

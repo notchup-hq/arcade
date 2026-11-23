@@ -6,6 +6,7 @@
 // the run ends when the chances are gone. The level lives in the link (?level=hard).
 
 import { neonColours } from '../../js/attract.js';
+import { whenDialogsClosed, wireDialogs } from '../../js/dialogs.js';
 import { createFame } from '../../js/fame.js';
 import { GRACE_MS } from '../../js/grace.js';
 import { logoSvg } from '../../js/logo.js';
@@ -176,11 +177,10 @@ function build() {
 /** The next round: a fresh deck, the run goes on. */
 function startNextRound() {
   clearTimeout(endTimer);
-  const open = document.querySelector('dialog[open]');
-  if (open) { // help or the hall of fame is open: deal when it closes, not behind it
-    open.addEventListener('close', startNextRound, { once: true });
-    return;
-  }
+  whenDialogsClosed(dealNextRound); // with help or the hall of fame open, deal when it closes, not behind it
+}
+
+function dealNextRound() {
   nextRound(g);
   layDeck();
   sfx.start();
@@ -299,8 +299,7 @@ for (const r of ui.levels) {
 }
 
 new ResizeObserver(fit).observe(ui.frame);
-$('help-open').addEventListener('click', () => ui.help.showModal());
-$('fame-open').addEventListener('click', () => { fame.render(); ui.fame.showModal(); });
+wireDialogs({ help: ui.help, fame });
 
 ui.badge.replaceChildren(logoSvg('logo badge-mark'));
 initSettings();

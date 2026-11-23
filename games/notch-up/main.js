@@ -5,6 +5,7 @@
 // hall of fame open in dialogs, and the game waits while one is open.
 
 import { neonColours } from '../../js/attract.js';
+import { dialogOpen, wireDialogs } from '../../js/dialogs.js';
 import { GRACE_MS, holdButton } from '../../js/grace.js';
 import { createFame } from '../../js/fame.js';
 import { createLoop } from '../../js/loop.js';
@@ -121,7 +122,7 @@ const loop = createLoop({
 });
 
 function dropFloor() {
-  if (g?.status !== 'playing' || document.querySelector('dialog[open]')) return;
+  if (g?.status !== 'playing' || dialogOpen()) return;
   const result = drop(g, still.matches);
   paintCounters();
   if (result.type === 'over') { endRun(); return; }
@@ -188,7 +189,7 @@ ui.drop.addEventListener('click', (e) => {
 // Space and Enter drop the moment they go down, unless the focus is on another control (help, sound,
 // the back link), which keeps its own Space and Enter.
 document.addEventListener('keydown', (e) => {
-  if (g?.status !== 'playing' || e.ctrlKey || e.metaKey || e.altKey || document.querySelector('dialog[open]')) return;
+  if (g?.status !== 'playing' || e.ctrlKey || e.metaKey || e.altKey || dialogOpen()) return;
   if (e.target !== ui.drop && e.target.closest?.('a, button, input, select, summary, textarea')) return;
   if (e.code !== 'Space' && e.code !== 'Enter' && e.code !== 'NumpadEnter') return;
   e.preventDefault();
@@ -216,15 +217,7 @@ fit(); // now, so the first frame already has its size; a view transition photog
 new ResizeObserver(fit).observe(ui.frame);
 
 // The game waits while a dialog is open.
-for (const dialog of [ui.help, ui.fame, ui.dialog]) {
-  dialog.addEventListener('close', () => { if (g?.status === 'playing') loop.start(); });
-}
-function openDialog(dialog) {
-  loop.stop();
-  dialog.showModal();
-}
-$('help-open').addEventListener('click', () => openDialog(ui.help));
-$('fame-open').addEventListener('click', () => { fame.render(); openDialog(ui.fame); });
+wireDialogs({ help: ui.help, fame, pause: () => loop.stop(), resume: () => { if (g?.status === 'playing') loop.start(); } });
 still.addEventListener('change', () => { lastSignature = ''; frame(); });
 
 initSettings();

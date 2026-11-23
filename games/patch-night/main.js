@@ -3,6 +3,7 @@
 // the bug in it. Help and the hall of fame open in dialogs, and the game waits while one is open.
 // The level lives in the link (?level=medium).
 
+import { dialogOpen, wireDialogs } from '../../js/dialogs.js';
 import { GRACE_MS, holdButton } from '../../js/grace.js';
 import { createFame } from '../../js/fame.js';
 import { createLoop } from '../../js/loop.js';
@@ -229,7 +230,7 @@ function aimAt(dir) {
 }
 
 function zapLane(dir) {
-  if (!g || g.status !== 'playing' || document.querySelector('dialog[open]')) return;
+  if (!g || g.status !== 'playing' || dialogOpen()) return;
   aimDir = dir;
   aimTo = aimFor(dir);
   const result = zap(g, dir);
@@ -345,7 +346,7 @@ ui.lanes.addEventListener('click', (e) => {
 // level in the middle of a run.
 const arrows = new Set(['ArrowUp', 'ArrowRight', 'ArrowDown', 'ArrowLeft']);
 document.addEventListener('keydown', (e) => {
-  if (!g || g.status !== 'playing' || e.ctrlKey || e.metaKey || e.altKey || document.querySelector('dialog[open]')) return;
+  if (!g || g.status !== 'playing' || e.ctrlKey || e.metaKey || e.altKey || dialogOpen()) return;
   const dirs = LEVELS[level].dirs;
   if (e.code === 'Space' || e.code === 'Enter' || e.code === 'NumpadEnter') {
     e.preventDefault();
@@ -407,15 +408,7 @@ fit(); // now, so the first frame already has its size; a view transition photog
 new ResizeObserver(fit).observe(ui.frame);
 
 // The game waits while a dialog is open.
-for (const dialog of [ui.help, ui.fame, ui.dialog]) {
-  dialog.addEventListener('close', () => { if (g?.status === 'playing') loop.start(); });
-}
-function openDialog(dialog) {
-  loop.stop();
-  dialog.showModal();
-}
-$('help-open').addEventListener('click', () => openDialog(ui.help));
-$('fame-open').addEventListener('click', () => { fame.render(); openDialog(ui.fame); });
+wireDialogs({ help: ui.help, fame, pause: () => loop.stop(), resume: () => { if (g?.status === 'playing') loop.start(); } });
 still.addEventListener('change', () => { lastSignature = ''; frame(); });
 addEventListener('pagehide', saveWeak);
 
