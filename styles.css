@@ -217,6 +217,27 @@ a.marquee-logo:hover, a.marquee-logo:focus-visible { background: radial-gradient
 .soon .screen { aspect-ratio: 16 / 9; }
 .soon .screen::before { content: ""; position: absolute; inset: 0; background: rgb(6 11 22 / 0.88); }
 
+/* The teaser on a ready screen is always on, so it is seen however far into its cycle the demo is: a
+   small plate at the foot of the picture that breathes slowly (see the motion block below). Fingers
+   tap, so a touch screen says so. */
+.cabinet[data-game] .screen::before {
+  content: "PRESS START";
+  position: absolute;
+  bottom: 0.5rem;
+  left: 50%;
+  z-index: 1;
+  padding: 0.1rem 0.6rem;
+  border-radius: 6px;
+  background: rgb(6 11 22 / 0.8);
+  color: var(--neon-gold);
+  font: 800 1rem/1.4 var(--mono);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+@media (pointer: coarse) { .cabinet[data-game] .screen::before { content: "TAP TO PLAY"; } }
+
 /* The control panel sticks out past the sides and slopes towards the player. */
 .cabinet-deck {
   display: flex;
@@ -711,11 +732,34 @@ body.game { height: 100dvh; min-height: 0; }
 .cabinet[data-game="notch-up"] .screen, .game[data-game="notch-up"] .game-main { view-transition-name: notch-up; }
 .cabinet[data-game="pair-up"] .screen, .game[data-game="pair-up"] .game-main { view-transition-name: pair-up; }
 
+/* A slow connection leaves the hall looking frozen between the tap and the game's first frame, so
+   after a moment the tapped screen dims and shows the logo, which notches round in the motion block. */
+.cabinet.opening .screen::before {
+  content: "";
+  inset: 0;
+  width: auto;
+  padding: 0;
+  border-radius: 0;
+  background: rgb(6 11 22 / 0.85);
+  transform: none;
+  animation: none;
+}
+.cabinet.opening .screen::after {
+  inset: 50% auto auto 50%;
+  width: 3.5rem;
+  height: 3.5rem;
+  margin: -1.75rem 0 0 -1.75rem;
+  background: url("assets/mark.svg") center / contain no-repeat;
+  z-index: 2;
+}
+
 /* ---------- Motion, only when the visitor has not asked for less ---------- */
 
 @media (prefers-reduced-motion: no-preference) {
   @view-transition { navigation: auto; }
   .stage { transition: border-color 0.6s, box-shadow 0.6s; }
+  .cabinet[data-game]:not(.opening) .screen::before { animation: breathe 2.4s ease-in-out infinite; }
+  .cabinet.opening .screen::after { animation: spin-notches 1.2s steps(4, end) infinite; }
   ::view-transition-group(*) { animation-duration: 0.3s; animation-timing-function: ease-in-out; }
   /* The page being left stays put while the next one fades in over it, and the screen grows as a
      solid, lit screen, so the two pages never show through each other. */
@@ -737,6 +781,8 @@ body.game { height: 100dvh; min-height: 0; }
   .stage.tower.pulse::after { animation: frame-pulse 0.45s ease-out 1; }
 }
 
+@keyframes breathe { 50% { opacity: 0.5; } }
+@keyframes spin-notches { to { transform: rotate(360deg); } }
 @keyframes four-notches { to { transform: rotate(120deg); } }
 @keyframes rise { to { transform: translate(10px, -10px); } }
 @keyframes shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }

@@ -39,10 +39,20 @@ centreCabinet();
 addEventListener('pagereveal', centreCabinet); // before the first frame, so the zoom back shrinks into place
 addEventListener('load', centreCabinet); // once everything above it has its size
 addEventListener('pageshow', (e) => { if (e.persisted) centreCabinet(); });
+let opening = 0;
+const OPENING_MS = 300;
+// Coming back from a game by the back button must not show the screen as still opening.
+addEventListener('pageshow', () => {
+  clearTimeout(opening);
+  for (const cabinet of document.querySelectorAll('.cabinet.opening')) cabinet.classList.remove('opening');
+});
 // Opening a game marks its cabinet in this page's address, so the back button comes back to it.
 for (const link of document.querySelectorAll('.cabinet[data-game] > a')) {
   link.addEventListener('click', (e) => {
-    if (e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey) history.replaceState(null, '', `#${link.parentElement.dataset.game}`);
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey) return;
+    history.replaceState(null, '', `#${link.parentElement.dataset.game}`);
+    // A game that is slow to arrive leaves the hall looking frozen; after a moment the screen says it is coming.
+    opening = setTimeout(() => link.parentElement.classList.add('opening'), OPENING_MS);
   });
 }
 const near = new IntersectionObserver((entries) => {
