@@ -7,7 +7,7 @@ import { FONT } from '../../js/screens.js';
 
 // A face's colour, by the neon colour names the stylesheet defines (js/attract.js reads them).
 const TINTS = ['cyan', 'gold', 'magenta', 'green'];
-export const SPRITE_TINT = { bug: 'green', ladybug: 'green', spider: 'green', butterfly: 'green', bulb: 'gold', fuse: 'cyan', floor: 'magenta' };
+export const SPRITE_TINT = { bug: 'green', ladybug: 'magenta', spider: 'cyan', butterfly: 'gold', bulb: 'gold', fuse: 'cyan', floor: 'magenta' };
 
 const tintOf = (face, c) => c[SPRITE_TINT[face] ?? TINTS[face.charCodeAt(0) % TINTS.length]];
 
