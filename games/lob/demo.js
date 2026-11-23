@@ -3,26 +3,26 @@
 // Then the logo notches up, this browser's top 5 shows, and the next street starts. Nothing shakes or
 // flashes.
 
-import { drawNotchUp, drawScores } from '../../js/screens.js';
+import { createTail, drawNotchUp } from '../../js/screens.js';
 import { aimComputer, createMatch, learn, newMemory, rivalFor, seeded, shown, stageFor, takeTurn } from './rules.js';
 import { drawScene } from './scene.js';
 
 const AIM_MS = 1200;
 const RING_MS = 400;
 const WON_MS = 3600;
-const SCORES_MS = 5000;
 const NOTCH_MS = 600;
 const SPEED = 0.9;       // path points (1/60 s each) per tick
 const SMOKE_FRAME = 1000 / 12; // the smoke is redrawn this often, so a waiting screen stays cheap
 const SKILL = 0.55;      // good enough to hit now and then
 
-/** @param {{ scores: () => Array<{ initials: string, value: number }> }} source the top runs to show */
+/** @param {{ scores: () => Array<{ label: string, table: Array<{ initials: string, value: number }> }> }} source the levels' top runs to show */
 export function createDemo({ scores, seed = 5 }) {
   const rand = seeded(seed);
   let level = 0;
   let rival;
   let match;
   let memory;
+  const tail = createTail(scores, String);
   let phase;
   let timer;
   let anim;
@@ -79,13 +79,13 @@ export function createDemo({ scores, seed = 5 }) {
     }
     if (phase === 'won') {
       const n = Math.min(Math.floor(timer / NOTCH_MS), 4);
-      if (timer >= WON_MS) { phase = 'scores'; timer = 0; return true; }
+      if (timer >= WON_MS) { phase = 'scores'; tail.open(); return true; }
       if (n !== notches) { notches = n; return true; }
       return false;
     }
-    if (phase === 'scores' && timer >= SCORES_MS) {
-      reset();
-      return true;
+    if (phase === 'scores') {
+      if (tail.done) { reset(); return true; }
+      return tail.step(dt);
     }
     return false;
   }
@@ -98,7 +98,7 @@ export function createDemo({ scores, seed = 5 }) {
     },
 
     draw(ctx, w, h, c) {
-      if (phase === 'scores') return drawScores(ctx, w, h, c, scores(), String);
+      if (phase === 'scores') return tail.draw(ctx, w, h, c);
       const path = anim?.flight.path;
       const seen = shown(match, anim?.flight, phase === 'ring');
       drawScene(ctx, w, h, c, {

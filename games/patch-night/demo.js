@@ -2,19 +2,19 @@
 // logo turns to the right bug and zaps it about every one and a half seconds, a few waves in a row,
 // then this browser's top 5 shows and it starts over. The demo knows the answer, so it never loses.
 
-import { drawScores, FONT } from '../../js/screens.js';
+import { FONT, createTail } from '../../js/screens.js';
 import { aimFor, drawScene, turnToward } from './scene.js';
 import { newGame, seeded, step, zap } from './rules.js';
 
 const ZAP_AFTER_MS = 1500;
 const WAVES = 5;
-const SCORES_MS = 5000;
 const AIM_MS = 160;   // the arrow's turn settles in about this long
 
-/** @param {{ scores: () => Array<{ initials: string, value: number }> }} source the top runs to show */
+/** @param {{ scores: () => Array<{ label: string, table: Array<{ initials: string, value: number }> }> }} source the levels' top runs to show */
 export function createDemo({ scores, seed = 11 }) {
   const rand = seeded(seed);
   let g;
+  const tail = createTail(scores, String);
   let phase;
   let timer;
   let waves;
@@ -37,9 +37,8 @@ export function createDemo({ scores, seed = 11 }) {
   return {
     step(dt) {
       if (phase === 'scores') {
-        timer += dt;
-        if (timer >= SCORES_MS) { reset(); return true; }
-        return false;
+        if (tail.done) { reset(); return true; }
+        return tail.step(dt);
       }
       const before = g.wave;
       step(g, dt);
@@ -50,12 +49,12 @@ export function createDemo({ scores, seed = 11 }) {
         aim = turnToward(aim, aimFor(rightDir()), 1 - Math.exp(-dt / AIM_MS));
         if (timer >= ZAP_AFTER_MS) zap(g, rightDir());
       }
-      if (waves >= WAVES && g.wave.done) { phase = 'scores'; timer = 0; }
+      if (waves >= WAVES && g.wave.done) { phase = 'scores'; tail.open(); }
       return true;
     },
 
     draw(ctx, w, h, c) {
-      if (phase === 'scores') return drawScores(ctx, w, h, c, scores(), String);
+      if (phase === 'scores') return tail.draw(ctx, w, h, c);
       const band = h * 0.2;
       ctx.fillStyle = c.bg;
       ctx.fillRect(0, 0, w, h);

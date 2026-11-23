@@ -2,7 +2,7 @@
 // wrong pair first (the demo "forgets" once), then the rest found one after another. Then the logo
 // notches up, this browser's top 5 shows, and it starts over.
 
-import { drawNotchUp, drawScores } from '../../js/screens.js';
+import { createTail, drawNotchUp } from '../../js/screens.js';
 import { drawBack, drawFace } from './faces.js';
 import { flip, newGame, seeded, shape } from './rules.js';
 
@@ -11,7 +11,6 @@ const STEP_MS = 700;     // between two turns
 const HEAD_START = 3;    // pairs already found, so a still frame (reduced motion) shows a deck at play
 const WIN_MS = 900;
 const END_MS = 2500;
-const SCORES_MS = 5000;
 
 /** The cards to turn, in order: a wrong pair, then every pair in turn. */
 function planOf(g) {
@@ -21,13 +20,14 @@ function planOf(g) {
   return [pairs[0][0], pairs[1][0], ...pairs.flat()];
 }
 
-/** @param {{ scores: () => Array<{ initials: string, value: number }> }} source the top runs to show */
+/** @param {{ scores: () => Array<{ label: string, table: Array<{ initials: string, value: number }> }> }} source the levels' top runs to show */
 export function createDemo({ scores, seed = 4 }) {
   const rand = seeded(seed);
   let g;
   let plan;
   let turned;   // how far down `plan` the demo has got
   let turn;     // per card, 0 (face down) to 1 (face up)
+  const tail = createTail(scores, String);
   let phase;
   let timer;
 
@@ -49,11 +49,11 @@ export function createDemo({ scores, seed = 4 }) {
     step(dt) {
       timer += dt;
       if (phase === 'scores') {
-        if (timer >= SCORES_MS) { reset(); return true; }
-        return false;
+        if (tail.done) { reset(); return true; }
+        return tail.step(dt);
       }
       if (phase === 'end') {
-        if (timer >= END_MS) { phase = 'scores'; timer = 0; }
+        if (timer >= END_MS) { phase = 'scores'; tail.open(); }
         return true;
       }
       let moved = false;
@@ -74,7 +74,7 @@ export function createDemo({ scores, seed = 4 }) {
     },
 
     draw(ctx, w, h, c) {
-      if (phase === 'scores') return drawScores(ctx, w, h, c, scores(), String);
+      if (phase === 'scores') return tail.draw(ctx, w, h, c);
       ctx.fillStyle = c.bg;
       ctx.fillRect(0, 0, w, h);
       const [cols, rows] = shape('easy', h > w);
