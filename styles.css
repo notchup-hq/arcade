@@ -221,7 +221,7 @@ a.marquee-logo:hover, a.marquee-logo:focus-visible { background: radial-gradient
    small plate at the foot of the picture that breathes slowly (see the motion block below). Fingers
    tap, so a touch screen says so. */
 .cabinet[data-game] .screen::before {
-  content: "PRESS START";
+  content: "CLICK TO PLAY";
   position: absolute;
   bottom: 0.5rem;
   left: 50%;

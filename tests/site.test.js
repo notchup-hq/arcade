@@ -52,7 +52,7 @@ test('a game page holds its first frame until its script has built the board', (
 
 test('a ready cabinet teases with a plate that fades slowly and never flashes, in text of 16 px or more', () => {
   const css = read('styles.css');
-  assert.match(css, /\.cabinet\[data-game\] \.screen::before \{\s*content: "PRESS START";[^}]*font: 800 1rem/);
+  assert.match(css, /\.cabinet\[data-game\] \.screen::before \{\s*content: "CLICK TO PLAY";[^}]*font: 800 1rem/);
   assert.match(css, /\(pointer: coarse\) \{ \.cabinet\[data-game\] \.screen::before \{ content: "TAP TO PLAY"; \} \}/);
   const motion = css.slice(css.indexOf('@media (prefers-reduced-motion: no-preference)'));
   assert.match(motion, /animation: breathe 2\.4s ease-in-out infinite/);
