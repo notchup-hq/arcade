@@ -2,14 +2,13 @@
 
 All notable changes to this project are listed here, newest first. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/).
 
-## Unreleased
+## 0.1.0 – 2026-11-23
 
-### Fixed
-
-- The zoom into a game no longer ends on an empty or small board that jumps to full size: a game page now holds its first frame until its board is built and sized.
+The first alpha: the hall and five games.
 
 ### Added
 
+- Pair Up has four bugs among its faces: a beetle (the one from Patch Night), a ladybird, a spider and a butterfly. They look alike on purpose: Easy deals one bug, Medium two and Hard three.
 - Pair Up, a memory game: turn the cards and find every pair; three wrong guesses end the run. The faces are letters and little pictures from the other games (the logo, a bug, a bulb, a fuse, a floor of the tower). Three levels (6, 8 and 10 pairs), a score that rewards pairs in a row and chances left, a top 5 per level, and a cheer with the logo notching up when every pair is found.
 - Notch Up, a tower stacker: drop each floor on the one below and build the Notchup tower into the night sky. Whatever hangs over is cut off; a perfect drop keeps the width, and three perfects in a row start winning width back. 10, 50 and 100 floors, and beating your best, get a calm cheer: a big word and a dry building-site line picked at random, with a few drifting sparks. Milestones also help: the crane builds that floor wider (back to full width at 100). Every tenth floor the logo notches up. Tap, click, Space or Enter; top 5 in this browser. It takes the fourth cabinet.
 - Patch Night, a times-table bug zapper: each wave asks one question and a bug carrying a number crawls in along every lane; zap the right one before it reaches the logo. Three levels (four lanes with easy tables, eight lanes with close wrong answers, and up to 12 × 12 with missing factors), a streak multiplier, and a top 5 per level. Missed facts come back a few questions later and are listed at the end; this browser remembers up to 20 per level, nothing leaves it. Its cabinet plays itself, and it takes the third cabinet.
@@ -17,6 +16,12 @@ All notable changes to this project are listed here, newest first. The format fo
 - The hall's cabinets look like real arcade machines, all in CSS: a lit marquee, the screen in its bezel with the game playing itself, a control panel with a stick and buttons, and a lit Play plate. Games still coming stand unlit with their screens off.
 - Opening a game, the cabinet's screen grows into the game in 0.3 s, and shrinks back on the way out. Browsers without view transitions, and visitors who ask for less motion, get a normal page load.
 - Patch Night pauses after every 10 answers on a small break card: a cheer, how many were right first time, the average answer time, and the one or two hardest facts, then Continue. The cheer is picked from a few lines at random, and every 50th answer gets a special one.
+- The hall: a neon arcade at night, one cabinet per game. A ready game plays itself calmly on its cabinet's screen (attract mode, drawn by the game's own code), the rest say "Coming soon". Without JavaScript the cabinets are plain links. It fits a phone screen.
+- The Notchup logo moves: its gear rolls slowly and its arrow notches up now and then; on a win the gear turns and the arrow rises.
+- Fuse Box, a logic puzzle: find the blown fuses from the numbers on the good ones, then fix the panel. The whole game fits the screen with no scrolling, on a phone and a laptop; help and the hall of fame open in dialogs. Three levels, the first test is always safe, tag with the Test / Tag switch under the panel, a long press, a right click or the T key, and play it all with a keyboard.
+- Hall of fame: the top 10 times per level with three-letter initials and dates, kept in this browser only.
+- Sound effects made in code (no audio files), with a switch in the footer.
+- Checks: unit tests, a privacy scan, a size budget, and a layout check in a real browser at 320, 360, 768 and 1280 px.
 
 ### Changed
 
@@ -39,22 +44,10 @@ All notable changes to this project are listed here, newest first. The format fo
 
 ### Fixed
 
+- The zoom into a game no longer ends on an empty or small board that jumps to full size: a game page now holds its first frame until its board is built and sized.
 - Notch Up no longer flashes the whole tower on a phone at every tap; the frame lights up softly instead (gold for a perfect drop), and the windows of the floor you just built glow for a moment.
 - A run that ends while you are still tapping no longer skips the high score or starts a new run: in Notch Up and Patch Night the buttons of the initials dialog and of the end and break cards wait 0.8 s. The initials dialog no longer opens the phone's keyboard until you tap the field, keeps your last initials from any game, and Enter in the field saves instead of skipping.
 - Coming back to the hall, by the phone's back button or a game's Arcade link, centres the cabinet of the game you just played instead of leaving another game in view. The Arcade link goes back like the back button, so the hall does not open at its top and scroll down; opened from elsewhere, it goes to the top of the hall.
 - Lob no longer rescales when the turn changes: the status line is always two lines high, so a longer message cannot take room from the street.
 - Lob's wind smoke is visible on a phone: it rises from a small chimney at the inner edge of the rival's roof, clear of the billboard that used to hide it.
 - The Lob and Patch Night pages carry the build tag too, so the deploy stamp reaches every page and CI is green again
-
-## 0.1.0 – 2026-11-21
-
-The first alpha: the hall and one game.
-
-### Added
-
-- The hall: a neon arcade at night, one cabinet per game. A ready game plays itself calmly on its cabinet's screen (attract mode, drawn by the game's own code), the rest say "Coming soon". Without JavaScript the cabinets are plain links. It fits a phone screen.
-- The Notchup logo moves: its gear rolls slowly and its arrow notches up now and then; on a win the gear turns and the arrow rises.
-- Fuse Box, a logic puzzle: find the blown fuses from the numbers on the good ones, then fix the panel. The whole game fits the screen with no scrolling, on a phone and a laptop; help and the hall of fame open in dialogs. Three levels, the first test is always safe, tag with the Test / Tag switch under the panel, a long press, a right click or the T key, and play it all with a keyboard.
-- Hall of fame: the top 10 times per level with three-letter initials and dates, kept in this browser only.
-- Sound effects made in code (no audio files), with a switch in the footer.
-- Checks: unit tests, a privacy scan, a size budget, and a layout check in a real browser at 320, 360, 768 and 1280 px.
