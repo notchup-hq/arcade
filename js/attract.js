@@ -5,6 +5,7 @@
 // A demo is { step(dt): boolean, draw(ctx, w, h, colours) }: step advances it by dt ms and says whether
 // anything visible changed, so a screen that waits between moves is not redrawn 60 times a second.
 
+import { sharpCanvas } from './canvas.js';
 import { createLoop } from './loop.js';
 
 const REDUCED = '(prefers-reduced-motion: reduce)';
@@ -18,7 +19,6 @@ export function neonColours(el = document.documentElement) {
 
 /** Run `demo` on `canvas`. Returns a function that stops it for good. */
 export function mountAttract(canvas, demo) {
-  const ctx = canvas.getContext('2d');
   const colours = neonColours();
   const still = window.matchMedia(REDUCED);
   let w = 0;
@@ -29,8 +29,7 @@ export function mountAttract(canvas, demo) {
   function draw() {
     if (!dirty || !w) return;
     dirty = false;
-    ctx.setTransform(canvas.width / w, 0, 0, canvas.height / h, 0, 0);
-    demo.draw(ctx, w, h, colours);
+    demo.draw(sharpCanvas(canvas, w, h), w, h, colours);
   }
 
   const loop = createLoop({
@@ -48,9 +47,6 @@ export function mountAttract(canvas, demo) {
     const box = entry.contentBoxSize?.[0];
     w = box ? box.inlineSize : canvas.clientWidth;
     h = box ? box.blockSize : canvas.clientHeight;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2); // more pixels than 2x cost time and show nothing
-    canvas.width = Math.round(w * dpr);
-    canvas.height = Math.round(h * dpr);
     dirty = true;
     draw();
   });

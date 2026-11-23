@@ -6,6 +6,7 @@
 // the run ends when the chances are gone. The level lives in the link (?level=hard).
 
 import { neonColours } from '../../js/attract.js';
+import { sharpCanvas } from '../../js/canvas.js';
 import { whenDialogsClosed, wireDialogs } from '../../js/dialogs.js';
 import { createFame } from '../../js/fame.js';
 import { GRACE_MS } from '../../js/grace.js';
@@ -101,13 +102,8 @@ function paintCounters() {
 
 /** Draw every face at the size the cards have now, sharp on a dense screen. */
 function drawFaces() {
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  const px = Math.round(cell * dpr);
   buttons.forEach((b, i) => {
-    const canvas = b.querySelector('canvas');
-    if (canvas.width !== px) { canvas.width = px; canvas.height = px; }
-    const ctx = canvas.getContext('2d');
-    ctx.setTransform(px / cell, 0, 0, px / cell, 0, 0);
+    const ctx = sharpCanvas(b.querySelector('canvas'), cell, cell);
     ctx.clearRect(0, 0, cell, cell);
     drawFace(ctx, g.cards[i].face, cell / 2, cell / 2, cell, colours);
   });
