@@ -14,16 +14,18 @@ export const PAIR_POINTS = 100;
 export const STREAK_POINTS = 50; // more for every pair found right after another
 export const SPARE_TOTAL = 450;  // for clearing a round with every chance left; fewer chances left win their share
 
-/** The pictures from the other games: the logo, Patch Night's bug, Lob's bulb, Fuse Box's fuse, Notch Up's floor. */
-export const SPRITES = ['logo', 'bug', 'bulb', 'fuse', 'floor'];
+/** Bugs look alike on purpose: the more of them in a deck, the harder it is to tell the cards apart. */
+export const BUGS = ['bug', 'ladybug', 'spider', 'butterfly'];
+/** The pictures: the logo, Lob's bulb, Fuse Box's fuse, Notch Up's floor, and the bugs (Patch Night's is the first). */
+export const SPRITES = ['logo', 'bulb', 'fuse', 'floor', ...BUGS];
 /** Letters that are hard to mix up with one another. */
 export const LETTERS = [...'ABDEFGHKLNPRSTUXZ'];
 
 // Pairs and chances per level (more pairs, more chances), and the chances a cleared deck lights back on top of its last pair's; the deck's shape follows the screen (a tall one for a phone held upright).
 export const LEVELS = {
-  easy: { pairs: 6, tall: [3, 4], wide: [4, 3], sprites: 3, chances: 4, clearBack: 1 },
-  medium: { pairs: 8, tall: [4, 4], wide: [4, 4], sprites: 4, chances: 5, clearBack: 1 },
-  hard: { pairs: 10, tall: [4, 5], wide: [5, 4], sprites: 5, chances: 6, clearBack: 2 },
+  easy: { pairs: 6, tall: [3, 4], wide: [4, 3], sprites: 3, bugs: 1, chances: 4, clearBack: 1 },
+  medium: { pairs: 8, tall: [4, 4], wide: [4, 4], sprites: 4, bugs: 2, chances: 5, clearBack: 1 },
+  hard: { pairs: 10, tall: [4, 5], wide: [5, 4], sprites: 5, bugs: 3, chances: 6, clearBack: 2 },
 };
 
 // The cheers, by how many wrong pairs it took: none, a couple, more (relieved). Praise word, then a dry line.
@@ -56,10 +58,15 @@ const shuffled = (list, rand) => {
   return out;
 };
 
-/** The faces of a level's deck, one each: its share of sprites, the rest letters. */
+/** The faces of a level's deck, one each: its share of sprites (of them as many bugs as the level says), the rest letters. */
 export function facesFor(level, rand) {
-  const { pairs, sprites } = LEVELS[level];
-  return [...shuffled(SPRITES, rand).slice(0, sprites), ...shuffled(LETTERS, rand).slice(0, pairs - sprites)];
+  const { pairs, sprites, bugs } = LEVELS[level];
+  const others = SPRITES.filter((f) => !BUGS.includes(f));
+  return [
+    ...shuffled(BUGS, rand).slice(0, bugs),
+    ...shuffled(others, rand).slice(0, sprites - bugs),
+    ...shuffled(LETTERS, rand).slice(0, pairs - sprites),
+  ];
 }
 
 const dealt = (level, rand) => {
@@ -159,4 +166,4 @@ export function flip(g, i) {
 }
 
 /** The picture or letter a card shows, for a screen reader. */
-export const nameOf = (face) => ({ logo: 'Notchup logo', bug: 'bug', bulb: 'bulb', fuse: 'fuse', floor: 'floor' }[face] ?? `letter ${face}`);
+export const nameOf = (face) => ({ logo: 'Notchup logo', bug: 'beetle', ladybug: 'ladybird', spider: 'spider', butterfly: 'butterfly', bulb: 'bulb', fuse: 'fuse', floor: 'floor' }[face] ?? `letter ${face}`);
