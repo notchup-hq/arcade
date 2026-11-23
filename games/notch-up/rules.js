@@ -6,7 +6,7 @@
 //
 // The world is WORLD units across, x from -WORLD/2 to WORLD/2, floors FLOOR units high.
 
-import { seeded } from '../../js/random.js';
+import { pickLine, seeded } from '../../js/random.js';
 
 export { seeded };
 
@@ -55,12 +55,6 @@ export function milestoneAt(floors) {
 
 /** True on the first floor past this browser's best (`best`), when that best is worth beating. */
 export const recordAt = (floors, best) => best >= MIN_RECORD && floors === best + 1;
-
-/** A line from `list` picked at random, never the same as `previous`. */
-export function pickLine(list, rand, previous = '') {
-  const lines = list.filter((p) => p !== previous);
-  return lines[Math.floor(rand() * lines.length)];
-}
 
 /** The cheer for `floors` built, or null; a new record wins over a round number on the same floor. */
 function cheerOf(g, floors) {

@@ -1,9 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  LIT_MS, PERFECT, PRAISE, QUIPS, START_WIDTH, STILL_STEP, WORLD, built, drop, milestoneAt, moverX, moving, newGame, pickLine,
+  LIT_MS, PERFECT, PRAISE, QUIPS, START_WIDTH, STILL_STEP, WORLD, built, drop, milestoneAt, moverX, moving, newGame,
   recordAt, seeded, step, swingOf,
 } from '../games/notch-up/rules.js';
+import { pickLine } from '../js/random.js';
 
 /** Put the sliding floor `off` units right of the floor below (left when negative). */
 const place = (g, off) => { g.mover.x = g.floors.at(-1).x + off; };

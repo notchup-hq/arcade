@@ -3,8 +3,9 @@ import assert from 'node:assert/strict';
 import { SPRITE_TINT } from '../games/pair-up/faces.js';
 import {
   BUGS, LEVELS, LETTERS, PAIR_POINTS, PRAISE, QUIPS, SPARE_TOTAL, SPRITES, STREAK_POINTS,
-  facesFor, flip, nameOf, newGame, nextRound, pickLine, seeded, settle, shape,
+  facesFor, flip, nameOf, newGame, nextRound, seeded, settle, shape,
 } from '../games/pair-up/rules.js';
+import { pickLine } from '../js/random.js';
 
 /** The positions of the two cards with face `face`. */
 const twins = (g, face) => g.cards.flatMap((c, i) => (c.face === face ? [i] : []));

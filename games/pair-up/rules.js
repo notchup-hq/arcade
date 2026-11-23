@@ -4,7 +4,7 @@
 // next round deals a fresh deck and the run goes on with the chances it has, until they are all gone.
 // The deal is seeded, so tests and the hall's demo replay.
 
-import { seeded } from '../../js/random.js';
+import { pickLine, seeded } from '../../js/random.js';
 
 export { seeded };
 
@@ -39,12 +39,6 @@ export const QUIPS = {
   sharp: ['Mostly from memory.', 'One slip, no witnesses.', 'The cards are impressed.'],
   close: ['One chance was plenty.', 'Nerves of tin.', 'The cards blinked first.'],
 };
-
-/** A line from `list` picked at random, never the same as `previous`. */
-export function pickLine(list, rand, previous = '') {
-  const lines = list.filter((p) => p !== previous);
-  return lines[Math.floor(rand() * lines.length)];
-}
 
 /** [columns, rows] of a level's deck: tall on a portrait screen, wide on a landscape one. */
 export const shape = (level, portrait) => LEVELS[level][portrait ? 'tall' : 'wide'];
