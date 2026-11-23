@@ -3,6 +3,7 @@
 // room the panel has, and help and the hall of fame open in dialogs. Tap or click to test a fuse; tag one with a right click, a long press,
 // the T key, or the Tag button. The level lives in the link (?level=medium).
 
+import { wireDialogs } from '../../js/dialogs.js';
 import { createFame } from '../../js/fame.js';
 import { logoSvg } from '../../js/logo.js';
 import { formatTime } from '../../js/scores.js';
@@ -284,8 +285,7 @@ function fit() {
 }
 new ResizeObserver(fit).observe(ui.frame);
 
-$('help-open').addEventListener('click', () => ui.help.showModal());
-$('fame-open').addEventListener('click', () => { fame.render(); ui.fame.showModal(); });
+wireDialogs({ help: ui.help, fame });
 
 ui.badge.replaceChildren(logoSvg('logo badge-mark'));
 initSettings();
