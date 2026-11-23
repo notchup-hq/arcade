@@ -1,8 +1,12 @@
-// The hall of fame table, laid out the same in every game: place, initials, the score, then the
-// columns only that game counts (Patch Night's answers right first time, say), then the date. The
-// rules of the table itself (top 5, initials) live in js/scores.js; a game only names its columns.
+// The hall of fame, the same in every game: the table (place, initials, the score, then the columns
+// only that game counts, such as Patch Night's answers right first time, then the date) and what
+// happens when a run ends (a score in the top 5 asks for initials, is saved, and the table opens with
+// it marked). The rules of the table itself (top 5, initials) live in js/scores.js; a game only names
+// its board, its columns and its words.
 
-import { formatDate } from './scores.js';
+import { askInitials } from './initials.js';
+import { memory } from './memory.js';
+import { formatDate, placeOf } from './scores.js';
 
 // The year may wrap under the day and month when a long score leaves a small phone no room.
 const dateCell = (ms) => formatDate(ms).replace(/\d+$/, '\u200b$&');
@@ -39,4 +43,37 @@ export function renderFame(table, entries, { score, columns = [], fresh = -1, em
     rows.push(tr);
   }
   table.tBodies[0].replaceChildren(...rows);
+}
+
+/**
+ * A game's hall of fame. `board()` names the current table (`fuse-box:easy`) and `order` says which
+ * end is best (`low` or `high`); `label()`, when given, is the level shown in `caption`. `score`,
+ * `columns` and `empty` are as for renderFame. `dialog` is the hall of fame dialog with `table` in
+ * it, and `initials` the new high score dialog.
+ */
+export function createFame({ dialog, table, caption, initials, board, order, label, score, columns, empty }) {
+  function render(fresh = -1) {
+    if (caption && label) caption.textContent = label();
+    renderFame(table, memory.scores(board(), order), { score, columns, empty, fresh });
+  }
+
+  return {
+    render,
+    /**
+     * A run just ended with `value`. If it makes the top 5, ask for initials (the dialog says
+     * `shown`, the score in the game's words, and holds its buttons for `grace` ms), save it with
+     * the game's own numbers (`extra`), and open the hall of fame with the new row marked.
+     * Resolves to true when it was saved; nothing scores with 0 or less.
+     */
+    async offer({ value, shown, extra, grace = 0 }) {
+      const place = value > 0 ? placeOf(memory.scores(board(), order), value, order) : -1;
+      if (place < 0) return false;
+      const who = await askInitials(initials, { place, score: shown, last: memory.initials(), grace });
+      if (!who) return false;
+      memory.addScore(board(), order, { initials: who, value, extra });
+      render(place);
+      dialog.showModal();
+      return true;
+    },
+  };
 }
