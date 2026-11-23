@@ -172,7 +172,7 @@ function startMatch() {
   epoch++;
   const portrait = ui.arena.clientWidth / ui.arena.clientHeight < 1.1;
   rival = twoPlayers ? { ...rivalFor(matches), sign: 'PLAYER 2', windMax: 5 } : rivalFor(run.level);
-  stage = stageFor(rival.street, portrait);
+  stage = stageFor(rival.street, portrait, rival.stack);
   match = createMatch({ stage, windMax: rival.windMax });
   computer = newMemory();
   aim = { left: { angle: DEFAULT_ANGLE, power: DEFAULT_POWER }, right: { angle: DEFAULT_ANGLE, power: DEFAULT_POWER } };
@@ -193,7 +193,7 @@ function startFresh() {
 }
 
 function whereText(where) {
-  return { roof: 'landed on a roof', street: 'fell in the street', away: 'flew off', own: 'hit its own sign' }[where] ?? 'missed';
+  return { roof: 'landed on a roof', street: 'fell in the street', away: 'flew off', own: 'hit its own sign', chimney: 'hit the chimney' }[where] ?? 'missed';
 }
 
 function resultText(flight) {
@@ -263,7 +263,7 @@ function finishThrow() {
   const { flight, thrown } = anim;
   anim = null;
   trails = [{ path: flight.path, alpha: 0.35 }, ...trails.slice(0, 1).map((t) => ({ ...t, alpha: 0.15 }))];
-  if (flight.side === 'right' && !twoPlayers) learn(computer, stage, 'right', thrown);
+  if (flight.side === 'right' && !twoPlayers) learn(computer, stage, 'right', thrown, flight);
   if (match.winner) {
     endMatch();
     return;

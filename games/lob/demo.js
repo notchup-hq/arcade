@@ -32,7 +32,7 @@ export function createDemo({ scores, seed = 5 }) {
 
   function reset() {
     rival = rivalFor(level++);
-    match = createMatch({ stage: stageFor(rival.street, false), windMax: 4, rand });
+    match = createMatch({ stage: stageFor(rival.street, false, rival.stack), windMax: 4, rand });
     memory = { left: newMemory(), right: newMemory() };
     trails = [];
     anim = null;
@@ -51,7 +51,7 @@ export function createDemo({ scores, seed = 5 }) {
     const wind = match.wind;
     const shot = aimComputer({ stage: match.stage, side, wind, skill: SKILL, memory: memory[side], rand });
     const flight = takeTurn(match, shot.angle, shot.power);
-    learn(memory[side], match.stage, side, { ...shot, wind });
+    learn(memory[side], match.stage, side, { ...shot, wind }, flight);
     return flight;
   }
 

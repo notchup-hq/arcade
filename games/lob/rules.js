@@ -1,6 +1,7 @@
 // Lob's rules: no DOM, so the page, the hall's demo and the tests share them. Two rooftops face each
 // other across a street. A bulb is thrown with an angle and a power, pulled by gravity and pushed by
-// the wind, and a billboard that takes three hits is out. Coordinates are in world units with y up;
+// the wind, and a billboard that takes three hits is out. A chimney stands in the middle of the street, so a
+// flat throw at full power hits it and the bulb has to be lobbed. Coordinates are in world units with y up;
 // the left rooftop belongs to the first player (the visitor in a solo run), the right one to the rival.
 
 import { seeded } from '../../js/random.js';
@@ -15,6 +16,10 @@ export const MAX_POWER = 100;
 export const DEFAULT_ANGLE = 50;
 export const DEFAULT_POWER = 60;
 export const MAX_WIND = 9;
+export const FIRST_STACK = 18;         // how far the chimney first stands above the higher roof
+const STACK_PER_LEVEL = 1.5;           // and how much higher it gets with each rival
+const MAX_STACK = 26;                  // the chimney stops growing here, so the last rivals stay beatable
+const LIFT_STEP = 2;                   // degrees the computer tries higher, one by one, after a bulb hit the chimney
 
 const GRAVITY = 40;                    // units per s²
 const SPEED_PER_POWER = 0.8;           // units per s for each point of power
@@ -54,15 +59,17 @@ export function rivalFor(level) {
     street: STREETS[level % STREETS.length],
     skill,
     windMax: Math.min(MAX_WIND, 2 + level),
+    stack: Math.min(MAX_STACK, FIRST_STACK + STACK_PER_LEVEL * level),
   };
 }
 
 /**
- * The stage for a street. On an upright screen the rooftops are closer and taller, so the tall screen is
+ * The stage for a street. `stack` is how far the chimney in the middle stands above the higher roof.
+ * On an upright screen the rooftops are closer and taller, so the tall screen is
  * used for higher arcs. Each side has its building, the spot the thrower stands on, and the billboard
  * (`board`, a box a bulb can hit) on the outer end of the roof.
  */
-export function stageFor(street, portrait) {
+export function stageFor(street, portrait, stack = FIRST_STACK) {
   const w = portrait ? 100 : 160;
   const h = portrait ? 150 : 100;
   const building = portrait ? 30 : 44;
@@ -84,7 +91,13 @@ export function stageFor(street, portrait) {
       board: { x: left ? 2 : w - 2 - boardW, y: roof + 5, w: boardW, h: 15 },
     };
   };
-  return { street, portrait, w, h, sides: { left: mk('left'), right: mk('right') } };
+  const chimneyW = portrait ? 4 : 5;
+  const chimney = {
+    x0: (w - chimneyW) / 2,
+    x1: (w + chimneyW) / 2,
+    top: Math.max(roofs.left, roofs.right) + (portrait ? stack * 1.5 : stack),
+  };
+  return { street, portrait, w, h, chimney, sides: { left: mk('left'), right: mk('right') } };
 }
 
 // ---------- Flight ----------
@@ -97,6 +110,7 @@ function collide(stage, side, x, y) {
   if (inBox(target.board)) return 'board';
   if (inBox(own.board)) return 'own';
   for (const s of [own, target]) if (x >= s.x0 && x <= s.x1 && y <= s.roof) return 'roof';
+  if (x >= stage.chimney.x0 && x <= stage.chimney.x1 && y <= stage.chimney.top) return 'chimney';
   if (y <= 0) return 'street';
   if (x < -30 || x > stage.w + 30) return 'away';
   return null;
@@ -105,7 +119,7 @@ function collide(stage, side, x, y) {
 /**
  * Throw a bulb from `side`'s roof. `angle` is degrees above flat, toward the other roof; `power` 10 to 100;
  * `wind` an integer, positive blowing to the right. Returns the path (a point every 1/60 s), whether it
- * hit the other billboard, where it landed and what it landed on ('board', 'roof', 'own', 'street', 'away').
+ * hit the other billboard, where it landed and what it landed on ('board', 'roof', 'own', 'chimney', 'street', 'away').
  * With `seconds` it stops early, for the guide.
  */
 export function fly(stage, side, angle, power, wind, seconds = Infinity) {
@@ -257,13 +271,18 @@ export const newMemory = () => ({ last: null });
  * The computer's next throw as { angle, power }. The first guess is rough and only half notices the wind.
  * After a miss it scales its power by how far off the bulb landed, as a person would, and adds what it
  * thinks the change in wind is worth; a computer that reads the wind badly overcorrects when the wind
- * changes a lot. Better rivals (higher `skill`) read the wind better and are steadier.
+ * changes a lot. After a bulb hit the chimney it raises its angle until the throw it has worked out clears it.
+ * Better rivals (higher `skill`) read the wind better and are steadier.
  */
 export function aimComputer({ stage, side, wind, skill, memory, rand }) {
   const sense = skill * 0.9;                    // how much of the wind it reads
   const wobble = 30 * (1 - skill);              // how unsteady its hand is, in power points
   const base = stage.portrait ? 64 : 45;
-  const angle = Math.round(clamp(memory.last ? memory.last.angle : base + gauss(rand) * 6 * (1 - skill), MIN_ANGLE, MAX_ANGLE));
+  const first = base + gauss(rand) * 6 * (1 - skill);
+  let angle = Math.round(clamp(memory.last ? memory.last.angle : first, MIN_ANGLE, MAX_ANGLE));
+  while (memory.last?.blocked && angle < MAX_ANGLE && fly(stage, side, angle, solvePower(stage, side, angle, wind * sense), wind * sense).where === 'chimney') {
+    angle = Math.min(MAX_ANGLE, angle + LIFT_STEP);
+  }
   let power = solvePower(stage, side, angle, wind * sense);
   if (memory.last) {
     const m = memory.last;
@@ -274,7 +293,7 @@ export function aimComputer({ stage, side, wind, skill, memory, rand }) {
   return { angle, power };
 }
 
-/** Tell the computer how its throw turned out. */
-export function learn(memory, stage, side, { angle, power, wind }) {
-  memory.last = { angle, power, wind, reach: carry(stage, side, angle, power, wind) };
+/** Tell the computer how its throw turned out; `flight` is the result of the throw, if it has one. */
+export function learn(memory, stage, side, { angle, power, wind }, flight = null) {
+  memory.last = { angle, power, wind, reach: carry(stage, side, angle, power, wind), blocked: flight?.where === 'chimney' };
 }
