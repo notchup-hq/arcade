@@ -6,12 +6,9 @@
 // the run ends when the chances are gone. The level lives in the link (?level=hard).
 
 import { neonColours } from '../../js/attract.js';
-import { renderFame } from '../../js/fame.js';
+import { createFame } from '../../js/fame.js';
 import { GRACE_MS } from '../../js/grace.js';
-import { askInitials } from '../../js/initials.js';
 import { logoSvg } from '../../js/logo.js';
-import { memory } from '../../js/memory.js';
-import { placeOf } from '../../js/scores.js';
 import { initSettings } from '../../js/settings.js';
 import { sfx } from '../../js/sound.js';
 import { drawFace } from './faces.js';
@@ -56,14 +53,24 @@ let cols = 1;
 let cell = 0;
 let missTimer = 0;
 let endTimer = 0;
-let lastAdded = -1;
 
 function levelFromUrl() {
   const l = new URLSearchParams(location.search).get('level');
   return l in LEVELS ? l : 'easy';
 }
 
-const board = () => `pair-up:${level}`;
+const fame = createFame({
+  dialog: ui.fame,
+  table: ui.scores,
+  caption: ui.scoresCaption,
+  initials: ui.dialog,
+  board: () => `pair-up:${level}`,
+  order: ORDER,
+  label: () => ({ easy: 'Easy', medium: 'Medium', hard: 'Hard' })[level],
+  score: { head: 'Points', cell: String },
+  columns: [{ key: 'pairs', head: 'Pairs', cell: String }],
+  empty: 'No scores on this browser yet. Clear a round to be the first.',
+});
 const say = (text) => { ui.status.textContent = text; };
 const label = (i) => `Card ${i + 1}`;
 
@@ -163,7 +170,7 @@ function build() {
   ui.lamps.replaceChildren(...Array.from({ length: g.maxChances }, lamp));
   layDeck();
   say('Turn a card.');
-  renderScores();
+  fame.render();
 }
 
 /** The next round: a fresh deck, the run goes on. */
@@ -201,20 +208,12 @@ function roundCleared() {
   endTimer = setTimeout(startNextRound, CHEER_MS);
 }
 
-async function endRun() {
+function endRun() {
   const score = g.score;
-  const place = score > 0 ? placeOf(memory.scores(board(), ORDER), score, ORDER) : -1;
   const cleared = g.round - 1;
   showCard('Out of chances', `${cleared} ${cleared === 1 ? 'round' : 'rounds'} cleared, ${g.total} pairs found. ${score} points.`);
   say(`Out of chances. ${g.total} pairs found over ${g.round} ${g.round === 1 ? 'round' : 'rounds'}. ${score} points.`);
-  if (place < 0) return;
-  const initials = await askInitials(ui.dialog, { place, score: `${score} points`, last: memory.initials(), grace: GRACE_MS });
-  if (!initials) return;
-  memory.addScore(board(), ORDER, { initials, value: score, extra: { pairs: g.total } });
-  lastAdded = place;
-  renderScores();
-  lastAdded = -1;
-  ui.fame.showModal();
+  fame.offer({ value: score, shown: `${score} points`, extra: { pairs: g.total }, grace: GRACE_MS });
 }
 
 function act(i) {
@@ -246,16 +245,6 @@ function act(i) {
     say('Out of chances.');
     endTimer = setTimeout(endRun, LOSE_MS);
   }
-}
-
-function renderScores() {
-  ui.scoresCaption.textContent = { easy: 'Easy', medium: 'Medium', hard: 'Hard' }[level];
-  renderFame(ui.scores, memory.scores(board(), ORDER), {
-    score: { head: 'Points', cell: String },
-    columns: [{ key: 'pairs', head: 'Pairs', cell: String }],
-    fresh: lastAdded,
-    empty: 'No scores on this browser yet. Clear a round to be the first.',
-  });
 }
 
 ui.deck.addEventListener('click', (e) => {
@@ -311,7 +300,7 @@ for (const r of ui.levels) {
 
 new ResizeObserver(fit).observe(ui.frame);
 $('help-open').addEventListener('click', () => ui.help.showModal());
-$('fame-open').addEventListener('click', () => { renderScores(); ui.fame.showModal(); });
+$('fame-open').addEventListener('click', () => { fame.render(); ui.fame.showModal(); });
 
 ui.badge.replaceChildren(logoSvg('logo badge-mark'));
 initSettings();
