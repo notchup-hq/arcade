@@ -9,6 +9,7 @@ import { neonColours } from '../../js/attract.js';
 import { whenDialogsClosed, wireDialogs } from '../../js/dialogs.js';
 import { createFame } from '../../js/fame.js';
 import { GRACE_MS } from '../../js/grace.js';
+import { pickLevel } from '../../js/levels.js';
 import { logoSvg } from '../../js/logo.js';
 import { initSettings } from '../../js/settings.js';
 import { sfx } from '../../js/sound.js';
@@ -47,18 +48,13 @@ const ui = {
 };
 
 const colours = neonColours();
-let level = levelFromUrl();
+let level = pickLevel(ui.levels, Object.keys(LEVELS), (next) => { level = next; build(); });
 let g;
 let buttons = [];
 let cols = 1;
 let cell = 0;
 let missTimer = 0;
 let endTimer = 0;
-
-function levelFromUrl() {
-  const l = new URLSearchParams(location.search).get('level');
-  return l in LEVELS ? l : 'easy';
-}
 
 const fame = createFame({
   dialog: ui.fame,
@@ -285,18 +281,6 @@ function restart() {
 }
 ui.again.addEventListener('click', restart);
 ui.go.addEventListener('click', () => (g.status === 'cleared' ? startNextRound() : restart()));
-
-for (const r of ui.levels) {
-  r.checked = r.value === level;
-  r.addEventListener('change', () => {
-    level = r.value;
-    const url = new URL(location.href);
-    if (level === 'easy') url.searchParams.delete('level');
-    else url.searchParams.set('level', level);
-    history.replaceState(null, '', url);
-    build();
-  });
-}
 
 new ResizeObserver(fit).observe(ui.frame);
 wireDialogs({ help: ui.help, fame });

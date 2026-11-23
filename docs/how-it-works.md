@@ -31,6 +31,7 @@
 | `grace.js` | A short grace period (0.8 s) for controls that appear the moment a run ends: dimmed, and taps, keys and Escape do nothing until it is over (an initials dialog closed by Escape then opens again). A held button gets the focus when the hold ends, or when a dialog open by then closes. Notch Up and Patch Night, played by fast tapping, use it on the initials dialog's buttons and on their cards' button (Patch Night's break card too); Fuse Box and Lob do not need it. |
 | `settings.js` | What every page has around its game: the sound switch (an icon button), the version, and a game's Arcade link. When the hall is the page before, that link goes back in history, the same as the back button; reached any other way, it opens the hall at its top. |
 | `dialogs.js` | The help and hall of fame buttons in a game's bar (`wireDialogs`). A game that moves on its own (Notch Up, Patch Night) waits while any dialog is open and ignores input under one (`dialogOpen`); Pair Up deals its next round only once every dialog is closed (`whenDialogsClosed`). |
+| `levels.js` | A game's levels: the radios above the board, and the level in the link (`?level=hard`; the first level keeps the link clean). The names come from the game's `LEVELS`, and `tests/screens.test.js` checks the hall's score pages list the same ones. |
 
 ## Cabinets and the zoom into a game
 

@@ -5,6 +5,7 @@
 
 import { wireDialogs } from '../../js/dialogs.js';
 import { createFame } from '../../js/fame.js';
+import { pickLevel } from '../../js/levels.js';
 import { logoSvg } from '../../js/logo.js';
 import { formatTime } from '../../js/scores.js';
 import { initSettings } from '../../js/settings.js';
@@ -36,18 +37,13 @@ const ui = {
   levels: [...document.querySelectorAll('input[name="level"]')],
 };
 
-let level = levelFromUrl();
+let level = pickLevel(ui.levels, Object.keys(LEVELS), (next) => { level = next; build(); });
 let p;
 let buttons = [];
 let started = 0;
 let finished = 0;
 let clock = 0;
 let tagging = false; // what a tap does: test a fuse, or tag it
-
-function levelFromUrl() {
-  const l = new URLSearchParams(location.search).get('level');
-  return l in LEVELS ? l : 'easy';
-}
 
 const fame = createFame({
   dialog: ui.fame,
@@ -261,18 +257,6 @@ ui.again.addEventListener('click', () => {
   build();
   buttons[0].focus();
 });
-
-for (const r of ui.levels) {
-  r.checked = r.value === level;
-  r.addEventListener('change', () => {
-    level = r.value;
-    const url = new URL(location.href);
-    if (level === 'easy') url.searchParams.delete('level');
-    else url.searchParams.set('level', level);
-    history.replaceState(null, '', url);
-    build();
-  });
-}
 
 /** Size the cells to the room the panel has: as big as fits, between MIN_CELL and MAX_CELL. */
 function fit() {

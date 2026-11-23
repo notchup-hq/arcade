@@ -6,6 +6,7 @@
 import { dialogOpen, wireDialogs } from '../../js/dialogs.js';
 import { GRACE_MS, holdButton } from '../../js/grace.js';
 import { createFame } from '../../js/fame.js';
+import { pickLevel } from '../../js/levels.js';
 import { createLoop } from '../../js/loop.js';
 import { memory } from '../../js/memory.js';
 import { initSettings } from '../../js/settings.js';
@@ -55,7 +56,7 @@ const ctx = ui.canvas.getContext('2d');
 const colours = neonColours();
 const still = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-let level = levelFromUrl();
+let level = pickLevel(ui.levels, Object.keys(LEVELS), (next) => { level = next; toStart(); });
 let g = null;        // the run, or null before the first start
 let aim = aimFor(1); // the arrow rests pointing up and to the right
 let aimTo = aim;
@@ -66,11 +67,6 @@ let side = 0;        // the board's size in CSS pixels
 let labelled = null; // the wave the lane labels were written for
 let lastSignature = '';
 let lastCheer = ''; // so a break never repeats the cheer before it
-
-function levelFromUrl() {
-  const l = new URLSearchParams(location.search).get('level');
-  return l in LEVELS ? l : 'simple';
-}
 
 const board = () => `${GAME}:${level}`;
 const fame = createFame({
@@ -384,18 +380,6 @@ ui.go.addEventListener('click', () => {
   loop.start();
   document.activeElement?.blur();
 });
-
-for (const r of ui.levels) {
-  r.checked = r.value === level;
-  r.addEventListener('change', () => {
-    level = r.value;
-    const url = new URL(location.href);
-    if (level === 'simple') url.searchParams.delete('level');
-    else url.searchParams.set('level', level);
-    history.replaceState(null, '', url);
-    toStart();
-  });
-}
 
 /** The board is the biggest square the frame holds. */
 function fit() {
