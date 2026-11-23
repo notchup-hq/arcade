@@ -3,13 +3,10 @@
 // mouse), with the − and + buttons and Throw, or with the arrow keys and Space. The page fits the screen
 // without scrolling; help and the hall of fame open in dialogs.
 
-import { renderFame } from '../../js/fame.js';
-import { askInitials } from '../../js/initials.js';
+import { createFame } from '../../js/fame.js';
 import { neonColours } from '../../js/attract.js';
 import { createLoop } from '../../js/loop.js';
 import { logoSvg } from '../../js/logo.js';
-import { memory } from '../../js/memory.js';
-import { placeOf } from '../../js/scores.js';
 import { initSettings } from '../../js/settings.js';
 import { sfx } from '../../js/sound.js';
 import {
@@ -320,17 +317,7 @@ async function endMatch() {
   setPrimary('again');
   showAll();
   say(`Your billboard is out. Run over: ${run.beaten} ${run.beaten === 1 ? 'rival' : 'rivals'} beaten, ${run.score} points.`);
-  const place = run.score > 0 ? placeOf(memory.scores(BOARD, ORDER), run.score, ORDER) : -1;
-  if (place >= 0) {
-    const initials = await askInitials(ui.dialog, { place, score: `${run.score} points`, last: memory.initials() });
-    if (initials) {
-      memory.addScore(BOARD, ORDER, { initials, value: run.score, extra: { rivals: run.beaten } });
-      renderScores(place);
-      ui.fame.showModal();
-      return;
-    }
-  }
-  ui.go.focus();
+  if (!(await fame.offer({ value: run.score, shown: `${run.score} points`, extra: { rivals: run.beaten } }))) ui.go.focus();
 }
 
 ui.go.addEventListener('click', () => {
@@ -414,19 +401,21 @@ document.addEventListener('keydown', (e) => {
 
 // ---------- Hall of fame ----------
 
-function renderScores(newPlace = -1) {
-  renderFame(ui.scores, memory.scores(BOARD, ORDER), {
-    score: { head: 'Score', cell: String },
-    columns: [{ key: 'rivals', head: 'Rivals', cell: String }],
-    fresh: newPlace,
-    empty: 'No runs on this browser yet. Beat a rival to be the first.',
-  });
-}
+const fame = createFame({
+  dialog: ui.fame,
+  table: ui.scores,
+  initials: ui.dialog,
+  board: () => BOARD,
+  order: ORDER,
+  score: { head: 'Score', cell: String },
+  columns: [{ key: 'rivals', head: 'Rivals', cell: String }],
+  empty: 'No runs on this browser yet. Beat a rival to be the first.',
+});
 
 $('help-open').addEventListener('click', () => ui.help.showModal());
-$('fame-open').addEventListener('click', () => { renderScores(); ui.fame.showModal(); });
+$('fame-open').addEventListener('click', () => { fame.render(); ui.fame.showModal(); });
 
 ui.badge.replaceChildren(logoSvg('logo badge-mark'));
 initSettings();
-renderScores();
+fame.render();
 startFresh();
