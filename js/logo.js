@@ -47,7 +47,8 @@ export const ARROW = [
 
 let ids = 0;
 
-function el(name, attrs, parent) {
+/** An SVG element with these attributes, appended to `parent` when given. */
+export function el(name, attrs, parent) {
   const node = document.createElementNS(SVG_NS, name);
   for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
   parent?.append(node);
