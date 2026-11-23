@@ -12,6 +12,7 @@
 
 import { mkdirSync } from 'node:fs';
 import { createRequire } from 'node:module';
+import { GAMES } from '../js/games.js';
 
 // Playwright comes from ./dev's own install (PW_HOME, under .local/) or from one already on the machine.
 const require = createRequire(process.env.PW_HOME ? `${process.env.PW_HOME}/` : import.meta.url);
@@ -19,7 +20,11 @@ const { chromium } = require('playwright');
 
 // Phones and a tablet upright, a laptop on its side.
 const SCREENS = [[320, 568], [360, 780], [768, 1024], [1280, 800]];
-const PAGES = ['/', '/games/fuse-box/', '/games/fuse-box/?level=hard', '/games/lob/', '/games/notch-up/', '/games/patch-night/', '/games/patch-night/?level=hard', '/games/pair-up/', '/games/pair-up/?level=hard'];
+// The hall, then every game in js/games.js; a game with levels also at its last, usually the biggest.
+const PAGES = ['/', ...GAMES.flatMap(({ id, boards }) => {
+  const page = `/games/${id}/`;
+  return boards.length > 1 ? [page, `${page}?level=${boards.at(-1).id.split(':')[1]}`] : [page];
+})];
 
 const [base, ...rest] = process.argv.slice(2);
 if (!base) {
