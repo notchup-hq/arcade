@@ -4,6 +4,10 @@ All notable changes to this project are listed here, newest first. The format fo
 
 ## Unreleased
 
+### Fixed
+
+- A game page no longer moves under a finger: the page does not scroll, rubber-band or pull to refresh, and a drag on the play area (`data-play`) never scrolls the page. `./dev layout` now checks this at four more phone sizes.
+
 ### Added
 
 - Every game's hall of fame has a second table, This week, beside All time. The week runs Monday to Sunday in Helsinki time and starts empty, so a score that cannot beat an old record can still top the board. A score that makes only the week's top 5 asks for initials too ("New weekly high score"). The cabinets in the hall keep showing all-time scores.
