@@ -50,21 +50,15 @@ function building(ctx, c, rand, side, reach) {
   ctx.fillRect(x0, side.roof - 0.5, x1 - x0, 0.9);
 }
 
-/**
- * The chimney whose smoke shows the wind: on the rival's roof, at the inner edge beside its thrower, so the
- * billboard never hides it (a chimney beside the billboard did, on a phone) and the street stays clear.
- */
-function stackOf(stage) {
-  const side = stage.sides.right;
-  return { x: side.x0 + 3.9, base: side.roof, top: side.roof + 6 };
-}
-
-function paintStack(g, stage) {
-  const { x, base, top } = stackOf(stage);
-  g.fillStyle = '#16263f';
-  g.fillRect(x - 1.4, base - 1, 2.8, top - base + 1);
-  g.fillStyle = 'rgb(94 242 255 / 0.55)';   // a lit rim on top, like the roof
-  g.fillRect(x - 1.8, top - 0.5, 3.6, 0.8);
+/** The chimney in the middle of the street: tall enough that a flat throw at full power hits it. */
+function paintChimney(g, { chimney }) {
+  const { x0, x1, top } = chimney;
+  g.fillStyle = '#1d3250';
+  g.fillRect(x0, 0, x1 - x0, top);
+  g.fillStyle = 'rgb(90 112 136 / 0.5)';      // steel bands
+  for (let y = 8; y < top - 3; y += 9) g.fillRect(x0, y, x1 - x0, 0.7);
+  g.fillStyle = 'rgb(94 242 255 / 0.55)';     // a lit rim on top, like the roofs
+  g.fillRect(x0 - 0.5, top - 0.5, x1 - x0 + 1, 0.9);
 }
 
 let cached = null;
@@ -72,7 +66,7 @@ let cached = null;
 /** The street: sky, stars, moon, two skylines, the street and the two buildings. */
 function street(ctx, w, h, c, stage) {
   const dpr = ctx.getTransform().a;
-  const key = `${w}x${h}@${dpr}:${stage.street.seed}:${stage.portrait}`;
+  const key = `${w}x${h}@${dpr}:${stage.street.seed}:${stage.portrait}:${stage.chimney.top}`;
   if (cached?.key !== key) {
     const canvas = document.createElement('canvas');
     canvas.width = Math.ceil(w * dpr);
@@ -129,7 +123,7 @@ function paintStreet(g, w, h, c, stage) {
   }
   building(g, c, rand, left, reach);
   building(g, c, rand, right, reach);
-  paintStack(g, stage);
+  paintChimney(g, stage);
   g.restore();
 }
 
@@ -141,7 +135,8 @@ const SMOKE_PERIOD = 9000; // ms for a puff to rise to the top: slow enough to s
  * more the higher they are and the stronger it blows. `t` is the time in ms (0 for a still picture).
  */
 function smoke(ctx, stage, wind, t) {
-  const { x, top } = stackOf(stage);
+  const { x0, x1, top } = stage.chimney;
+  const x = (x0 + x1) / 2;
   for (let k = 0; k < SMOKE_PUFFS; k++) {
     const u = (t / SMOKE_PERIOD + k / SMOKE_PUFFS) % 1;
     ctx.fillStyle = `rgb(205 220 240 / ${0.34 * (1 - u) * Math.min(1, u * 8)})`;

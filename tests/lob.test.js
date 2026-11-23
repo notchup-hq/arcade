@@ -1,13 +1,14 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  STREETS, WINS, aimComputer, carry, createMatch, fly, guide, learn, loseRun, matchPoints, newMemory, newRun,
+  MAX_ANGLE, MAX_WIND, MIN_ANGLE, STREETS, WINS, aimComputer, carry, createMatch, fly, guide, learn, loseRun, matchPoints, newMemory, newRun,
   rivalFor, rollWind, seeded, shown, solvePower, stageFor, takeTurn, winMatch,
 } from '../games/lob/rules.js';
 
 const street = STREETS[0];
 const wide = stageFor(street, false);
 const tall = stageFor(street, true);
+const low = (portrait) => stageFor(street, portrait, 0);   // a chimney no higher than the roofs, out of the way
 
 test('the same throw always flies the same way', () => {
   assert.deepEqual(fly(wide, 'left', 45, 70, 3), fly(wide, 'left', 45, 70, 3));
@@ -36,7 +37,7 @@ test('a bulb that lands short falls on a roof or the street, one that is far too
 test('the solved power hits the middle of the other billboard on every street, both ways, upright or not', () => {
   for (const s of STREETS) {
     for (const portrait of [false, true]) {
-      const stage = stageFor(s, portrait);
+      const stage = stageFor(s, portrait, 0);
       for (const side of ['left', 'right']) {
         const angle = portrait ? 64 : 45;
         const power = solvePower(stage, side, angle, 0);
@@ -46,6 +47,50 @@ test('the solved power hits the middle of the other billboard on every street, b
   }
 });
 
+/** Every street and shape, with the chimney each rival of a run would face. */
+const stages = () => STREETS.flatMap((st) => [false, true].flatMap((portrait) =>
+  [0, 4, 8, 12].map((level) => ({ level, stage: stageFor(st, portrait, rivalFor(level).stack), portrait }))));
+
+test('a flat throw at full power hits the chimney, so it no longer wins', () => {
+  for (const { stage, level } of stages()) {
+    for (const side of ['left', 'right']) {
+      assert.equal(fly(stage, side, stage.portrait ? 25 : 12, 100, 0).where, 'chimney', `${stage.street.name} level ${level} ${side}`);
+    }
+  }
+});
+
+test('no flat throw at full power (up to 25 degrees) hits the billboard, wind or not', () => {
+  for (const { stage } of stages()) {
+    for (const side of ['left', 'right']) {
+      for (let angle = 5; angle <= 25; angle++) {
+        for (const wind of [-MAX_WIND, 0, MAX_WIND]) assert.equal(fly(stage, side, angle, 100, wind).hit, false);
+      }
+    }
+  }
+});
+
+test('a lob always gets over the chimney and onto the billboard, from every roof of every rival', () => {
+  for (const { stage, level } of stages()) {
+    for (const side of ['left', 'right']) {
+      const found = [...Array(MAX_ANGLE - MIN_ANGLE + 1)].some((_, i) => {
+        const angle = MIN_ANGLE + i;
+        return fly(stage, side, angle, solvePower(stage, side, angle, 0), 0).hit;
+      });
+      assert.ok(found, `${stage.street.name} ${stage.portrait ? 'upright' : 'wide'} level ${level} ${side}`);
+    }
+  }
+});
+
+test('the chimney stands between the roofs and grows with the rivals up to a limit', () => {
+  for (const { stage } of stages()) {
+    assert.ok(stage.chimney.x0 > stage.sides.left.x1 && stage.chimney.x1 < stage.sides.right.x0);
+    assert.ok(stage.chimney.top > Math.max(stage.sides.left.roof, stage.sides.right.roof));
+  }
+  const stacks = Array.from({ length: 14 }, (_, i) => rivalFor(i).stack);
+  assert.ok(stacks.every((v, i) => i === 0 || v >= stacks[i - 1]));
+  assert.ok(stacks[0] < stacks[13] && stacks[13] <= 26);
+});
+
 test('an upright stage has its rooftops closer than a wide one', () => {
   const gap = (st) => st.sides.right.x0 - st.sides.left.x1;
   assert.ok(gap(tall) < gap(wide));
@@ -53,8 +98,8 @@ test('an upright stage has its rooftops closer than a wide one', () => {
 });
 
 test('the guide is only the start of the arc', () => {
-  const full = fly(wide, 'left', 45, 70, 0).path;
-  const start = guide(wide, 'left', 45, 70, 0);
+  const full = fly(low(false), 'left', 45, 70, 0).path;
+  const start = guide(low(false), 'left', 45, 70, 0);
   assert.ok(start.length > 10 && start.length < full.length / 2);
   assert.deepEqual(start, full.slice(0, start.length));
 });
@@ -107,7 +152,7 @@ test('rivals get better one after another, with more wind, up to a limit', () =>
 function throwsToHit(level, seed, { portrait = false } = {}) {
   const rival = rivalFor(level);
   const rand = seeded(seed);
-  const stage = stageFor(rival.street, portrait);
+  const stage = stageFor(rival.street, portrait, rival.stack);
   const match = createMatch({ stage, windMax: rival.windMax, rand });
   match.turn = 'right';
   const memory = newMemory();
@@ -137,6 +182,24 @@ test('the computer usually misses with its first throw, then closes in', () => {
 test('a later rival hits sooner than the first, on a wide and on an upright stage', () => {
   for (const opts of [{}, { portrait: true }]) {
     assert.ok(average(8, opts) < average(0, opts), JSON.stringify(opts));
+  }
+});
+
+test('the computer lifts its angle after a bulb hits the chimney', () => {
+  const memory = newMemory();
+  learn(memory, wide, 'right', { angle: 20, power: 90, wind: 0 }, { where: 'chimney' });
+  const shot = aimComputer({ stage: wide, side: 'right', wind: 0, skill: 0.9, memory, rand: seeded(3) });
+  assert.ok(shot.angle > 20);
+});
+
+test('after hitting the chimney, the computer aims a throw that clears it, on every street and shape', () => {
+  for (const { stage, level } of stages()) {
+    const rand = seeded(level + 1);
+    const memory = newMemory();
+    learn(memory, stage, 'right', { angle: 8, power: 90, wind: 0 }, { where: 'chimney' });
+    const shot = aimComputer({ stage, side: 'right', wind: 0, skill: 0.9, memory, rand });
+    const worked = fly(stage, 'right', shot.angle, solvePower(stage, 'right', shot.angle, 0), 0);
+    assert.notEqual(worked.where, 'chimney', `${stage.street.name} ${stage.portrait ? 'upright' : 'wide'} level ${level}`);
   }
 });
 

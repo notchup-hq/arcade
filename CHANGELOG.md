@@ -4,6 +4,10 @@ All notable changes to this project are listed here, newest first. The format fo
 
 ## Unreleased
 
+### Added
+
+- Lob has a chimney in the middle of the street, with slow smoke that leans with the wind. A flat throw at full power now hits it, so you have to lob over it. It gets taller with each rival, and the computer lifts its aim when it hits the chimney. The smoke used to come from a small chimney on the rival's roof; it comes from this one now.
+
 ### Fixed
 
 - Fuse Box on a short phone: the Hard panel no longer scrolls inside its frame. It takes a squarer shape with the same 180 fuses and 40 blown (12×15 instead of 10×18 on a 360×640 screen), so cells stay at least 24 px.
