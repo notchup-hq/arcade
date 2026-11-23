@@ -53,7 +53,10 @@ export function renderFame(table, entries, { score, columns = [], fresh = -1 }) 
  * A game's hall of fame. `board()` names the current table (`fuse-box:easy`) and `order` says which
  * end is best (`low` or `high`); `label()`, when given, is the level shown in `caption`. `score`
  * and `columns` are as for renderFame. `dialog` is the hall of fame dialog with `table` in
- * it, and `initials` the new high score dialog.
+ * it, and `initials` the new high score dialog. The hall of fame has a Challenge button that
+ * shares the best all-time score of the level as a link, and a link to this page that carries a
+ * challenge greets the visitor (js/challenge-ui.js, loaded only then). The game's id is the start of
+ * its board's name and its name is the page's h1, so a game passes nothing more for it.
  */
 export function createFame({ dialog, table, caption, initials, board, order, label, score, columns }) {
   const credit = dialog.querySelector('.credit');
@@ -82,6 +85,29 @@ export function createFame({ dialog, table, caption, initials, board, order, lab
   });
   tabs.append(...buttons);
   table.before(tabs);
+
+  const gameName = () => document.querySelector('h1')?.textContent ?? 'the arcade';
+  const share = document.createElement('button');
+  share.type = 'button';
+  share.textContent = 'Challenge a friend';
+  const shared = document.createElement('p');
+  shared.className = 'share-note';
+  shared.setAttribute('role', 'status');
+  share.addEventListener('click', async () => {
+    const best = memory.scores(board(), order)[0];
+    if (!best) return;
+    const { shareChallenge, shareText } = await import('./challenge-ui.js');
+    const result = await shareChallenge(board(), best, { text: shareText(best, score.cell(best.value), gameName(), board()) });
+    shared.textContent = { copied: 'Link copied. Send it to a friend.', failed: 'Could not share. Try again.' }[result] ?? '';
+  });
+  dialog.querySelector('.actions')?.prepend(share);
+  dialog.querySelector('.credit')?.after(shared);
+
+  if (location.hash.startsWith('#c=')) {
+    import('./challenge-ui.js').then(({ greetChallenger }) => {
+      greetChallenger({ hash: location.hash, game: board().split(':')[0], gameName: gameName(), score: score.cell });
+    });
+  }
   dialog.addEventListener('close', () => { view = 'all'; });
 
   /** Draw the table for the current level; `fresh` is the new row to mark, `show` switches the view. */
@@ -90,6 +116,8 @@ export function createFame({ dialog, table, caption, initials, board, order, lab
     if (caption && label) caption.textContent = label();
     const entries = view === 'week' ? memory.weekScores(board(), order) : memory.scores(board(), order);
     renderFame(table, entries, { score, columns, fresh });
+    share.disabled = memory.scores(board(), order).length === 0;
+    shared.textContent = '';
     buttons.forEach((b, k) => b.setAttribute('aria-pressed', String(VIEWS[k].id === view)));
     prints.forEach((p, k) => { p.classList.toggle('off', VIEWS[k].id !== view); });
   }

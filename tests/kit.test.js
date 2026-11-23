@@ -12,7 +12,8 @@ const OWNED = [
   { re: /0x6d2b79f5/i, use: 'seeded in js/random.js', owner: 'js/random.js' },
   { re: /function pickLine\b/, use: 'pickLine in js/random.js', owner: 'js/random.js' },
   { re: /\baskInitials\(|\.addScore\(/, use: 'createFame in js/fame.js', owner: 'js/fame.js', also: ['js/initials.js', 'js/memory.js'] },
-  { re: /history\.replaceState|searchParams\.(get|set)\(['"]level['"]/, use: 'pickLevel in js/levels.js', owner: 'js/levels.js', also: ['js/hall.js'] },
+  { re: /challenge|navigator\.share|clipboard/i, use: 'createFame in js/fame.js (the Challenge button and card)', owner: 'js/fame.js', also: ['js/challenge.js', 'js/challenge-ui.js'] },
+  { re: /history\.replaceState|searchParams\.(get|set)\(['"]level['"]/, use: 'pickLevel in js/levels.js', owner: 'js/levels.js', also: ['js/hall.js', 'js/challenge-ui.js'] },
   { re: /dialog\[open\]|help-open|fame-open/, use: 'js/dialogs.js', owner: 'js/dialogs.js', also: ['js/grace.js'] },
   { re: /badge-logo/, use: 'consoleLogo in js/logo.js', owner: 'js/logo.js' },
   // Grid moves: Home and End go with the arrows only on a board of buttons. Patch Night's arrows aim

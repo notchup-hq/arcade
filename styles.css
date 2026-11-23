@@ -827,3 +827,9 @@ html:has(body.game), body.game { overflow: hidden; overscroll-behavior: none; }
 @keyframes shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
 @keyframes frame-pulse { 30% { opacity: 1; } }
 @keyframes light-up { from { background: rgb(94 242 255 / 0.35); } }
+
+/* Challenges: the card that greets a friend's link, and the note under the hall of fame's share button. */
+.challenge { width: min(22rem, calc(100vw - 2 * var(--gap))); border-color: var(--neon-gold); box-shadow: var(--glow-gold); text-align: center; }
+.challenge h2 { color: var(--neon-gold); text-shadow: var(--glow-gold); }
+.challenge-text { margin: 0 0 0.75rem; font-size: 1.125rem; }
+.share-note { margin: 0.5rem 0 0; color: var(--neon-cyan); text-align: center; }
