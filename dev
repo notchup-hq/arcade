@@ -35,6 +35,9 @@ Commands:
                             scroll, text under 16 px, small tap targets, other-origin requests or console
                             errors (scripts/check-layout.mjs). Installs Playwright into .local/tools the
                             first time unless it is already installed. --shots saves screenshots to .local/shots.
+  bench [--runs N]          Measure what the hall and each game cost the main thread at phone size with the CPU
+                            slowed 4x, and print a table to paste into a pull request (scripts/bench.mjs).
+                            Run it before and after a change on the same machine. Installs Playwright like layout.
 EOF
 }
 
@@ -221,6 +224,13 @@ cmd_layout() {
     esac
   done
   need node "needed to run the layout check" "Install Node.js (18 or newer)."
+  need_playwright
+  start_bg_server "$TEST_PORT"
+  node scripts/check-layout.mjs "http://127.0.0.1:$TEST_PORT" "${shots[@]+"${shots[@]}"}"
+}
+
+# Playwright from the machine, or installed once into .local/tools (PW_HOME tells the scripts where).
+need_playwright() {
   if ! node -e "require('playwright')" >/dev/null 2>&1; then
     export PW_HOME="$ROOT_DIR/.local/tools/node_modules"
     if [ ! -d "$PW_HOME/playwright" ]; then
@@ -230,8 +240,24 @@ cmd_layout() {
       "$PW_HOME/.bin/playwright" install chromium
     fi
   fi
+}
+
+cmd_bench() {
+  local runs=()
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --runs)
+        [ $# -ge 2 ] || die_usage "--runs needs a number."
+        runs=(--runs "$2")
+        shift 2
+        ;;
+      *) die_usage "Unknown option for bench: $1" ;;
+    esac
+  done
+  need node "needed to run the benchmark" "Install Node.js (18 or newer)."
+  need_playwright
   start_bg_server "$TEST_PORT"
-  node scripts/check-layout.mjs "http://127.0.0.1:$TEST_PORT" "${shots[@]+"${shots[@]}"}"
+  node scripts/bench.mjs "http://127.0.0.1:$TEST_PORT" "${runs[@]+"${runs[@]}"}"
 }
 
 cmd=help
@@ -245,6 +271,7 @@ case "$cmd" in
   serve) cmd_serve "$@" ;;
   test) cmd_test "$@" ;;
   layout) cmd_layout "$@" ;;
+  bench) cmd_bench "$@" ;;
   order)
     need node "needed to reorder the hall" "Install Node.js (18 or newer)."
     node scripts/order-hall.mjs ;;

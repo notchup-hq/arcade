@@ -2,6 +2,12 @@
 
 All notable changes to this project are listed here, newest first. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+
+### Changed
+
+- Behind the scenes: `./dev bench` measures how much work the hall and each game make on a slow phone, and the games share one random line picker, one seeded random generator and one win fanfare instead of their own copies.
+
 ## 0.1.0 – 2026-11-23
 
 The first alpha: the hall and five games.
