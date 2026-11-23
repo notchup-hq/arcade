@@ -235,8 +235,7 @@ function act(i) {
     say(`Not a pair. ${chancesLeft()}.`);
     missTimer = setTimeout(() => { settle(g); paintAll(); }, MISS_MS);
   } else if (result.type === 'cleared') {
-    sfx.win();
-    for (let k = 1; k <= 4; k++) sfx.notch(0.4 + k * 0.25);
+    sfx.fanfare();
     ui.deck.classList.add('won');
     say(`A pair: ${name}.`);
     endTimer = setTimeout(roundCleared, CLEAR_MS);
