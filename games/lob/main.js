@@ -114,6 +114,7 @@ function sizeCanvas() {
   ui.canvas.height = Math.round(ui.canvas.clientHeight * dpr);
   render();
 }
+sizeCanvas(); // now, so the first frame is already sharp; a view transition photographs that frame
 new ResizeObserver(sizeCanvas).observe(ui.canvas);
 
 // ---------- The readouts and the controls ----------

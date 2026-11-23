@@ -4,6 +4,10 @@ All notable changes to this project are listed here, newest first. The format fo
 
 ## Unreleased
 
+### Fixed
+
+- The zoom into a game no longer ends on an empty or small board that jumps to full size: a game page now holds its first frame until its board is built and sized.
+
 ### Added
 
 - Pair Up, a memory game: turn the cards and find every pair; three wrong guesses end the run. The faces are letters and little pictures from the other games (the logo, a bug, a bulb, a fuse, a floor of the tower). Three levels (6, 8 and 10 pairs), a score that rewards pairs in a row and chances left, a top 5 per level, and a cheer with the logo notching up when every pair is found.

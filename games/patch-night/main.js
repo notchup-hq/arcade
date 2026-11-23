@@ -412,6 +412,7 @@ function fit() {
   lastSignature = '';
   draw();
 }
+fit(); // now, so the first frame already has its size; a view transition photographs that frame
 new ResizeObserver(fit).observe(ui.frame);
 
 // The game waits while a dialog is open.

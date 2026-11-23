@@ -68,6 +68,6 @@ export function moduleGraph(entry) {
 
 /** The entry module of a page (its one script type="module"). */
 export function entryOf(page) {
-  const src = /<script type="module" src="([^"]+)">/.exec(read(page))[1];
+  const src = /<script type="module" src="([^"]+)"[^>]*>/.exec(read(page))[1];
   return resolve(page.split('/').slice(0, -1), src);
 }
