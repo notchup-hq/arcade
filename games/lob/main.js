@@ -7,7 +7,7 @@ import { wireDialogs } from '../../js/dialogs.js';
 import { createFame } from '../../js/fame.js';
 import { neonColours } from '../../js/attract.js';
 import { createLoop } from '../../js/loop.js';
-import { logoSvg } from '../../js/logo.js';
+import { consoleLogo } from '../../js/logo.js';
 import { initSettings } from '../../js/settings.js';
 import { sfx } from '../../js/sound.js';
 import {
@@ -47,6 +47,7 @@ const ui = {
   scores: $('scores'),
   dialog: $('initials'),
 };
+const badge = consoleLogo(ui.badge);
 const ctx = ui.canvas.getContext('2d');
 const colours = neonColours();
 const still = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -186,7 +187,7 @@ function startMatch() {
   anim = null;
   phase = 'aim';
   matches++;
-  ui.badge.className = 'badge-logo';
+  badge.reset();
   setPrimary('throw');
   showAll();
   say(twoPlayers ? 'Player 1: hit the sign. Drag back and let go.' : `Rival ${run.level + 1}: ${rival.sign}. Hit the sign! Drag back and let go.`);
@@ -293,7 +294,7 @@ async function endMatch() {
   phase = 'over';
   const winner = match.winner;
   if (twoPlayers) {
-    ui.badge.className = 'badge-logo fixed';
+    badge.notchUp();
     sfx.win();
     setPrimary('again');
     showAll();
@@ -304,7 +305,7 @@ async function endMatch() {
   if (winner === 'left') {
     const points = matchPoints(match.throws.left);
     winMatch(run, match.throws.left);
-    ui.badge.className = 'badge-logo fixed';
+    badge.notchUp();
     sfx.fanfare();
     setPrimary('next');
     showAll();
@@ -313,7 +314,7 @@ async function endMatch() {
     return;
   }
   loseRun(run);
-  ui.badge.className = 'badge-logo sparked';
+  badge.spark();
   sfx.spark();
   setPrimary('again');
   showAll();
@@ -415,7 +416,6 @@ const fame = createFame({
 
 wireDialogs({ help: ui.help, fame });
 
-ui.badge.replaceChildren(logoSvg('logo badge-mark'));
 initSettings();
 fame.render();
 startFresh();

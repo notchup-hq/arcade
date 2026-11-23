@@ -10,7 +10,7 @@ import { whenDialogsClosed, wireDialogs } from '../../js/dialogs.js';
 import { createFame } from '../../js/fame.js';
 import { GRACE_MS } from '../../js/grace.js';
 import { pickLevel } from '../../js/levels.js';
-import { logoSvg } from '../../js/logo.js';
+import { consoleLogo } from '../../js/logo.js';
 import { initSettings } from '../../js/settings.js';
 import { sfx } from '../../js/sound.js';
 import { drawFace } from './faces.js';
@@ -46,6 +46,7 @@ const ui = {
   dialog: $('initials'),
   levels: [...document.querySelectorAll('input[name="level"]')],
 };
+const badge = consoleLogo(ui.badge);
 
 const colours = neonColours();
 let level = pickLevel(ui.levels, Object.keys(LEVELS), (next) => { level = next; build(); });
@@ -188,9 +189,8 @@ function showCard(title, text, { cleared = false } = {}) {
   ui.cardTitle.textContent = title;
   ui.cardText.textContent = text;
   ui.go.textContent = cleared ? 'Next round' : 'Play again';
-  ui.badge.className = 'badge-logo';
-  void ui.badge.offsetWidth; // so the logo's animation starts over
-  if (cleared) ui.badge.className = 'badge-logo fixed';
+  if (cleared) badge.notchUp();
+  else badge.reset();
   ui.card.hidden = false;
   ui.deck.inert = true;
   ui.go.focus();
@@ -285,6 +285,5 @@ ui.go.addEventListener('click', () => (g.status === 'cleared' ? startNextRound()
 new ResizeObserver(fit).observe(ui.frame);
 wireDialogs({ help: ui.help, fame });
 
-ui.badge.replaceChildren(logoSvg('logo badge-mark'));
 initSettings();
 build();
