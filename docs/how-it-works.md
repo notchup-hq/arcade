@@ -7,7 +7,7 @@
 | `js/games.js` | The games in the hall, in the order their cabinets stand, each with its demo and the high-score tables (one per level) the demo shows. To change the order, move a line and run `./dev order` (`scripts/order-hall.mjs`), which puts the cabinets in `index.html` in the same order; the hall stays plain HTML, so nothing moves after the first paint. `tests/site.test.js` fails while the two differ. |
 | `index.html`, `js/hall.js` | The hall: one arcade cabinet per game (below). A ready game plays itself on its screen; the rest say "Coming soon". A demo's code is fetched only when its cabinet comes within 200 px of the screen, so the hall's first load stays small however many games there are. Without JavaScript the cabinets are plain links. |
 | `games/<game>/` | One folder per game: `index.html` (its page), `main.js` (the page's code), `rules.js` (the rules, no DOM, tested), `demo.js` (attract mode for the hall). |
-| `scripts/templates/game/index.html` | The game page the others share their HTML with: the head's first lines (charset to build stamp), the bar's Arcade link and buttons, and the initials dialog. Change them there and run `./dev sync` (`scripts/sync-pages.mjs`), which copies them into every page (the head into the hall too) and writes each page's `modulepreload` list from the imports of its script. The pages stay plain HTML. The title, help, hall-of-fame caption and the game itself stay in each page. `tests/sync.test.js` fails while a page differs from what `./dev sync` writes. |
+| `scripts/templates/game/` | The starter game `./dev new-game` writes (`scripts/new-game.mjs`; see [adding-a-game.md](adding-a-game.md)). Its `index.html` is also the game page the others share their HTML with: the head's first lines (charset to build stamp), the bar's Arcade link and buttons, and the initials dialog. Change them there and run `./dev sync` (`scripts/sync-pages.mjs`), which copies them into every page (the head into the hall too) and writes each page's `modulepreload` list from the imports of its script. The pages stay plain HTML. The title, help, hall-of-fame caption and the game itself stay in each page. `tests/sync.test.js` fails while a page differs from what `./dev sync` writes. |
 | `js/` | Shared by the hall and every game (below). |
 | `styles.css` | The one stylesheet. Colour tokens `--neon-*` are read by canvas code too. |
 | `_headers` | Security headers for Cloudflare Pages (strict CSP). |
@@ -102,11 +102,7 @@
 
 ## Adding a game
 
-1. `games/<name>/` with `rules.js` (pure, with tests in `tests/<name>.test.js`), `main.js`, `index.html` (copy `scripts/templates/game/index.html` and fill in its `{{...}}` parts) and `demo.js` (`{ step(dt), draw(ctx, w, h, colours) }`).
-2. Its cabinet in `index.html` with `data-game="<name>"` (copy a ready one), its line in `GAMES` in `js/games.js` where it should stand (a lazy `import()` of its demo, with its own budget in `tests/budget.test.js`), then `./dev order`, `data-game="<name>"` on its page's `<body>`, and its line next to Fuse Box's `view-transition-name` rule in `styles.css` (`tests/site.test.js` says what is missing).
-3. Its page in `sitemap.xml` and in `PAGES` in `scripts/check-layout.mjs`.
-4. `./dev sync` writes its preload list (run it again after a change to its imports), and the budget stays green.
-5. Pick a name of our own and check it is not another game's: add the names you checked against to `tests/originality.test.js`.
+`./dev new-game <id> "<Name>"` starts a small working game and adds it to every list; [adding-a-game.md](adding-a-game.md) walks through it and what to change next.
 
 Ideas for the next games are in [next-games.md](next-games.md).
 

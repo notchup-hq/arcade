@@ -34,6 +34,9 @@ Commands:
   sync                      Write the HTML every page shares (head, the game bar's Arcade link and buttons,
                             the initials dialog) from scripts/templates/game/index.html into every page,
                             with each page's modulepreload list from its imports (scripts/sync-pages.mjs).
+  new-game <id> "<Name>"    Start a game: write a small working one into games/<id>/ from scripts/templates/game/
+                            and add it to the hall, js/games.js, styles.css and the sitemap
+                            (scripts/new-game.mjs). docs/adding-a-game.md says what to change next.
   layout [--shots]          Load every page in Chromium at 320, 360, 768 and 1280 px and fail on sideways
                             scroll, text under 16 px, small tap targets, other-origin requests or console
                             errors (scripts/check-layout.mjs). Installs Playwright into .local/tools the
@@ -278,6 +281,10 @@ case "$cmd" in
   order)
     need node "needed to reorder the hall" "Install Node.js (18 or newer)."
     node scripts/order-hall.mjs ;;
+  new-game)
+    [ $# -eq 2 ] || die_usage 'new-game needs an id and a name: ./dev new-game light-up "Light Up"'
+    need node "needed to start a game" "Install Node.js (18 or newer)."
+    node scripts/new-game.mjs "$1" "$2" ;;
   sync)
     need node "needed to sync the pages" "Install Node.js (18 or newer)."
     node scripts/sync-pages.mjs ;;

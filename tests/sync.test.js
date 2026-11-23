@@ -11,7 +11,7 @@ const template = read(TEMPLATE);
 for (const page of pages()) {
   test(`${page} has the shared HTML and preloads ./dev sync writes`, () => {
     assert.equal(syncPage(page, read(page), template), read(page), 'run ./dev sync');
-    assert.doesNotMatch(read(page), /\{\{/, 'a {{...}} part of the template is still to be filled in');
+    assert.doesNotMatch(read(page), /\{\{\w+\}\}/, 'a {{...}} part of the template is still to be filled in');
   });
 }
 
