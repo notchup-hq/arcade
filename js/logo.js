@@ -83,6 +83,22 @@ export function logoSvg(className = 'logo') {
   return svg;
 }
 
+/**
+ * The logo in a game's console (`el`, a .badge-logo): draws the mark in it and returns what it can
+ * do. notchUp() turns the gear four teeth and lifts the arrow, spark() shows it sparked, reset()
+ * puts it back. Each starts its CSS animation over, even when it ran just before.
+ */
+export function consoleLogo(el) {
+  el.replaceChildren(logoSvg('logo badge-mark'));
+  const show = (mood) => {
+    el.className = 'badge-logo';
+    if (!mood) return;
+    void el.offsetWidth; // so the animation starts over
+    el.className = `badge-logo ${mood}`;
+  };
+  return { notchUp: () => show('fixed'), spark: () => show('sparked'), reset: () => show('') };
+}
+
 const paths = new Map();
 const pathOf = (points) => {
   if (!paths.has(points)) paths.set(points, new Path2D(`M${points.trim().split(/\s+/).join('L')}Z`));

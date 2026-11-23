@@ -6,7 +6,7 @@
 import { wireDialogs } from '../../js/dialogs.js';
 import { createFame } from '../../js/fame.js';
 import { pickLevel } from '../../js/levels.js';
-import { logoSvg } from '../../js/logo.js';
+import { consoleLogo } from '../../js/logo.js';
 import { formatTime } from '../../js/scores.js';
 import { initSettings } from '../../js/settings.js';
 import { sfx } from '../../js/sound.js';
@@ -36,6 +36,7 @@ const ui = {
   dialog: $('initials'),
   levels: [...document.querySelectorAll('input[name="level"]')],
 };
+const badge = consoleLogo(ui.badge);
 
 let level = pickLevel(ui.levels, Object.keys(LEVELS), (next) => { level = next; build(); });
 let p;
@@ -115,7 +116,7 @@ function build() {
   ui.board.style.setProperty('--rows', p.rows);
   ui.board.dataset.level = level;
   ui.board.classList.remove('dark');
-  ui.badge.className = 'badge-logo';
+  badge.reset();
   fit();
   const frag = document.createDocumentFragment();
   buttons = [];
@@ -169,7 +170,7 @@ function lose() {
   sfx.spark();
   paintAll();
   ui.board.classList.add('dark');
-  ui.badge.className = 'badge-logo sparked';
+  badge.spark();
   say('Spark! That one was blown.');
   ui.again.focus();
 }
@@ -180,7 +181,7 @@ async function win() {
   sfx.fanfare();
   paintAll();
   paintCounters();
-  ui.badge.className = 'badge-logo fixed';
+  badge.notchUp();
   say(`Fixed in ${formatTime(ms)} s. Notch up!`);
   if (!(await fame.offer({ value: ms, shown: `${formatTime(ms)} s` }))) ui.again.focus();
 }
@@ -271,6 +272,5 @@ new ResizeObserver(fit).observe(ui.frame);
 
 wireDialogs({ help: ui.help, fame });
 
-ui.badge.replaceChildren(logoSvg('logo badge-mark'));
 initSettings();
 build();

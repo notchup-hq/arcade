@@ -9,7 +9,7 @@ import { dialogOpen, wireDialogs } from '../../js/dialogs.js';
 import { GRACE_MS, holdButton } from '../../js/grace.js';
 import { createFame } from '../../js/fame.js';
 import { createLoop } from '../../js/loop.js';
-import { logoSvg } from '../../js/logo.js';
+import { consoleLogo } from '../../js/logo.js';
 import { memory } from '../../js/memory.js';
 import { initSettings } from '../../js/settings.js';
 import { sfx } from '../../js/sound.js';
@@ -40,6 +40,7 @@ const ui = {
   scores: $('scores'),
   dialog: $('initials'),
 };
+const badge = consoleLogo(ui.badge);
 
 const ctx = ui.canvas.getContext('2d');
 const colours = neonColours();
@@ -67,13 +68,6 @@ const bestSoFar = () => memory.scores(BOARD, ORDER)[0]?.value ?? 0;
 function paintCounters() {
   ui.floors.textContent = String(g ? built(g) : 0);
   ui.best.textContent = String(Math.max(bestSoFar(), g ? built(g) : 0));
-}
-
-/** The logo in the console notches up again: its gear turns four teeth and its arrow rises. */
-function notchUp() {
-  ui.badge.className = 'badge-logo';
-  void ui.badge.offsetWidth; // so the animation starts over
-  ui.badge.className = 'badge-logo fixed';
 }
 
 /** The frame lights up softly for a drop, gold when it was perfect (styles.css; none with reduced motion). */
@@ -129,7 +123,7 @@ function dropFloor() {
   if (result.type === 'perfect') sfx.notch();
   else sfx.blip();
   pulse(result.type === 'perfect');
-  if (result.floors % 10 === 0) notchUp();
+  if (result.floors % 10 === 0) badge.notchUp();
   if (result.cheer) {
     sfx.win();
     say(`${result.cheer.count}. ${result.cheer.praise}! ${result.cheer.quip}${result.widened ? ' The crane widens the floor.' : ''}`);
@@ -144,7 +138,7 @@ function startRun() {
   g = newGame(seeded(Math.floor(Math.random() * 2 ** 32)), bestSoFar());
   camera = 0;
   lastSignature = '';
-  ui.badge.className = 'badge-logo';
+  badge.reset();
   ui.stage.classList.remove('dark', 'pulse', 'perfect');
   ui.card.hidden = true;
   ui.drop.inert = false;
@@ -221,7 +215,6 @@ wireDialogs({ help: ui.help, fame, pause: () => loop.stop(), resume: () => { if 
 still.addEventListener('change', () => { lastSignature = ''; frame(); });
 
 initSettings();
-ui.badge.replaceChildren(logoSvg('logo badge-mark'));
 fame.render();
 paintCounters();
 showCard('Notch Up', 'Drop each floor on the one below. Whatever hangs over is cut off.');
