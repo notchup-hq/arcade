@@ -2,6 +2,12 @@
 
 All notable changes to this project are listed here, newest first. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+
+### Changed
+
+- Behind the scenes: `./dev version x.y.z` releases a version in one step (sets `js/version.js`, dates the changelog's Unreleased heading, and syncs the version every page shows), and `./dev sync` now writes that version into every page, so a bump no longer means editing seven files by hand.
+
 ## 0.2.0 – 2026-11-23
 
 The game kit, a weekly hall of fame, and a round of polish.
