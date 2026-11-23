@@ -352,7 +352,12 @@ a.marquee-logo:hover, a.marquee-logo:focus-visible { background: radial-gradient
 
 /* ---------- Game pages: everything on one screen ---------- */
 
-body.game { height: 100dvh; min-height: 0; }
+body.game { height: 100vh; height: 100dvh; min-height: 0; } /* vh first for in-app browsers that predate dvh */
+
+/* A game never moves under a finger: the page does not scroll, rubber-band or pull to refresh, and a
+   drag on a play area is the game's own (a frame that must scroll, see .panel-frame, says so). */
+html:has(body.game), body.game { overflow: hidden; overscroll-behavior: none; }
+[data-play] { touch-action: none; }
 
 .game-bar {
   display: flex;
@@ -427,7 +432,11 @@ body.game { height: 100dvh; min-height: 0; }
   display: grid;
   place-items: center;
   overflow: auto;
+  overscroll-behavior: contain;
 }
+/* Cells never go under 24 px, so a Hard panel on the smallest phones is bigger than its frame: there a
+   drag scrolls the frame (and only the frame). */
+.panel-frame.scrolls [data-play] { touch-action: pan-x pan-y; }
 .panel {
   --cell: 32px;
   display: grid;
@@ -437,7 +446,6 @@ body.game { height: 100dvh; min-height: 0; }
   border-radius: var(--radius);
   background: #040810;
   box-shadow: var(--glow-cyan);
-  touch-action: manipulation;
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
@@ -506,7 +514,6 @@ body.game { height: 100dvh; min-height: 0; }
   background: #040810;
   box-shadow: var(--glow-cyan);
   overflow: hidden;
-  touch-action: manipulation;
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
@@ -622,7 +629,7 @@ body.game { height: 100dvh; min-height: 0; }
   background: var(--neon-bg);
   overflow: hidden;
 }
-.scene { display: block; width: 100%; height: 100%; touch-action: none; cursor: crosshair; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.scene { display: block; width: 100%; height: 100%; cursor: crosshair; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
 .game[data-game="lob"] .status { height: 3em; overflow: hidden; } /* two lines always, so the street never resizes when the words change */
 .aim { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem 1rem; }
 .stepper { display: flex; align-items: center; gap: 0.25rem; }

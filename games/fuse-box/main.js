@@ -260,6 +260,8 @@ function fit() {
   const { width, height } = room();
   const cell = Math.floor(Math.max(MIN_CELL, Math.min(MAX_CELL, width / p.cols, height / p.rows)));
   ui.board.style.setProperty('--cell', `${cell}px`);
+  const { frame } = ui; // the browser's own verdict, so padding and borders cannot drift from it
+  ui.frame.classList.toggle('scrolls', frame.scrollWidth > frame.clientWidth || frame.scrollHeight > frame.clientHeight);
 }
 new ResizeObserver(fit).observe(ui.frame);
 

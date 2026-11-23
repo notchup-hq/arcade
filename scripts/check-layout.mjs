@@ -4,7 +4,9 @@
 //
 // Each page, at each width, must have:
 // - no sideways scroll of the page itself (a game panel may scroll inside its own frame)
-// - on a game page, no scrolling up and down either: the whole game fits the screen
+// - on a game page, no scrolling up and down either: the whole game fits the screen, and the page
+//   neither pulls to refresh nor rubber-bands (overscroll-behavior), and every [data-play] area ignores
+//   touch drags (touch-action: none) so a swipe moves the game, never the page
 // - no visible text under 16 px
 // - tap targets of at least 44 x 44 px; inside [data-small-target] (a game board) at least 24 x 24 px
 // - exactly one h1, alt text on every image, a label on every form field
@@ -18,8 +20,8 @@ import { GAMES } from '../js/games.js';
 const require = createRequire(process.env.PW_HOME ? `${process.env.PW_HOME}/` : import.meta.url);
 const { chromium } = require('playwright');
 
-// Phones and a tablet upright, a laptop on its side.
-const SCREENS = [[320, 568], [360, 780], [768, 1024], [1280, 800]];
+// Small phones with the browser's bars showing, a tall phone, a tablet upright, a laptop on its side.
+const SCREENS = [[320, 568], [360, 640], [375, 667], [390, 844], [768, 1024], [1280, 800]];
 // The hall, then every game in js/games.js; a game with levels also at its last, usually the biggest.
 const PAGES = ['/', ...GAMES.flatMap(({ id, boards }) => {
   const page = `/games/${id}/`;
@@ -39,7 +41,22 @@ function inspect() {
   const problems = [];
   const doc = document.documentElement;
   if (doc.scrollWidth > doc.clientWidth + 1) problems.push(`scrolls sideways: ${doc.scrollWidth} px wide in ${doc.clientWidth} px`);
-  if (document.body.classList.contains('game') && doc.scrollHeight > doc.clientHeight + 1) problems.push(`game scrolls: ${doc.scrollHeight} px tall in ${doc.clientHeight} px`);
+  if (document.body.classList.contains('game')) {
+    if (doc.scrollHeight > doc.clientHeight + 1) problems.push(`game scrolls: ${doc.scrollHeight} px tall in ${doc.clientHeight} px`);
+    for (const el of [doc, document.body]) {
+      if (getComputedStyle(el).overscrollBehaviorY !== 'none') problems.push(`${el.tagName.toLowerCase()} allows pull to refresh: overscroll-behavior is ${getComputedStyle(el).overscrollBehaviorY}`);
+    }
+    const areas = document.querySelectorAll('[data-play]');
+    if (!areas.length) problems.push('no [data-play] area: a touch drag on the game could scroll the page');
+    for (const el of areas) {
+      const frame = el.closest('.panel-frame');
+      const overflows = frame && (frame.scrollWidth > frame.clientWidth || frame.scrollHeight > frame.clientHeight);
+      if (frame && overflows !== frame.classList.contains('scrolls')) problems.push(`frame ${overflows ? 'scrolls without' : 'has'} the "scrolls" class`);
+      const action = getComputedStyle(el).touchAction;
+      const want = overflows ? 'pan-x pan-y' : 'none';
+      if (action !== want) problems.push(`play area touch-action is ${action}, want ${want}: ${el.tagName.toLowerCase()}#${el.id}`);
+    }
+  }
 
   const visible = (el) => {
     const r = el.getBoundingClientRect();
