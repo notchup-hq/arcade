@@ -1,7 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { SPRITE_TINT } from '../games/pair-up/faces.js';
 import {
-  LEVELS, LETTERS, PAIR_POINTS, PRAISE, QUIPS, SPARE_TOTAL, SPRITES, STREAK_POINTS,
+  BUGS, LEVELS, LETTERS, PAIR_POINTS, PRAISE, QUIPS, SPARE_TOTAL, SPRITES, STREAK_POINTS,
   facesFor, flip, nameOf, newGame, nextRound, pickLine, seeded, settle, shape,
 } from '../games/pair-up/rules.js';
 
@@ -11,13 +12,14 @@ const twins = (g, face) => g.cards.flatMap((c, i) => (c.face === face ? [i] : []
 const pairAt = (g, k) => twins(g, [...new Set(g.cards.map((c) => c.face))][k]);
 
 test('every level deals each face twice, from the sprites and letters, with the level\'s share of sprites', () => {
-  for (const [level, { pairs, sprites }] of Object.entries(LEVELS)) {
+  for (const [level, { pairs, sprites, bugs }] of Object.entries(LEVELS)) {
     const g = newGame(level, seeded(7));
     assert.equal(g.cards.length, pairs * 2);
     const faces = [...new Set(g.cards.map((c) => c.face))];
     assert.equal(faces.length, pairs);
     for (const f of faces) assert.equal(twins(g, f).length, 2);
     assert.equal(faces.filter((f) => SPRITES.includes(f)).length, sprites);
+    assert.equal(faces.filter((f) => BUGS.includes(f)).length, bugs);
     assert.ok(faces.filter((f) => !SPRITES.includes(f)).every((f) => LETTERS.includes(f)));
   }
 });
@@ -215,4 +217,9 @@ test('every face has a name a screen reader can say', () => {
   assert.equal(nameOf('logo'), 'Notchup logo');
   assert.equal(nameOf('K'), 'letter K');
   for (const s of SPRITES) assert.ok(!nameOf(s).startsWith('letter'));
+  assert.equal(new Set(BUGS.map(nameOf)).size, BUGS.length);
+});
+
+test('every picture has a colour of its own, not a letter\'s', () => {
+  for (const s of SPRITES.filter((f) => f !== 'logo')) assert.ok(SPRITE_TINT[s], s);
 });

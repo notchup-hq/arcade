@@ -1,5 +1,5 @@
 // What a card shows, drawn on a canvas for both the page and the hall's demo: the card's back, and its
-// face, which is a letter or a small picture from one of the other games (the Notchup logo, a bug, a
+// face, which is a letter or a small picture from one of the other games (the Notchup logo, a few bugs, a
 // bulb, a fuse, a floor of the tower). Every face has a colour of its own, so a pair looks alike.
 
 import { drawLogo } from '../../js/logo.js';
@@ -7,7 +7,7 @@ import { FONT } from '../../js/screens.js';
 
 // A face's colour, by the neon colour names the stylesheet defines (js/attract.js reads them).
 const TINTS = ['cyan', 'gold', 'magenta', 'green'];
-const SPRITE_TINT = { bug: 'green', bulb: 'gold', fuse: 'cyan', floor: 'magenta' };
+export const SPRITE_TINT = { bug: 'green', ladybug: 'green', spider: 'green', butterfly: 'green', bulb: 'gold', fuse: 'cyan', floor: 'magenta' };
 
 const tintOf = (face, c) => c[SPRITE_TINT[face] ?? TINTS[face.charCodeAt(0) % TINTS.length]];
 
@@ -17,9 +17,10 @@ function path(ctx, points, close = false) {
   if (close) ctx.closePath();
 }
 
-function bug(ctx, r, colour) {
-  ctx.strokeStyle = colour;
-  ctx.lineCap = 'round';
+const NAVY = '#0b1730';
+
+/** Six legs and two feelers, in the shape every walking bug here shares. */
+function legs(ctx, r) {
   ctx.beginPath();
   for (const row of [-0.55, 0, 0.55]) {
     for (const side of [-1, 1]) {
@@ -30,11 +31,69 @@ function bug(ctx, r, colour) {
   ctx.moveTo(-r * 0.3, -r * 1.05); ctx.lineTo(-r * 0.5, -r * 1.45);
   ctx.moveTo(r * 0.3, -r * 1.05); ctx.lineTo(r * 0.5, -r * 1.45);
   ctx.stroke();
+}
+
+function head(ctx, r, colour) {
   ctx.fillStyle = colour;
   ctx.beginPath(); ctx.arc(0, -r, r * 0.3, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = '#0b1730';
+}
+
+// The beetle of Patch Night (games/patch-night/scene.js) without its number: a plain round back, drawn to match it.
+function bug(ctx, r, colour) {
+  ctx.strokeStyle = colour;
+  ctx.lineCap = 'round';
+  legs(ctx, r);
+  head(ctx, r, colour);
+  ctx.fillStyle = NAVY;
   ctx.beginPath(); ctx.arc(0, 0, r * 0.95, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(0, -r * 0.9); ctx.lineTo(0, r * 0.9); ctx.stroke();
+}
+
+// A ladybird: no legs, a round back with spots.
+function ladybug(ctx, r, colour) {
+  ctx.strokeStyle = colour;
+  head(ctx, r, colour);
+  ctx.fillStyle = NAVY;
+  ctx.beginPath(); ctx.arc(0, 0, r * 0.95, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = colour;
+  for (const [x, y] of [[-0.42, -0.2], [0.45, 0], [-0.1, 0.5]]) {
+    ctx.beginPath(); ctx.arc(x * r, y * r, r * 0.2, 0, Math.PI * 2); ctx.fill();
+  }
+}
+
+// A spider: a small head, a big round rear and eight bent legs.
+function spider(ctx, r, colour) {
+  ctx.strokeStyle = colour;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  for (const side of [-1, 1]) {
+    for (const [y, knee, foot] of [[-0.5, -1.2, -0.7], [-0.15, -0.55, -0.1], [0.2, 0.05, 0.6], [0.55, 0.75, 1.3]]) {
+      ctx.moveTo(side * r * 0.3, y * r * 0.8);
+      ctx.lineTo(side * r * 1.0, knee * r);
+      ctx.lineTo(side * r * 1.5, foot * r);
+    }
+  }
+  ctx.stroke();
+  ctx.fillStyle = NAVY;
+  ctx.beginPath(); ctx.arc(0, r * 0.4, r * 0.6, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = colour;
+  ctx.beginPath(); ctx.arc(0, -r * 0.4, r * 0.32, 0, Math.PI * 2); ctx.fill();
+}
+
+// A butterfly: two pairs of wide wings, a slim body and two feelers.
+function butterfly(ctx, r, colour) {
+  ctx.strokeStyle = colour;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(-r * 0.1, -r * 0.8); ctx.lineTo(-r * 0.45, -r * 1.35);
+  ctx.moveTo(r * 0.1, -r * 0.8); ctx.lineTo(r * 0.45, -r * 1.35);
+  ctx.stroke();
+  ctx.fillStyle = NAVY;
+  for (const side of [-1, 1]) {
+    ctx.beginPath(); ctx.ellipse(side * r * 0.75, -r * 0.3, r * 0.8, r * 0.5, side * -0.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(side * r * 0.55, r * 0.5, r * 0.55, r * 0.38, side * 0.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  }
+  ctx.fillStyle = colour;
+  ctx.beginPath(); ctx.ellipse(0, 0, r * 0.2, r * 0.8, 0, 0, Math.PI * 2); ctx.fill();
 }
 
 function bulb(ctx, r, colour) {
@@ -79,6 +138,9 @@ export function drawFace(ctx, face, x, y, size, c) {
   ctx.lineJoin = 'round';
   const r = size * 0.3;
   if (face === 'bug') bug(ctx, r, colour);
+  else if (face === 'ladybug') ladybug(ctx, r, colour);
+  else if (face === 'spider') spider(ctx, r, colour);
+  else if (face === 'butterfly') butterfly(ctx, r, colour);
   else if (face === 'bulb') bulb(ctx, r, colour);
   else if (face === 'fuse') fuse(ctx, r, colour);
   else if (face === 'floor') floor(ctx, r, colour, c);
