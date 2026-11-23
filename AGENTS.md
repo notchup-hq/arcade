@@ -30,6 +30,7 @@ Notchup Arcade: a neon hall of tiny classic arcade games, at https://arcade.notc
 ./dev check           # tests, then check that every file loads over HTTP
 ./dev order           # put the hall's cabinets in the order of js/games.js
 ./dev sync            # copy the shared page HTML from scripts/templates/game/ and write the preload lists
+./dev new-game <id> "<Name>"  # start a game from scripts/templates/game/ (docs/adding-a-game.md)
 ./dev layout          # every page in Chromium at 320, 360, 768 and 1280 px (--shots saves screenshots)
 ./dev bench           # main-thread cost of the hall and each game on a slow phone; before and after a change
 ```

@@ -2,6 +2,7 @@
 // run ./dev order, which puts the cabinets in index.html in the same order (tests/site.test.js fails
 // until they match). `demo` fetches the cabinet's attract-mode demo; `boards` name the high-score
 // tables it shows, one page each (a level without a score is skipped), `order` says which end is best.
+// ./dev new-game adds a line here, and the layout check (scripts/check-layout.mjs) loads every game listed.
 
 const levels = (game, names) => names.map((name) => ({ id: `${game}:${name}`, label: name.toUpperCase() }));
 

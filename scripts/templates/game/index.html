@@ -43,6 +43,7 @@
     <div id="frame" class="panel-frame">
       <div id="stage" class="stage" data-small-target>
         <canvas id="board" aria-hidden="true"></canvas>
+        <button type="button" id="tap" class="drop-zone" aria-label="Tap the light"></button>
         <div id="card" class="card">
           <h2 id="card-title">{{name}}</h2>
           <p id="card-text">{{pitch}}</p>
@@ -59,7 +60,8 @@
       <h2 id="help-title">How to play</h2>
       <p>{{pitch}}</p>
       <ul>
-        <li>Tap or click, or press Space or Enter, to play.</li>
+        <li>Tap or click anywhere on the picture, or press Space or Enter, while the light is lit.</li>
+        <li>The light stays lit for less time as your score grows.</li>
       </ul>
       <p class="credit">{{name}} is made by <a href="https://www.notchup.fi">Notchup</a>. No ads, no cookies, no tracking. <span class="version">v0.1.0</span></p>
       <div class="actions"><button type="submit" class="primary">Close</button></div>
