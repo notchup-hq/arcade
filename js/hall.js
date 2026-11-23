@@ -13,10 +13,13 @@ import { GAMES } from './games.js';
 import { memory } from './memory.js';
 import { initSettings } from './settings.js';
 
-// A ready cabinet's demo, by game id: fetched on demand, showing that game's high scores.
-const DEMOS = Object.fromEntries(GAMES.map(({ id, demo, board, order }) => [
+// A ready cabinet's demo, by game id: fetched on demand, showing the high scores of every level of
+// the game that has any.
+const DEMOS = Object.fromEntries(GAMES.map(({ id, demo, boards, order }) => [
   id,
-  () => demo().then((m) => m.createDemo({ scores: () => memory.scores(board, order) })),
+  () => demo().then((m) => m.createDemo({
+    scores: () => boards.map(({ id: board, label }) => ({ label, table: memory.scores(board, order) })).filter((b) => b.table.length),
+  })),
 ]));
 const NEAR = '200px'; // start fetching a demo this far before its cabinet scrolls into view
 

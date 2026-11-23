@@ -4,12 +4,11 @@
 // cheats (it knows where the blown fuses are), so it never loses.
 
 import { formatTime } from '../../js/scores.js';
-import { FONT, drawNotchUp, drawScores } from '../../js/screens.js';
+import { FONT, createTail, drawNotchUp } from '../../js/screens.js';
 import { LEVELS, TAGGED, TESTED, UNTESTED, around, newPanel, seeded, testFuse, toggleTag } from './rules.js';
 
 const MOVE_MS = 1100;
 const FIXED_MS = 4000;
-const SCORES_MS = 5000;
 const NOTCH_MS = 600;
 
 /** The colour of a count, from calm cyan for 1 to hot red for 5 and up. */
@@ -33,7 +32,7 @@ function nextMove(p, from) {
   return { i: best, tag: p.isBlown[best] === 1 };
 }
 
-/** @param {{ scores: () => Array<{ initials: string, value: number }> }} source the hall of fame to show */
+/** @param {{ scores: () => Array<{ label: string, table: Array<{ initials: string, value: number }> }> }} source the levels' top runs to show */
 export function createDemo({ scores, seed = 7 }) {
   const rand = seeded(seed);
   let p;
@@ -41,6 +40,7 @@ export function createDemo({ scores, seed = 7 }) {
   let timer;
   let cursor;
   let notches = 0;
+  const tail = createTail(scores, formatTime);
 
   function reset() {
     p = newPanel(LEVELS.easy);
@@ -73,13 +73,13 @@ export function createDemo({ scores, seed = 7 }) {
       if (phase === 'fixed') {
         // The gear turns one tooth at a time, slowly; the arrow rises with it.
         const n = Math.min(Math.floor(timer / NOTCH_MS), 4);
-        if (timer >= FIXED_MS) { phase = 'scores'; timer = 0; return true; }
+        if (timer >= FIXED_MS) { phase = 'scores'; tail.open(); return true; }
         if (n !== notches) { notches = n; return true; }
         return false;
       }
-      if (phase === 'scores' && timer >= SCORES_MS) {
-        reset();
-        return true;
+      if (phase === 'scores') {
+        if (tail.done) { reset(); return true; }
+        return tail.step(dt);
       }
       return false;
     },
@@ -87,7 +87,7 @@ export function createDemo({ scores, seed = 7 }) {
     draw(ctx, w, h, c) {
       ctx.fillStyle = c.bg;
       ctx.fillRect(0, 0, w, h);
-      if (phase === 'scores') return drawScores(ctx, w, h, c, scores(), formatTime);
+      if (phase === 'scores') return tail.draw(ctx, w, h, c);
       drawPanel(ctx, w, h, c, p, cursor);
       if (phase === 'fixed') drawNotchUp(ctx, w, h, c, notches, 'PANEL FIXED');
     },

@@ -20,6 +20,7 @@ All notable changes to this project are listed here, newest first. The format fo
 
 ### Changed
 
+- A cabinet's demo ends with the top 5 of every level that has a score (Easy, then Medium, then Hard; skipping empty ones) and a slowly fading "PRESS START" ("TAP TO PLAY" on a phone), instead of Easy's table alone.
 - Pair Up gives lamps back for a cleared deck, on top of the lamp the last pair lights: one on Easy and Medium, two on Hard.
 - Pair Up is gentler: the chances depend on the level (Easy 4, Medium 5, Hard 6) and every pair you find lights one chance back. The bonus for chances left is the same total on every level.
 - Pair Up goes on after a cleared deck: a cheer, then the next round with a fresh deck, the same score and chances, until the chances run out. The high score is the whole run.

@@ -3,7 +3,7 @@
 // Then the logo notches up over the tower, this browser's top 5 shows, and it starts over. The demo
 // aims where it means to, so it never misses.
 
-import { drawNotchUp, drawScores } from '../../js/screens.js';
+import { createTail, drawNotchUp } from '../../js/screens.js';
 import { cameraFor, drawScene, easeCamera } from './scene.js';
 import { built, drop, newGame, seeded, step } from './rules.js';
 
@@ -11,12 +11,12 @@ const DROP_MS = 1000;   // at least this long between drops
 const FLOORS = 12;      // floors to build, past the first cheer
 const HEAD_START = 4;   // floors already up, so a still frame (reduced motion) shows a tower
 const END_MS = 2500;
-const SCORES_MS = 5000;
 
-/** @param {{ scores: () => Array<{ initials: string, value: number }> }} source the top runs to show */
+/** @param {{ scores: () => Array<{ label: string, table: Array<{ initials: string, value: number }> }> }} source the levels' top runs to show */
 export function createDemo({ scores, seed = 5 }) {
   const rand = seeded(seed);
   let g;
+  const tail = createTail(scores, String);
   let phase;
   let timer;
   let target;       // where the next drop is meant to land, as an offset from the floor below
@@ -45,11 +45,11 @@ export function createDemo({ scores, seed = 5 }) {
     step(dt) {
       timer += dt;
       if (phase === 'scores') {
-        if (timer >= SCORES_MS) { reset(); return true; }
-        return false;
+        if (tail.done) { reset(); return true; }
+        return tail.step(dt);
       }
       if (phase === 'end') {
-        if (timer >= END_MS) { phase = 'scores'; timer = 0; }
+        if (timer >= END_MS) { phase = 'scores'; tail.open(); }
         return true;
       }
       const before = g.mover.x - g.floors.at(-1).x;
@@ -68,7 +68,7 @@ export function createDemo({ scores, seed = 5 }) {
     },
 
     draw(ctx, w, h, c) {
-      if (phase === 'scores') return drawScores(ctx, w, h, c, scores(), String);
+      if (phase === 'scores') return tail.draw(ctx, w, h, c);
       if (!size[0]) camera = cameraFor(g, h, w);
       size = [w, h];
       drawScene(ctx, w, h, c, { g: phase === 'play' ? g : { ...g, status: 'built' }, camera });

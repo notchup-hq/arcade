@@ -4,7 +4,7 @@
 
 | Path | What |
 |---|---|
-| `js/games.js` | The games in the hall, in the order their cabinets stand, each with its demo and the high-score table the demo shows. To change the order, move a line and run `./dev order` (`scripts/order-hall.mjs`), which puts the cabinets in `index.html` in the same order; the hall stays plain HTML, so nothing moves after the first paint. `tests/site.test.js` fails while the two differ. |
+| `js/games.js` | The games in the hall, in the order their cabinets stand, each with its demo and the high-score tables (one per level) the demo shows. To change the order, move a line and run `./dev order` (`scripts/order-hall.mjs`), which puts the cabinets in `index.html` in the same order; the hall stays plain HTML, so nothing moves after the first paint. `tests/site.test.js` fails while the two differ. |
 | `index.html`, `js/hall.js` | The hall: one arcade cabinet per game (below). A ready game plays itself on its screen; the rest say "Coming soon". A demo's code is fetched only when its cabinet comes within 200 px of the screen, so the hall's first load stays small however many games there are. Without JavaScript the cabinets are plain links. |
 | `games/<game>/` | One folder per game: `index.html` (its page), `main.js` (the page's code), `rules.js` (the rules, no DOM, tested), `demo.js` (attract mode for the hall). |
 | `js/` | Shared by the hall and every game (below). |
@@ -20,7 +20,7 @@
 | `attract.js` | Runs a game's demo on a cabinet canvas: sharp at any pixel ratio, paused off screen, one still frame with reduced motion, redrawn only when the demo says something changed. |
 | `logo.js` | The Notchup logo in parts (gear, compass, arrow), with the same shapes as `assets/mark.svg` (`tests/logo.test.js`), as inline SVG or on canvas. In the hall the logo is the plain mark, a link to notchup.fi (the demo screen also draws it); on a win the gear turns four teeth and the arrow rises. |
 | `sound.js` | Sound effects made with the Web Audio API, no files. The audio context starts on the first sound, which always follows a tap. |
-| `screens.js` | The two screens a demo ends with: the logo notching up under a line of text, and this browser's top 5. |
+| `screens.js` | The screens a demo ends with: the logo notching up under a line of text, then this browser's top 5 for each level that has a score (4 s a page, the level named in magenta; "no scores yet" when none has), then a "PRESS START" teaser ("TAP TO PLAY" where the main pointer is a finger) that fades slowly between 55 % and full brightness, never flashing, text 16 px or more. `createTail` runs the sequence for every demo. |
 | `city.js` | The night city of notchup.fi: a row of buildings with a few lit windows, seeded (Lob's street, Notch Up's skyline). |
 | `sparks.js` | A calm burst of sparks in the neon colours that drifts out and fades, no flash (Patch Night's right zap, Notch Up's cheers). |
 | `random.js` | A seedable random number generator, so rules and demos can replay in tests. |
@@ -47,7 +47,7 @@
 - Levels: Easy 8×8 with 10 blown, Medium 13×9 with 22, Hard 18×10 with 40. On a portrait screen the panel turns (9×13, 10×18) so cells stay big; the fuse count is the same, so times compare. The level is in the link (`?level=hard`).
 - The page fits the screen with no scrolling: a bar (back, title, help, hall of fame, sound), the levels, the counters with the logo, the panel, one status line and the two buttons. The panel takes the room that is left and `main.js` sizes the cells to the biggest that fits, 24 to 52 px; below 24 px the panel scrolls inside its frame. Help and the hall of fame open in dialogs. The panel is a grid of real buttons with one tab stop: arrow keys move, Enter tests, and each button says its row, column and state to a screen reader.
 - On a win the logo's gear turns four teeth and its arrow rises. A time that makes the top 5 of its level asks for initials, then shows the hall of fame.
-- Attract mode (`demo.js`) plays Easy by the same rules, calmly: about one move a second, the cursor stepping to a fuse near the last one, no glow or flashing. Then the logo notches up and this browser's top 5 for Easy shows.
+- Attract mode (`demo.js`) plays Easy by the same rules, calmly: about one move a second, the cursor stepping to a fuse near the last one, no glow or flashing. Then the logo notches up and this browser's top 5 shows, for every level with a score.
 
 ## Lob
 
