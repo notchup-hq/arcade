@@ -4,6 +4,10 @@ All notable changes to this project are listed here, newest first. The format fo
 
 ## Unreleased
 
+### Fixed
+
+- Fuse Box on a short phone: the Hard panel no longer scrolls inside its frame. It takes a squarer shape with the same 180 fuses and 40 blown (12×15 instead of 10×18 on a 360×640 screen), so cells stay at least 24 px.
+
 ### Changed
 
 - Behind the scenes: `./dev bench` measures how much work the hall and each game make on a slow phone, and the games share one random line picker, one seeded random generator and one win fanfare instead of their own copies.

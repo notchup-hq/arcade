@@ -11,7 +11,7 @@ import { consoleLogo } from '../../js/logo.js';
 import { formatTime } from '../../js/scores.js';
 import { initSettings } from '../../js/settings.js';
 import { sfx } from '../../js/sound.js';
-import { LEVELS, TAGGED, TESTED, fusesLeft, newPanel, shaped, testFuse, toggleTag } from './rules.js';
+import { LEVELS, TAGGED, TESTED, fitted, fusesLeft, newPanel, testFuse, toggleTag } from './rules.js';
 
 const GAME = 'fuse-box';
 const ORDER = 'low'; // a faster time is better
@@ -108,8 +108,8 @@ function paintCounters() {
 }
 
 function build() {
-  // The panel takes the screen's shape when it is made; turning the phone mid-game keeps it as it is.
-  p = newPanel(shaped(LEVELS[level], window.matchMedia('(orientation: portrait)').matches));
+  // The panel takes the screen's shape and room when it is made; turning the phone mid-game keeps it as it is.
+  p = newPanel(fitted(LEVELS[level], window.matchMedia('(orientation: portrait)').matches, room(), MIN_CELL, MAX_CELL));
   started = 0;
   finished = 0;
   clearInterval(clock);
@@ -244,13 +244,17 @@ ui.again.addEventListener('click', () => {
   buttons[0].focus();
 });
 
+/** The room the panel's cells have: its frame less the panel's padding and border. */
+function room() {
+  const pad = 20;
+  return { width: ui.frame.clientWidth - pad, height: ui.frame.clientHeight - pad };
+}
+
 /** Size the cells to the room the panel has: as big as fits, between MIN_CELL and MAX_CELL. */
 function fit() {
   if (!p) return;
-  const pad = 20; // the panel's padding and border
-  const w = ui.frame.clientWidth - pad;
-  const h = ui.frame.clientHeight - pad;
-  const cell = Math.floor(Math.max(MIN_CELL, Math.min(MAX_CELL, w / p.cols, h / p.rows)));
+  const { width, height } = room();
+  const cell = Math.floor(Math.max(MIN_CELL, Math.min(MAX_CELL, width / p.cols, height / p.rows)));
   ui.board.style.setProperty('--cell', `${cell}px`);
 }
 new ResizeObserver(fit).observe(ui.frame);

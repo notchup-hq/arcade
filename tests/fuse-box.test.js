@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { LEVELS, TAGGED, TESTED, around, fusesLeft, newPanel, seeded, shaped, testFuse, toggleTag } from '../games/fuse-box/rules.js';
+import { LEVELS, TAGGED, TESTED, around, fitted, fusesLeft, newPanel, seeded, shaped, testFuse, toggleTag } from '../games/fuse-box/rules.js';
 
 const blownCount = (p) => p.isBlown.reduce((a, b) => a + b, 0);
 
@@ -89,4 +89,25 @@ test('on a portrait screen a wide panel turns, with the same fuses', () => {
   assert.deepEqual(shaped(LEVELS.hard, true), { cols: 10, rows: 18, blown: 40 });
   assert.equal(shaped(LEVELS.hard, false), LEVELS.hard);
   assert.equal(shaped(LEVELS.easy, true), LEVELS.easy);
+});
+
+test('a panel that fits with big enough cells keeps the screen\'s shape', () => {
+  const room = { width: 328, height: 584 }; // a tall phone
+  assert.deepEqual(fitted(LEVELS.hard, true, room, 24, 52), { cols: 10, rows: 18, blown: 40 });
+});
+
+test('a short phone gets a squarer hard panel with the same number of fuses', () => {
+  const room = { width: 308, height: 360 }; // 360 x 640: 10 x 18 would need 24 px cells and 432 px
+  const p = fitted(LEVELS.hard, true, room, 24, 52);
+  assert.equal(p.cols * p.rows, 180);
+  assert.equal(p.blown, 40);
+  assert.ok(Math.min(room.width / p.cols, room.height / p.rows) >= 24);
+});
+
+test('where no shape reaches the smallest cell, the biggest cells win', () => {
+  const room = { width: 268, height: 232 }; // 320 x 568
+  const p = fitted(LEVELS.hard, true, room, 24, 52);
+  const size = (c, r) => Math.min(room.width / c, room.height / r);
+  assert.equal(p.cols * p.rows, 180);
+  assert.ok(size(p.cols, p.rows) >= size(10, 18));
 });

@@ -19,6 +19,26 @@ export const shaped = (level, portrait) => (portrait && level.cols > level.rows
   ? { ...level, cols: level.rows, rows: level.cols }
   : level);
 
+/**
+ * A level shaped to fit `room` (width and height in px) with cells of at least `min` px (and at most
+ * `max`): the screen's shape from shaped(), or when its cells would be smaller than `min`, the pair of
+ * columns and rows with the same number of fuses (so the same difficulty) that gives the biggest cells.
+ * Where none reaches `min` the biggest still wins, and the panel scrolls inside its frame.
+ */
+export function fitted(level, portrait, { width, height }, min, max) {
+  const base = shaped(level, portrait);
+  const size = (cols, rows) => Math.min(width / cols, height / rows, max);
+  let best = base;
+  if (size(base.cols, base.rows) >= min) return best;
+  const n = base.cols * base.rows;
+  for (let cols = 1; cols <= n; cols++) {
+    const rows = n / cols;
+    const squarish = Math.max(cols, rows) <= 2 * Math.min(cols, rows); // no 4×45 strips
+    if (n % cols === 0 && squarish && size(cols, rows) > size(best.cols, best.rows)) best = { ...level, cols, rows };
+  }
+  return best;
+}
+
 export const UNTESTED = 0;
 export const TESTED = 1;
 export const TAGGED = 2;
