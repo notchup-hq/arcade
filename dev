@@ -34,6 +34,9 @@ Commands:
   sync                      Write the HTML every page shares (head, the game bar's Arcade link and buttons,
                             the initials dialog) from scripts/templates/game/index.html into every page,
                             with each page's modulepreload list from its imports (scripts/sync-pages.mjs).
+  version <x.y.z>           Release a version: set js/version.js, turn the changelog's Unreleased heading into
+                            "## x.y.z – date", and sync every page's shown version (scripts/set-version.mjs).
+                            You still tag and make the GitHub release.
   new-game <id> "<Name>"    Start a game: write a small working one into games/<id>/ from scripts/templates/game/
                             and add it to the hall, js/games.js, styles.css and the sitemap
                             (scripts/new-game.mjs). docs/adding-a-game.md says what to change next.
@@ -285,6 +288,10 @@ case "$cmd" in
     [ $# -eq 2 ] || die_usage 'new-game needs an id and a name: ./dev new-game light-up "Light Up"'
     need node "needed to start a game" "Install Node.js (18 or newer)."
     node scripts/new-game.mjs "$1" "$2" ;;
+  version)
+    [ $# -eq 1 ] || die_usage 'version needs a number: ./dev version 0.3.0'
+    need node "needed to set the version" "Install Node.js (18 or newer)."
+    node scripts/set-version.mjs "$1" ;;
   sync)
     need node "needed to sync the pages" "Install Node.js (18 or newer)."
     node scripts/sync-pages.mjs ;;

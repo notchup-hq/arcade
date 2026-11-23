@@ -35,6 +35,7 @@ git clone https://github.com/notchup-hq/arcade.git && cd arcade
 ./dev layout            # every page in a real browser at phone, tablet and laptop widths
 ./dev bench             # how much work the hall and each game make on a slow phone
 ./dev sync              # after changing the shared page HTML or a game's imports
+./dev version x.y.z     # release: version file, changelog heading and every page's version (then tag it yourself)
 ./dev new-game light-up "Light Up"   # start a game; docs/adding-a-game.md says what next
 ```
 

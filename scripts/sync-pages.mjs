@@ -2,12 +2,14 @@
 // stay plain static HTML (nothing is put together in the browser), and this script is what keeps the
 // copies the same, like ./dev order does for the hall. From scripts/templates/game/index.html it copies
 // into every page the head's first lines (charset to build stamp), and into every game page the Arcade
-// link, the bar's buttons and the initials dialog. It also writes each page's modulepreload list from
+// link, the bar's buttons and the initials dialog, and the version (from js/version.js) wherever a page
+// shows it before its script runs. It also writes each page's modulepreload list from
 // the imports of its script. What differs per game (title, help, hall-of-fame caption) is left alone.
 
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { VERSION } from '../js/version.js';
 import { entryOf, moduleGraph, pages, read, relativeTo, root } from './site.mjs';
 
 export const TEMPLATE = 'scripts/templates/game/index.html';
@@ -19,6 +21,9 @@ const BLOCKS = [
   { name: 'bar buttons', re: /    <div class="tools">\n[\s\S]*?\n    <\/div>\n/, games: true },
   { name: 'initials dialog', re: /  <dialog id="initials"[\s\S]*?\n  <\/dialog>\n/, games: true },
 ];
+
+/** The version a page shows before its script runs (js/settings.js writes the same into every .version). */
+const SHOWN_VERSION = /(class="version">v)\d+\.\d+\.\d+(?=<)/g;
 
 /** The modulepreload lines just before the page's script (none is fine, as in the template). */
 const PRELOADS = /(?:  <link rel="modulepreload" href="[^"]+">\n)*(?=  <script type="module")/;
@@ -38,6 +43,7 @@ export function syncPage(page, html, template, graph = moduleGraph(entryOf(page,
     const block = only(template, re, name, TEMPLATE);
     out = out.replace(only(out, re, name, page), () => block);
   }
+  out = out.replace(SHOWN_VERSION, `$1${VERSION}`);
   const preloads = graph.map((f) => `  <link rel="modulepreload" href="${relativeTo(page, f)}">\n`).join('');
   return out.replace(PRELOADS, () => preloads);
 }
@@ -45,9 +51,14 @@ export function syncPage(page, html, template, graph = moduleGraph(entryOf(page,
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const template = read(TEMPLATE);
   const changed = [];
+  const stamped = template.replace(SHOWN_VERSION, `$1${VERSION}`);
+  if (stamped !== template) {
+    writeFileSync(join(root, TEMPLATE), stamped);
+    changed.push(TEMPLATE);
+  }
   for (const page of pages()) {
     const html = read(page);
-    const next = syncPage(page, html, template);
+    const next = syncPage(page, html, stamped);
     if (next !== html) {
       writeFileSync(join(root, page), next);
       changed.push(page);

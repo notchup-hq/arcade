@@ -30,6 +30,7 @@ Notchup Arcade: a neon hall of tiny classic arcade games, at https://arcade.notc
 ./dev check           # tests, then check that every file loads over HTTP
 ./dev order           # put the hall's cabinets in the order of js/games.js
 ./dev sync            # copy the shared page HTML from scripts/templates/game/ and write the preload lists
+./dev version 0.3.0   # release: set js/version.js, date the changelog's Unreleased, sync the shown version
 ./dev new-game <id> "<Name>"  # start a game from scripts/templates/game/ (docs/adding-a-game.md)
 ./dev layout          # every page in Chromium at 320, 360, 768 and 1280 px (--shots saves screenshots)
 ./dev bench           # main-thread cost of the hall and each game on a slow phone; before and after a change
@@ -40,7 +41,7 @@ Run tests quietly; show the output only on failure.
 ## Deploy and releases
 
 - Cloudflare Pages via its Git integration: a merge to `main` deploys https://arcade.notchup.fi, and PRs get preview URLs. Build command `node scripts/stamp-build.mjs` (stamps the commit and date into `<meta name="build">`, set in `wrangler.jsonc`), output directory `/`. Security headers live in `_headers`. Cloudflare Web Analytics stays off (it injects a script).
-- The version lives only in `js/version.js` and must match the newest `## x.y.z – date` heading in `CHANGELOG.md` (`tests/version.test.js`) and the version shown on each page. A PR adds its changes under `## Unreleased`. The owner tags releases (`v0.1.0`).
+- The version lives only in `js/version.js` (`./dev version x.y.z` sets it and syncs the pages) and must match the newest `## x.y.z – date` heading in `CHANGELOG.md` (`tests/version.test.js`) and the version shown on each page. A PR adds its changes under `## Unreleased`. The owner tags releases (`v0.1.0`).
 
 ## For agents
 
