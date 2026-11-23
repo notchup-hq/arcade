@@ -50,6 +50,22 @@ test('a game page holds its first frame until its script has built the board', (
   }
 });
 
+test('a ready cabinet teases with a plate that fades slowly and never flashes, in text of 16 px or more', () => {
+  const css = read('styles.css');
+  assert.match(css, /\.cabinet\[data-game\] \.screen::before \{\s*content: "PRESS START";[^}]*font: 800 1rem/);
+  assert.match(css, /\(pointer: coarse\) \{ \.cabinet\[data-game\] \.screen::before \{ content: "TAP TO PLAY"; \} \}/);
+  const motion = css.slice(css.indexOf('@media (prefers-reduced-motion: no-preference)'));
+  assert.match(motion, /animation: breathe 2\.4s ease-in-out infinite/);
+  assert.match(css, /@keyframes breathe \{ 50% \{ opacity: 0\.5; \} \}/);
+});
+
+test('the hall shows a tapped cabinet as opening and clears it when the page comes back', () => {
+  const hall = read('js/hall.js');
+  assert.match(hall, /classList\.add\('opening'\)/);
+  assert.match(hall, /pageshow[\s\S]*classList\.remove\('opening'\)/);
+  assert.match(read('styles.css'), /\.cabinet\.opening \.screen::after \{[^}]*mark\.svg/);
+});
+
 test('the zoom between pages runs only when the visitor has not asked for less motion', () => {
   const css = read('styles.css');
   const motion = css.slice(css.indexOf('@media (prefers-reduced-motion: no-preference)'));
