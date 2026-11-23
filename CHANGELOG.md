@@ -4,6 +4,10 @@ All notable changes to this project are listed here, newest first. The format fo
 
 ## Unreleased
 
+### Added
+
+- Challenge a friend: the hall of fame has a button that shares your best score on the level as a link (the phone's share sheet, or a copied link). Opening such a link shows a card ("A challenger has arrived…"), with the score in the game's words. Nothing is saved or sent: the score travels in the link's `#` part, which the browser never sends, and it never touches your own tables. A challenge is a short code, not a secret, and is not verified.
+
 ### Changed
 
 - Behind the scenes: `./dev version x.y.z` releases a version in one step (sets `js/version.js`, dates the changelog's Unreleased heading, and syncs the version every page shows), and `./dev sync` now writes that version into every page, so a bump no longer means editing seven files by hand.
