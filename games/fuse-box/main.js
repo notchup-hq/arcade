@@ -59,7 +59,6 @@ const fame = createFame({
   order: ORDER,
   label: () => ({ easy: 'Easy', medium: 'Medium', hard: 'Hard' })[level],
   score: { head: 'Time (s)', cell: formatTime },
-  empty: 'No scores on this browser yet. Fix a panel to be the first.',
 });
 const elapsed = () => (started ? (finished || performance.now()) - started : 0);
 

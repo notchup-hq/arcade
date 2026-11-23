@@ -69,7 +69,6 @@ const fame = createFame({
   label: () => ({ easy: 'Easy', medium: 'Medium', hard: 'Hard' })[level],
   score: { head: 'Points', cell: String },
   columns: [{ key: 'pairs', head: 'Pairs', cell: String }],
-  empty: 'No scores on this browser yet. Clear a round to be the first.',
 });
 const say = (text) => { ui.status.textContent = text; };
 const label = (i) => `Card ${i + 1}`;

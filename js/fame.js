@@ -7,11 +7,11 @@
 
 import { askInitials } from './initials.js';
 import { memory } from './memory.js';
-import { formatDate, placeOf, whereMade } from './scores.js';
+import { MAX_ENTRIES, formatDate, placeOf, whereMade } from './scores.js';
 
 const VIEWS = [
   { id: 'all', name: 'All time' },
-  { id: 'week', name: 'This week', note: 'A new week starts on Monday.', empty: 'Nothing this week yet. Be the first.' },
+  { id: 'week', name: 'This week', note: 'A new week starts on Monday.' },
 ];
 
 // The year may wrap under the day and month when a long score leaves a small phone no room.
@@ -31,10 +31,10 @@ function row(tag, cells, attrs = {}) {
 /**
  * Fill `table` (its <thead> and <tbody>) with `entries`, best first. `score` is { head, cell } for
  * the score column; each of `columns` is { key, head, cell } for one of the entries' `extra` numbers
- * (an older entry without it shows a dash). The row at `fresh` (0-based) is marked new; `empty` is
- * what an empty table says.
+ * (an older entry without it shows a dash). The row at `fresh` (0-based) is marked new. The table
+ * always has MAX_ENTRIES rows, the unplayed places as dashes, so its height never depends on the data.
  */
-export function renderFame(table, entries, { score, columns = [], fresh = -1, empty = 'No scores on this browser yet. Be the first.' }) {
+export function renderFame(table, entries, { score, columns = [], fresh = -1 }) {
   const heads = ['#', 'Who', score.head, ...columns.map((c) => c.head), 'Date'];
   table.tHead.replaceChildren(row('th', heads, { scope: 'col' }));
   const rows = entries.map((e, k) => {
@@ -43,23 +43,30 @@ export function renderFame(table, entries, { score, columns = [], fresh = -1, em
     if (k === fresh) tr.className = 'new';
     return tr;
   });
-  if (!rows.length) {
-    const tr = row('td', [empty]);
-    tr.firstChild.colSpan = heads.length;
-    rows.push(tr);
+  for (let k = rows.length; k < MAX_ENTRIES; k++) {
+    rows.push(row('td', [String(k + 1), '---', ...heads.slice(2).map(() => '\u2013')]));
   }
   table.tBodies[0].replaceChildren(...rows);
 }
 
 /**
  * A game's hall of fame. `board()` names the current table (`fuse-box:easy`) and `order` says which
- * end is best (`low` or `high`); `label()`, when given, is the level shown in `caption`. `score`,
- * `columns` and `empty` are as for renderFame. `dialog` is the hall of fame dialog with `table` in
+ * end is best (`low` or `high`); `label()`, when given, is the level shown in `caption`. `score`
+ * and `columns` are as for renderFame. `dialog` is the hall of fame dialog with `table` in
  * it, and `initials` the new high score dialog.
  */
-export function createFame({ dialog, table, caption, initials, board, order, label, score, columns, empty }) {
+export function createFame({ dialog, table, caption, initials, board, order, label, score, columns }) {
   const credit = dialog.querySelector('.credit');
   const kept = credit?.textContent ?? '';
+  // One line of small print per view, stacked in the same place, so the dialog is as tall on a
+  // small phone whichever table shows (the longer line wraps there).
+  const prints = VIEWS.map(({ note }) => {
+    const span = document.createElement('span');
+    span.textContent = note ? `${kept} ${note}` : kept;
+    return span;
+  });
+  credit?.replaceChildren(...prints);
+  credit?.classList.add('stack');
   let view = 'all';
 
   const tabs = document.createElement('div');
@@ -80,12 +87,11 @@ export function createFame({ dialog, table, caption, initials, board, order, lab
   /** Draw the table for the current level; `fresh` is the new row to mark, `show` switches the view. */
   function render(fresh = -1, show = view) {
     view = show;
-    const { note, empty: none } = VIEWS.find((v) => v.id === view);
     if (caption && label) caption.textContent = label();
     const entries = view === 'week' ? memory.weekScores(board(), order) : memory.scores(board(), order);
-    renderFame(table, entries, { score, columns, empty: none ?? empty, fresh });
+    renderFame(table, entries, { score, columns, fresh });
     buttons.forEach((b, k) => b.setAttribute('aria-pressed', String(VIEWS[k].id === view)));
-    if (credit) credit.textContent = note ? `${kept} ${note}` : kept;
+    prints.forEach((p, k) => { p.classList.toggle('off', VIEWS[k].id !== view); });
   }
 
   return {

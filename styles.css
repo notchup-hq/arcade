@@ -706,6 +706,9 @@ html:has(body.game), body.game { overflow: hidden; overscroll-behavior: none; }
 .sheet ul { padding-left: 1.25rem; }
 .sheet .actions { margin-top: 1rem; }
 .credit { color: var(--neon-muted); }
+.credit.stack { display: grid; }
+.credit.stack > span { grid-area: 1 / 1; }
+.credit.stack > .off { visibility: hidden; }
 .board-tabs { display: flex; justify-content: center; gap: 0.5rem; margin-bottom: 0.5rem; }
 .board-tabs button {
   min-height: 44px;

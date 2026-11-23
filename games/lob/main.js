@@ -404,7 +404,6 @@ const fame = createFame({
   order: ORDER,
   score: { head: 'Score', cell: String },
   columns: [{ key: 'rivals', head: 'Rivals', cell: String }],
-  empty: 'No runs on this browser yet. Beat a rival to be the first.',
 });
 
 wireDialogs({ help: ui.help, fame });
