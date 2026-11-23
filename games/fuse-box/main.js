@@ -5,6 +5,7 @@
 
 import { wireDialogs } from '../../js/dialogs.js';
 import { createFame } from '../../js/fame.js';
+import { gridKeys } from '../../js/grid.js';
 import { pickLevel } from '../../js/levels.js';
 import { consoleLogo } from '../../js/logo.js';
 import { formatTime } from '../../js/scores.js';
@@ -217,29 +218,13 @@ ui.board.addEventListener('contextmenu', (e) => {
   if (i !== pressed) act(i, true); // a long press on a touch screen also opens the context menu
 });
 
-// Keyboard: arrows move, Enter or Space tests (the button's own click), T or F tags.
+// Keyboard: arrows move (js/grid.js), Enter or Space tests (the button's own click), T or F tags.
+gridKeys(ui.board, () => p.cols);
 ui.board.addEventListener('keydown', (e) => {
   const b = e.target.closest('button');
-  if (!b) return;
-  const i = Number(b.dataset.i);
-  const x = i % p.cols;
-  const moves = {
-    ArrowLeft: x > 0 ? i - 1 : i,
-    ArrowRight: x < p.cols - 1 ? i + 1 : i,
-    ArrowUp: i >= p.cols ? i - p.cols : i,
-    ArrowDown: i + p.cols < buttons.length ? i + p.cols : i,
-    Home: i - x,
-    End: i - x + p.cols - 1,
-  };
-  if (e.key in moves) {
-    e.preventDefault();
-    b.tabIndex = -1;
-    buttons[moves[e.key]].tabIndex = 0;
-    buttons[moves[e.key]].focus();
-  } else if (e.key === 't' || e.key === 'T' || e.key === 'f' || e.key === 'F') {
-    e.preventDefault();
-    act(i, true);
-  }
+  if (!b || !['t', 'T', 'f', 'F'].includes(e.key)) return;
+  e.preventDefault();
+  act(Number(b.dataset.i), true);
 });
 
 /** Switch what a tap does. The panel's frame turns gold while tapping tags. */

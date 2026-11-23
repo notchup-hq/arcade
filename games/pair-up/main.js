@@ -10,6 +10,7 @@ import { sharpCanvas } from '../../js/canvas.js';
 import { whenDialogsClosed, wireDialogs } from '../../js/dialogs.js';
 import { createFame } from '../../js/fame.js';
 import { GRACE_MS } from '../../js/grace.js';
+import { gridKeys } from '../../js/grid.js';
 import { pickLevel } from '../../js/levels.js';
 import { consoleLogo } from '../../js/logo.js';
 import { initSettings } from '../../js/settings.js';
@@ -244,31 +245,8 @@ ui.deck.addEventListener('click', (e) => {
   if (b) act(Number(b.dataset.i));
 });
 
-// Keyboard: arrows move around the deck; Enter and Space are the button's own click.
-ui.deck.addEventListener('keydown', (e) => {
-  const b = e.target.closest('button');
-  if (!b) return;
-  const i = Number(b.dataset.i);
-  const x = i % cols;
-  const moves = {
-    ArrowLeft: x > 0 ? i - 1 : i,
-    ArrowRight: x < cols - 1 && i + 1 < buttons.length ? i + 1 : i,
-    ArrowUp: i >= cols ? i - cols : i,
-    ArrowDown: i + cols < buttons.length ? i + cols : i,
-    Home: i - x,
-    End: Math.min(i - x + cols - 1, buttons.length - 1),
-  };
-  if (!(e.key in moves)) return;
-  e.preventDefault();
-  buttons[moves[e.key]].focus();
-});
-
-// The one tab stop follows the focus, so Tab out and back returns to the card last used.
-ui.deck.addEventListener('focusin', (e) => {
-  const b = e.target.closest('button');
-  if (!b) return;
-  for (const other of buttons) other.tabIndex = other === b ? 0 : -1;
-});
+// Keyboard: arrows move around the deck (js/grid.js); Enter and Space are the button's own click.
+gridKeys(ui.deck, () => cols);
 
 function restart() {
   sfx.start();

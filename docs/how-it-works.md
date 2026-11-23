@@ -33,6 +33,7 @@
 | `settings.js` | What every page has around its game: the sound switch (an icon button), the version, and a game's Arcade link. When the hall is the page before, that link goes back in history, the same as the back button; reached any other way, it opens the hall at its top. |
 | `dialogs.js` | The help and hall of fame buttons in a game's bar (`wireDialogs`). A game that moves on its own (Notch Up, Patch Night) waits while any dialog is open and ignores input under one (`dialogOpen`); Pair Up deals its next round only once every dialog is closed (`whenDialogsClosed`). |
 | `levels.js` | A game's levels: the radios above the board, and the level in the link (`?level=hard`; the first level keeps the link clean). The names come from the game's `LEVELS`, and `tests/screens.test.js` checks the hall's score pages list the same ones. |
+| `grid.js` | A board of buttons in rows (Fuse Box's panel, Pair Up's deck): one tab stop that follows the focus, and the arrow keys, Home and End to move around it. |
 
 ## Cabinets and the zoom into a game
 
