@@ -97,6 +97,26 @@ function card(line, canSave) {
 }
 
 /**
+ * A link opened from outside (a chat app, say) has nothing behind it, so Back would leave the arcade.
+ * Put the hall behind the game: this entry takes the hall's address and the game is pushed on top.
+ * Back then lands on that entry, still showing the game, so a click on the Arcade link `back` loads
+ * the hall for real; the link goes to the address the entry already has, which the browser treats as
+ * a replace, so Back from the hall leaves cleanly instead of coming round again. A page reached from
+ * the arcade itself (same-origin referrer) already has the hall behind it and is left alone.
+ */
+export function hallBehind(back) {
+  if (document.referrer && new URL(document.referrer).origin === location.origin) return;
+  const hall = new URL(back.href);
+  if (hall.origin !== location.origin) return;
+  const here = location.pathname + location.search;
+  history.replaceState({ hallEntry: true }, '', hall.pathname);
+  history.pushState(null, '', here);
+  addEventListener('popstate', (e) => {
+    if (e.state?.hallEntry) back.click();
+  });
+}
+
+/**
  * Greet a visitor who opened a challenge link, if the page's address (`hash`) carries a good one for
  * this game. A challenge made on the table this page shows (`board`) can be saved: `onSave(challenge)`
  * runs when the visitor taps Save challenger, and only then. One from another level of the game only
@@ -110,6 +130,8 @@ export function greetChallenger({ hash, game, board, gameName, score, rand, onSa
     ? challengeLine(challenge, { gameName, score, rand })
     : `This challenge was made in ${whereWords(gameName, challenge.board)}. Switch to that level to take it on.`;
   history.replaceState(null, '', location.pathname + location.search); // a reload does not greet twice
+  const hall = document.querySelector('a.back');
+  if (hall) hallBehind(hall);
   const dialog = card(line, here);
   document.body.append(dialog);
   dialog.addEventListener('close', () => {
