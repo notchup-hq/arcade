@@ -2,6 +2,7 @@
 // colours. Spades and clubs are cyan, hearts and diamonds magenta, and the suit's shape tells them
 // apart too. Suits are drawn as shapes, not letters of a font, so every phone shows the same ones.
 
+import { drawLogo } from '../../js/logo.js';
 import { CARDS, isRed, place } from './rules.js';
 
 const FONT = 'ui-sans-serif, system-ui, sans-serif';
@@ -50,23 +51,10 @@ const outline = (ctx, x, y, w, h) => {
   ctx.roundRect(x, y, w, h, w * 0.1);
 };
 
-/** The back of a card: a ring of twelve notches, the logo's gear in outline. */
-function back(ctx, x, y, w, h, c) {
-  ctx.globalAlpha = 0.5;
-  ctx.strokeStyle = c.gold;
-  ctx.lineWidth = Math.max(1, w * 0.04);
-  const cx = x + w / 2;
-  const cy = y + h / 2;
-  const r = Math.min(w, h) * 0.26;
-  ctx.beginPath();
-  for (let k = 0; k < 12; k++) {
-    const a = (k * Math.PI) / 6;
-    ctx.moveTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
-    ctx.lineTo(cx + Math.cos(a) * r * 1.4, cy + Math.sin(a) * r * 1.4);
-  }
-  ctx.moveTo(cx + r, cy);
-  ctx.arc(cx, cy, r, 0, Math.PI * 2);
-  ctx.stroke();
+/** The back of a card: the Notchup logo, dimmed so the face-up cards stay the loudest thing on the table. */
+function back(ctx, x, y, w, h) {
+  ctx.globalAlpha = 0.75;
+  drawLogo(ctx, { x: x + w / 2, y: y + h / 2, size: Math.min(w, h) * 0.7 });
   ctx.globalAlpha = 1;
 }
 
@@ -84,7 +72,7 @@ function card(ctx, lay, c, { id, up }, x, y, full) {
   ctx.strokeStyle = up ? c.ink : c.dim;
   ctx.stroke();
   if (!up) {
-    if (full) back(ctx, x, y, cw, ch, c);
+    if (full) back(ctx, x, y, cw, ch);
     return;
   }
   const { rank, suit: kind } = CARDS[id];
