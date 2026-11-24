@@ -117,8 +117,8 @@ function fakeHistory(referrer) {
     body: { append: (d) => { d.isConnected = true; dialogs.push(d); } },
     createElement: (tag) => ({ tag, listeners: {}, attrs: {}, append() {}, setAttribute(k, v) { this.attrs[k] = v; }, remove() { this.isConnected = false; }, addEventListener(name, fn) { this.listeners[name] = fn; }, showModal() { this.open = true; } }),
   };
-  globalThis.location = { origin: 'https://arcade.notchup.fi', href: 'https://arcade.notchup.fi/games/lob/#c=x', pathname: '/games/lob/', search: '?level=hard', };
-  const back = { href: 'https://arcade.notchup.fi/', click: () => log.push(['click']) };
+  globalThis.location = { origin: 'https://arcade.notchup.fi', href: 'https://arcade.notchup.fi/games/lob/#c=x', pathname: '/games/lob/', search: '?level=hard', reload: () => log.push(['reload']) };
+  const back = { href: 'https://arcade.notchup.fi/' };
   globalThis.history = {
     replaceState: (state, _t, url) => log.push(['replaceState', state, url]),
     pushState: (state, _t, url) => log.push(['pushState', state, url]),
@@ -129,25 +129,25 @@ function fakeHistory(referrer) {
 
 test('a link opened from outside gets the hall put behind it, and Back goes to the hall', () => {
   const { log, listeners, back, dialogs } = fakeHistory('');
-  hallBehind(back);
-  assert.deepEqual(log, [['replaceState', { hallEntry: true }, '/'], ['pushState', null, '/games/lob/?level=hard']]);
+  hallBehind(back, 'lob');
+  assert.deepEqual(log, [['replaceState', { hallEntry: true }, '/#lob'], ['pushState', null, '/games/lob/?level=hard']]);
   listeners.popstate({ state: null });
   assert.equal(log.length, 2, 'a step within the game does nothing');
   assert.deepEqual(dialogs, [], 'no card for a step within the game');
   listeners.popstate({ state: { hallEntry: true } });
   assert.equal(dialogs.filter((d) => d.tag === 'dialog' && d.open).length, 1, 'the waiting card shows');
   assert.equal(dialogs[0].attrs['aria-labelledby'], 'back-title');
-  assert.deepEqual(log.at(-1), ['click']);
+  assert.deepEqual(log.at(-1), ['reload']);
   listeners.popstate({ state: { hallEntry: true } });
   assert.equal(dialogs.length, 1, 'a second Back does not stack a second card');
-  assert.equal(log.filter((l) => l[0] === 'click').length, 2, 'but still loads the hall');
+  assert.equal(log.filter((l) => l[0] === 'reload').length, 2, 'but still loads the hall');
   dialogs[0].listeners.close();
   assert.equal(dialogs[0].isConnected, false, 'closing the card removes it');
 });
 
 test('a page reached from the arcade already has the hall behind it', () => {
   const { log, back } = fakeHistory('https://arcade.notchup.fi/');
-  hallBehind(back);
+  hallBehind(back, 'lob');
   assert.deepEqual(log, []);
 });
 
@@ -160,12 +160,12 @@ test('greeting a link puts the hall behind the game, after clearing the hash', (
   greetChallenger({ ...args(), onSave: () => {} });
   assert.deepEqual(log.map((l) => l[0]), ['replaceState', 'replaceState', 'pushState']);
   assert.equal(log[0][2], '/games/lob/');
-  assert.equal(log[1][2], '/');
+  assert.equal(log[1][2], '/#lob');
 });
 
 test('an Arcade link on another origin is not made a hall entry', () => {
   const { log, back } = fakeHistory('');
   back.href = 'https://example.com/';
-  hallBehind(back);
+  hallBehind(back, 'lob');
   assert.deepEqual(log, []);
 });

@@ -98,19 +98,19 @@ function card(line, canSave) {
 
 /**
  * A link opened from outside (a chat app, say) has nothing behind it, so Back would leave the arcade.
- * Put the hall behind the game: this entry takes the hall's address and the game is pushed on top.
- * Back then lands on that entry, still showing the game, so a click on the Arcade link `back` loads
- * the hall for real; the link goes to the address the entry already has, which the browser treats as
- * a replace, so Back from the hall leaves cleanly instead of coming round again. A small card says
- * "Back to the arcade…" meanwhile. A page reached from
- * the arcade itself (same-origin referrer) already has the hall behind it and is left alone.
+ * Put the hall behind the game: this entry takes the hall's address with the game's name (`/#lob`, as
+ * the hall itself writes it) and the game is pushed on top. Back then lands on that entry, still
+ * showing the game, so a reload loads the hall for real, on the cabinet just played, so the screen
+ * shrinks back into it. A reload replaces the entry, so Back from the hall leaves cleanly. A small
+ * card says "Back to the arcade…" meanwhile. A page reached from the arcade itself (same-origin
+ * referrer) already has the hall behind it and is left alone.
  */
-export function hallBehind(back) {
+export function hallBehind(back, game) {
   if (document.referrer && new URL(document.referrer).origin === location.origin) return;
   const hall = new URL(back.href);
   if (hall.origin !== location.origin) return;
   const here = location.pathname + location.search;
-  history.replaceState({ hallEntry: true }, '', hall.pathname);
+  history.replaceState({ hallEntry: true }, '', `${hall.pathname}#${game}`);
   history.pushState(null, '', here);
   let wait = null;
   addEventListener('popstate', (e) => {
@@ -125,7 +125,7 @@ export function hallBehind(back) {
       wait.addEventListener('close', () => wait.remove());
     }
     if (!wait.open) wait.showModal();
-    back.click();
+    location.reload();
   });
 }
 
@@ -144,7 +144,7 @@ export function greetChallenger({ hash, game, board, gameName, score, rand, onSa
     : `This challenge was made in ${whereWords(gameName, challenge.board)}. Switch to that level to take it on.`;
   history.replaceState(null, '', location.pathname + location.search); // a reload does not greet twice
   const hall = document.querySelector('a.back');
-  if (hall) hallBehind(hall);
+  if (hall) hallBehind(hall, game);
   const dialog = card(line, here);
   document.body.append(dialog);
   dialog.addEventListener('close', () => {
