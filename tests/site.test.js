@@ -101,3 +101,10 @@ test('a disabled button looks disabled, and a hover does not light it up', () =>
   assert.match(css, /\.sheet button:disabled\s*\{[^}]*opacity/);
   assert.match(css, /button:hover:not\(:disabled\)/);
 });
+
+test('a touch screen held sideways is asked to turn upright, and a long title never runs under the back link', () => {
+  const css = read('styles.css');
+  assert.match(css, /@media \(orientation: landscape\) and \(max-height: 30rem\) and \(pointer: coarse\) \{\s*body\.game::before \{\s*content: "[^"]*Turn your phone upright"/);
+  assert.match(css, /@media \(max-width: 30rem\) \{\s*\.back-text \{ position: absolute/);
+  assert.match(css, /\.game-bar h1 \{[^}]*min-width: 0;[^}]*text-overflow: ellipsis;[^}]*font: 800 clamp\(1rem/);
+});
