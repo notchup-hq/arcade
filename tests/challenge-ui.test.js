@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { packChallenge } from '../js/challenge.js';
-import { challengeLine, explainSharing, greetChallenger, readChallenge, shareText, showChallengeQr, whereWords } from '../js/challenge-ui.js';
+import { challengeLine, explainSharing, greetChallenger, hallBehind, readChallenge, shareText, showChallengeQr, whereWords } from '../js/challenge-ui.js';
 
 const code = packChallenge({ board: 'lob:solo', value: 1840, initials: 'PEK', date: Date.now() });
 const args = (extra) => ({ hash: `#c=${code}`, game: 'lob', board: 'lob:solo', gameName: 'Lob', score: String, rand: () => 0, ...extra });
@@ -27,9 +27,12 @@ test('reading a link never touches browser storage', () => {
 
 // The card is built with the DOM, so these tests give it a tiny stand-in for one.
 function fakePage() {
+  const fake = { back: null };
   const dialogs = [];
   globalThis.document = {
     body: { append: () => {} },
+    referrer: '',
+    querySelector: () => fake.back,
     createElement(tag) {
       const el = { tag, listeners: {}, append() {}, setAttribute() {}, remove() {}, addEventListener(name, fn) { this.listeners[name] = fn; }, showModal() { this.open = true; } };
       if (tag === 'dialog') dialogs.push(el);
@@ -37,7 +40,8 @@ function fakePage() {
     },
   };
   globalThis.history = { replaceState() {} };
-  globalThis.location = { pathname: '/games/lob/', search: '' };
+  globalThis.location = { origin: 'https://arcade.notchup.fi', href: 'https://arcade.notchup.fi/games/lob/', pathname: '/games/lob/', search: '' };
+  dialogs.fake = fake;
   return dialogs;
 }
 
@@ -101,4 +105,54 @@ test('the sharing note says what a link is, that nothing is sent and that scores
   } finally {
     delete globalThis.document;
   }
+});
+
+/** A page with a history that records what is done to it. */
+function fakeHistory(referrer) {
+  const log = [];
+  const listeners = {};
+  globalThis.document = { referrer };
+  globalThis.location = { origin: 'https://arcade.notchup.fi', href: 'https://arcade.notchup.fi/games/lob/#c=x', pathname: '/games/lob/', search: '?level=hard', };
+  const back = { href: 'https://arcade.notchup.fi/', click: () => log.push(['click']) };
+  globalThis.history = {
+    replaceState: (state, _t, url) => log.push(['replaceState', state, url]),
+    pushState: (state, _t, url) => log.push(['pushState', state, url]),
+  };
+  globalThis.addEventListener = (name, fn) => { listeners[name] = fn; };
+  return { log, listeners, back };
+}
+
+test('a link opened from outside gets the hall put behind it, and Back goes to the hall', () => {
+  const { log, listeners, back } = fakeHistory('');
+  hallBehind(back);
+  assert.deepEqual(log, [['replaceState', { hallEntry: true }, '/'], ['pushState', null, '/games/lob/?level=hard']]);
+  listeners.popstate({ state: null });
+  assert.equal(log.length, 2, 'a step within the game does nothing');
+  listeners.popstate({ state: { hallEntry: true } });
+  assert.deepEqual(log.at(-1), ['click']);
+});
+
+test('a page reached from the arcade already has the hall behind it', () => {
+  const { log, back } = fakeHistory('https://arcade.notchup.fi/');
+  hallBehind(back);
+  assert.deepEqual(log, []);
+});
+
+test('greeting a link puts the hall behind the game, after clearing the hash', () => {
+  const dialogs = fakePage();
+  const log = [];
+  globalThis.history = { replaceState: (s, _t, u) => log.push(['replaceState', s, u]), pushState: (s, _t, u) => log.push(['pushState', s, u]) };
+  globalThis.addEventListener = () => {};
+  dialogs.fake.back = { href: 'https://arcade.notchup.fi/', click() {} };
+  greetChallenger({ ...args(), onSave: () => {} });
+  assert.deepEqual(log.map((l) => l[0]), ['replaceState', 'replaceState', 'pushState']);
+  assert.equal(log[0][2], '/games/lob/');
+  assert.equal(log[1][2], '/');
+});
+
+test('an Arcade link on another origin is not made a hall entry', () => {
+  const { log, back } = fakeHistory('');
+  back.href = 'https://example.com/';
+  hallBehind(back);
+  assert.deepEqual(log, []);
 });
