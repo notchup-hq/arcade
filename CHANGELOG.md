@@ -16,6 +16,7 @@ All notable changes to this project are listed here, newest first. The format fo
 
 ### Fixed
 
+- A long game title (Night Deal on a phone) no longer runs under the Arcade link: on phones the link is just the arrow, and the title shrinks to fit.
 - A button that cannot be used now looks it: Challenge a friend and Show QR looked ready with no score to share, and Delete and Clear in Friends looked ready with nothing to remove. They are dimmed.
 
 ## 0.3.0 – 2026-11-24
