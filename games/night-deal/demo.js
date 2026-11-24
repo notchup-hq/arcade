@@ -12,7 +12,7 @@ import { newGame, parseMove, play, seeded } from './rules.js';
 export const SEED = 4;
 export const LINE = 'c0f2 c6c5 c5c1x2 sw sw wc6 c5c6 sw sw sw wc3 sw wc0 c6c0x3 c6f1 c6c0 c6f3 c6f0 c5f0 c2f0 c2c0 c2c0 wc0 wf1 sw wc0 sw wf3 c5f3 c5c6 sw wc6 sw sw sw wf3 sw wf1 sw wc1 c3c1x2 c3c2 c6c3x3 sw wc0 sw wf2 sw wf3 c3f3 sw wf0 sw sw wc4 c1c4x6 c4c1x8 c4f2 c0f2 c1f2 c4c6 c4f3 c4c2 wc2 sw wf0 c5f0 c3f0 c3f3 sw wc6 sw wf1 c0f1 c0f2 c1f1 c0f1 c1f2 c0f2 c1f0 c0f0 wf2 wf1 c1f3 c1f0 c3f1 wf1 c0f2 c3f2 c0f0 c0f2 c2f1 c6f0 c2c0 sw wf3 c1f3 c0f3 c1f1 c0f1 c1f3 c2f0 c6f2'.split(' ').map(parseMove);
 
-const MOVE_MS = 90;      // between two moves
+const MOVE_MS = 450;     // between two moves: a calm hand, the whole deal in under a minute
 const START_MS = 700;    // the dealt table shows first
 const END_MS = 2500;
 const SMALL = { floor: 5, minWidth: 8, run: 6 }; // the screen is small: suits without letters
