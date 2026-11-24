@@ -10,7 +10,7 @@ test('the board list only grows at the end: its order is part of every link', ()
   assert.deepEqual(BOARDS, [
     'fuse-box:easy', 'fuse-box:medium', 'fuse-box:hard', 'lob:solo',
     'patch-night:simple', 'patch-night:medium', 'patch-night:hard', 'notch-up:tower',
-    'pair-up:easy', 'pair-up:medium', 'pair-up:hard',
+    'pair-up:easy', 'pair-up:medium', 'pair-up:hard', 'night-deal:draw-1', 'night-deal:draw-3',
   ]);
 });
 

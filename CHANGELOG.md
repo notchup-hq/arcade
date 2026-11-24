@@ -4,6 +4,10 @@ All notable changes to this project are listed here, newest first. The format fo
 
 ## Unreleased
 
+### Added
+
+- Night Deal, a calm card game: build four stacks from ace to king by moving cards between seven columns. Tap a card to send it where it fits, or drag it; undo is free. Every deal can be won, and when nothing useful is left the game says so. The time is counted but only shown when you win, and your best time is your score (Draw 1 and Draw 3 are two levels; moves ride beside it). Behind the scenes: Pair Up's deck shuffle moved to a shared `js/shuffle.js`.
+
 ### Fixed
 
 - A button that cannot be used now looks it: Challenge a friend and Show QR looked ready with no score to share, and Delete and Clear in Friends looked ready with nothing to remove. They are dimmed.

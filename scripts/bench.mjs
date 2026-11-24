@@ -32,6 +32,7 @@ const SCENES = [
   { name: 'Notch Up, playing', path: '/games/notch-up/', size: PHONE, start: '#go' },
   { name: 'Patch Night, playing', path: '/games/patch-night/', size: PHONE, start: '#go' },
   { name: 'Pair Up, waiting', path: '/games/pair-up/', size: PHONE },
+  { name: 'Night Deal, waiting', path: '/games/night-deal/', size: PHONE },
 ];
 
 const args = process.argv.slice(2);

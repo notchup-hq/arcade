@@ -12,4 +12,5 @@ export const GAMES = [
   { id: 'patch-night', demo: () => import('../games/patch-night/demo.js'), boards: levels('patch-night', ['simple', 'medium', 'hard']), order: 'high' },
   { id: 'notch-up', demo: () => import('../games/notch-up/demo.js'), boards: [{ id: 'notch-up:tower', label: '' }], order: 'high' },
   { id: 'pair-up', demo: () => import('../games/pair-up/demo.js'), boards: levels('pair-up', ['easy', 'medium', 'hard']), order: 'high' },
+  { id: 'night-deal', demo: () => import('../games/night-deal/demo.js'), boards: levels('night-deal', ['draw-1', 'draw-3']), order: 'low' },
 ];
