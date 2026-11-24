@@ -111,6 +111,7 @@ function label() {
 
 function paintCounters() {
   ui.score.textContent = String(g?.score ?? 0);
+  if (g) fame.passing(g.score);
   const streak = g?.streak ?? 0;
   const mult = multiplier(streak);
   ui.streak.textContent = mult > 1 ? `${streak} ×${mult}` : String(streak);
@@ -232,6 +233,7 @@ function zapLane(dir) {
 function startRun() {
   sfx.start();
   g = newGame(level, seeded(Math.floor(Math.random() * 2 ** 32)), memory.weak(board()));
+  fame.startRun();
   aimDir = 0;
   aimTo = aim = aimFor(aimDir);
   held.clear();

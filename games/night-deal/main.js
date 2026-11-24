@@ -307,6 +307,7 @@ async function win() {
   ui.piles.inert = true;
   say(`Every card is on its stack. ${shown}, ${countOf(count, 'move')}. Notch up!`);
   holdButton(ui.go);
+  fame.passing(ms, true);
   if (await fame.offer({ value: ms, shown, extra: { moves: count }, grace: GRACE_MS })) paintCounters();
 }
 
@@ -348,6 +349,7 @@ function build() {
   finishing = false;
   clearTimeout(stuckTimer);
   g = newGame(level, seeded(winnableSeed(Math.random)));
+  fame.startRun();
   history = [];
   count = 0;
   over = false;

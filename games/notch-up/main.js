@@ -67,6 +67,7 @@ const bestSoFar = () => memory.scores(BOARD, ORDER)[0]?.value ?? 0;
 function paintCounters() {
   ui.floors.textContent = String(g ? built(g) : 0);
   ui.best.textContent = String(Math.max(bestSoFar(), g ? built(g) : 0));
+  if (g) fame.passing(built(g));
 }
 
 /** The frame lights up softly for a drop, gold when it was perfect (styles.css; none with reduced motion). */
@@ -122,6 +123,7 @@ function dropFloor() {
 function startRun() {
   sfx.start();
   g = newGame(seeded(Math.floor(Math.random() * 2 ** 32)), bestSoFar());
+  fame.startRun();
   camera = 0;
   frames.forget();
   badge.reset();

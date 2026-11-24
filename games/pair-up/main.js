@@ -93,6 +93,7 @@ function paintAll() {
 
 function paintCounters() {
   ui.score.textContent = String(g.score);
+  fame.passing(g.score);
   ui.round.textContent = `Round ${g.round}`;
   ui.pairs.textContent = `${g.found}/${g.pairs}`;
   ui.pairs.setAttribute('aria-label', `${g.found} of ${g.pairs} pairs`);
@@ -159,6 +160,7 @@ function build() {
   clearTimeout(missTimer);
   clearTimeout(endTimer);
   g = newGame(level, seeded(Math.floor(Math.random() * 2 ** 32)));
+  fame.startRun();
   [cols] = shape(level, window.matchMedia('(orientation: portrait)').matches);
   ui.deck.style.setProperty('--cols', cols);
   ui.lamps.replaceChildren(...Array.from({ length: g.maxChances }, lamp));
