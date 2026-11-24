@@ -131,6 +131,7 @@ function showSide() {
   } else {
     ui.sideLabel.textContent = 'Score';
     ui.sideValue.textContent = String(run.score);
+    fame.passing(run.score);
   }
 }
 
@@ -188,6 +189,7 @@ function startMatch() {
 
 function startFresh() {
   run = newRun();
+  fame.startRun();
   matches = 0;
   startMatch();
 }

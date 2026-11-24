@@ -110,6 +110,7 @@ function paintCounters() {
 }
 
 function build() {
+  fame.startRun();
   // The panel takes the screen's shape and room when it is made; turning the phone mid-game keeps it as it is.
   p = newPanel(fitted(LEVELS[level], window.matchMedia('(orientation: portrait)').matches, room(), MIN_CELL, MAX_CELL));
   started = 0;
@@ -186,6 +187,7 @@ async function win() {
   paintCounters();
   badge.notchUp();
   say(`Fixed in ${formatTime(ms)} s. Notch up!`);
+  fame.passing(ms, true);
   if (!(await fame.offer({ value: ms, shown: `${formatTime(ms)} s` }))) ui.again.focus();
 }
 
