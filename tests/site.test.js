@@ -95,3 +95,9 @@ test('the hall shows the games in the order of js/games.js (./dev order puts the
   assert.equal(orderHall(reversed, ids), hall);
   assert.throws(() => orderHall(hall, ids.slice(1)), new RegExp(`not in GAMES: ${ids[0]}`));
 });
+
+test('a disabled button looks disabled, and a hover does not light it up', () => {
+  const css = read('styles.css');
+  assert.match(css, /\.sheet button:disabled\s*\{[^}]*opacity/);
+  assert.match(css, /button:hover:not\(:disabled\)/);
+});
