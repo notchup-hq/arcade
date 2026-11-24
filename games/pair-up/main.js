@@ -94,7 +94,7 @@ function paintAll() {
 function paintCounters() {
   ui.score.textContent = String(g.score);
   fame.passing(g.score);
-  ui.round.textContent = `Round ${g.round}`;
+  ui.round.textContent = String(g.round);
   ui.pairs.textContent = `${g.found}/${g.pairs}`;
   ui.pairs.setAttribute('aria-label', `${g.found} of ${g.pairs} pairs`);
   [...ui.lamps.children].forEach((lamp, k) => lamp.classList.toggle('on', k < g.chances));
