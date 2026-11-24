@@ -71,7 +71,8 @@ button {
   background: var(--surface);
   cursor: pointer;
 }
-button:hover { border-color: var(--neon-cyan); }
+button:hover:not(:disabled) { border-color: var(--neon-cyan); }
+.sheet button:disabled { opacity: 0.4; cursor: default; } /* in dialogs only: Lob disables its controls between throws, and dimming them each turn would flicker */
 button[aria-pressed="true"] { border-color: var(--neon-cyan); box-shadow: var(--glow-cyan); }
 button.primary {
   border-color: var(--neon-gold);
