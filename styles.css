@@ -856,6 +856,9 @@ html:has(body.game), body.game { overflow: hidden; overscroll-behavior: none; }
 .challenge svg { display: block; width: 100%; max-width: 16rem; max-height: 40dvh; margin: 0 auto; }
 .challenge-text { margin: 0 0 0.75rem; font-size: 1.125rem; }
 .share-note { margin: 0.5rem 0 0; color: var(--neon-cyan); text-align: center; }
+.how-sharing { margin-top: 0.5rem; color: var(--neon-muted); }
+.how-sharing summary { display: flex; align-items: center; min-height: 44px; cursor: pointer; color: var(--neon-cyan); }
+.how-sharing p { margin: 0 0 0.5rem; }
 .challenger-tools { margin: 0.5rem 0 0; }
 .challenger-tools.off { visibility: hidden; }
 /* A row of a table you can pick: its initials are the button, as tall as the row (44 px, in every table, so the dialog is as tall in all of them). */

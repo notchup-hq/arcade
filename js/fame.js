@@ -208,9 +208,18 @@ export function createFame({ dialog, table, caption, initials, board, order, lab
     prints.forEach((p, k) => { p.classList.toggle('off', VIEWS[k].id !== view); });
   }
 
+  let explained = false;
   return {
     dialog,
     render,
+    /** Add the folded "How does sharing work?" note, once, when the table is first opened (so a page's first load does not carry it). */
+    explain() {
+      if (explained) return;
+      import('./challenge-ui.js').then(({ explainSharing }) => {
+        explained = true;
+        shared.before(explainSharing());
+      });
+    },
     /**
      * A run just ended with `value`. If it makes the top 5, all time or this week, ask for initials
      * (the dialog says `shown`, the score in the game's words, and holds its buttons for `grace` ms),
