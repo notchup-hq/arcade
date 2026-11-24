@@ -1,9 +1,8 @@
-// The hall of fame, the same in every game: the table (place, initials, the score, then the columns
-// only that game counts, such as Patch Night's answers right first time, then the date) and what
-// happens when a run ends (a score in the top 5 asks for initials, is saved, and the table opens with
-// it marked). Two tables per board, All time and This week, switched by two buttons above the table
-// (it always opens on All time). The rules of the table itself (top 5, initials) live in js/scores.js; a game only names
-// its board, its columns and its words.
+// The hall of fame, the same in every game: the table (place, initials, the score, the columns only
+// that game counts, the date) and what happens when a run ends (a top 5 score asks for initials, is
+// saved, and the table opens with it marked). All time, This week and Friends tables per board, always
+// opening on All time. The table's rules (top 5, initials) live in js/scores.js; a game only names
+// its board, its columns and its words. js/rivals.js cheers each saved friend a run passes.
 
 import { askInitials } from './initials.js';
 import { memory } from './memory.js';
@@ -38,12 +37,10 @@ function row(tag, cells, attrs = {}) {
 }
 
 /**
- * Fill `table` (its <thead> and <tbody>) with `entries`, best first. `score` is { head, cell } for
- * the score column; each of `columns` is { key, head, cell } for one of the entries' `extra` numbers
- * (an older entry without it shows a dash). The row at `fresh` (0-based) is marked new. The table
- * always has MAX_ENTRIES rows, the unplayed places as dashes, so its height never depends on the data.
- * With `pick`, each row's initials are a button (a row to tap and select, `data-k` its index), and
- * the row at `picked` is shown selected.
+ * Fill `table` with `entries`, best first. `score` is { head, cell } for the score column; each of
+ * `columns` is { key, head, cell } for one of the entries' `extra` numbers (a dash when missing).
+ * The row at `fresh` is marked new. There are always MAX_ENTRIES rows, so the height never depends
+ * on the data. With `pick`, each row's initials are a button (`data-k` its index); `picked` is selected.
  */
 export function renderFame(table, entries, { score, columns = [], fresh = -1, pick = false, picked = -1 }) {
   const heads = ['#', 'Who', score.head, ...columns.map((c) => c.head), 'Date'];
@@ -72,16 +69,13 @@ export function renderFame(table, entries, { score, columns = [], fresh = -1, pi
  * A game's hall of fame. `board()` names the current table (`fuse-box:easy`) and `order` says which
  * end is best (`low` or `high`); `label()`, when given, is the level shown in `caption`. `score`
  * and `columns` are as for renderFame. `dialog` is the hall of fame dialog with `table` in
- * it, and `initials` the new high score dialog. The hall of fame has a Challenge button that
- * shares the best all-time score of the level as a link, and a link to this page that carries a
- * challenge greets the visitor (js/challenge-ui.js, loaded only then). The game's id is the start of
- * its board's name and its name is the page's h1, so a game passes nothing more for it.
+ * it, and `initials` the new high score dialog. A Challenge button shares the level's best score as
+ * a link, and a link carrying one greets the visitor (js/challenge-ui.js, loaded only then).
  */
 export function createFame({ dialog, table, caption, initials, board, order, label, score, columns }) {
   const credit = dialog.querySelector('.credit');
   const kept = credit?.textContent ?? '';
-  // One line of small print per view, stacked in the same place, so the dialog is as tall on a
-  // small phone whichever table shows (the longer line wraps there).
+  // One line of small print per view, stacked, so the dialog is as tall whichever table shows.
   const prints = VIEWS.map(({ note }) => {
     const span = document.createElement('span');
     span.textContent = note ? `${kept} ${note}` : kept;
@@ -123,7 +117,7 @@ export function createFame({ dialog, table, caption, initials, board, order, lab
   dialog.querySelector('.actions')?.prepend(share, qr);
   dialog.querySelector('.credit')?.after(shared);
 
-  // A link to this page and this level greets at load, before any run; nothing is saved until Save.
+  // A link to this level greets at load; nothing is saved until Save.
   if (location.hash.startsWith('#c=')) {
     import('./challenge-ui.js').then(({ greetChallenger }) => {
       greetChallenger({
@@ -142,9 +136,8 @@ export function createFame({ dialog, table, caption, initials, board, order, lab
     });
   }
 
-  // Challengers: saved scores from friends' links. Tap a row to select it, then Delete; Compare adds a
-  // column with how far ahead (+) or behind (-) your best is; Clear all asks twice. The tools stay in
-  // place, hidden, in the other views, so the dialog is as tall in every one.
+  // Friends: tap a row, then Delete; Compare adds how far ahead (+) or behind (-) your best is; Clear
+  // asks twice. The tools stay, hidden, in the other views, so the dialog is as tall in each.
   let compare = false;
   let list = [];
   let picked = -1;
@@ -208,11 +201,22 @@ export function createFame({ dialog, table, caption, initials, board, order, lab
     prints.forEach((p, k) => { p.classList.toggle('off', VIEWS[k].id !== view); });
   }
 
+  let watch = null;
   let explained = false;
   return {
     dialog,
     render,
-    /** Add the folded "How does sharing work?" note, once, when the table is first opened (so a page's first load does not carry it). */
+    /** A run starts: `passing` now cheers each saved friend it passes (js/rivals.js, loaded only when there is one). */
+    startRun() {
+      watch = null;
+      const friends = memory.challengers(board(), order);
+      if (friends.length) import('./rivals.js').then(({ watchRun }) => { watch = watchRun(friends, order); });
+    },
+    /** The run's score is `value`, `final` when it ended; a time (`low`) counts only then. */
+    passing(value, final = false) {
+      watch?.(value, final);
+    },
+    /** Add the folded "How does sharing work?" note, once, when the table is first opened. */
     explain() {
       if (explained) return;
       import('./challenge-ui.js').then(({ explainSharing }) => {
@@ -221,11 +225,9 @@ export function createFame({ dialog, table, caption, initials, board, order, lab
       });
     },
     /**
-     * A run just ended with `value`. If it makes the top 5, all time or this week, ask for initials
-     * (the dialog says `shown`, the score in the game's words, and holds its buttons for `grace` ms),
-     * save it with the game's own numbers (`extra`), and open the hall of fame with the new row
-     * marked, on the all-time table when it made that, else on this week's.
-     * Resolves to true when it was saved; nothing scores with 0 or less.
+     * A run ended with `value`. If it makes the top 5, all time or this week, ask for initials (the
+     * dialog says `shown`, holds its buttons for `grace` ms), save it with the game's `extra` numbers
+     * and open the table with the new row marked. Resolves to true when saved; 0 or less never scores.
      */
     async offer({ value, shown, extra, grace = 0 }) {
       const placed = (entries) => (value > 0 ? placeOf(entries, value, order) : -1);

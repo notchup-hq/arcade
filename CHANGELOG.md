@@ -7,6 +7,7 @@ All notable changes to this project are listed here, newest first. The format fo
 ### Added
 
 - Night Deal, a calm card game: build four stacks from ace to king by moving cards between seven columns. Tap a card to send it where it fits, or drag it; undo is free. Every deal can be won, and when nothing useful is left the game says so. The time is counted but only shown when you win, and your best time is your score (Draw 1 and Draw 3 are two levels; moves ride beside it). Behind the scenes: Pair Up's deck shuffle moved to a shared `js/shuffle.js`.
+- A small cheer when a run passes a friend saved in the Friends table, in every game: a line with their initials slides in at the top edge for a moment ("Passed ABC!", "Sorry, ABC." and more, in changing colours and on alternate sides). It never takes a tap, does not flash, is read out politely, and names each friend once per run. In the timed games (Fuse Box, Night Deal) it comes when you finish with a faster time.
 - Games on a phone held sideways show "Turn your phone upright": the screen is too short for any board, so it is asked to turn rather than shown a cut-off game.
 
 ### Changed
