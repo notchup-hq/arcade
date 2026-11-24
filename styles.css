@@ -880,7 +880,7 @@ html:has(body.game), body.game { overflow: hidden; overscroll-behavior: none; }
 .how-sharing summary { display: flex; align-items: center; min-height: 44px; cursor: pointer; color: var(--neon-cyan); }
 .how-sharing p { margin: 0 0 0.5rem; }
 .challenger-tools { margin: 0.5rem 0 0; }
-.challenger-tools.off { visibility: hidden; }
+.challenger-tools.off { display: none; }
 /* A row of a table you can pick: its initials are the button, as tall as the row (44 px, in every table, so the dialog is as tall in all of them). */
 .sheet tbody tr { height: 2.75rem; }
 .sheet .pick { display: block; width: 100%; min-height: 2.75rem; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; box-shadow: none; cursor: pointer; }

@@ -11,7 +11,7 @@ import { MAX_ENTRIES, formatDate, lead, placeOf, whereMade } from './scores.js';
 const VIEWS = [
   { id: 'all', name: 'All time' },
   { id: 'week', name: 'This week', note: 'A new week starts on Monday.' },
-  { id: 'challengers', name: 'Friends', note: 'Scores from friends\' links, not verified. With Compare, + means you are ahead.' },
+  { id: 'challengers', name: 'Friends', note: 'Not verified. In Compare, + means you lead.' },
 ];
 
 // The year may wrap under the day and month when a long score leaves a small phone no room.
@@ -137,7 +137,7 @@ export function createFame({ dialog, table, caption, initials, board, order, lab
   }
 
   // Friends: tap a row, then Delete; Compare adds how far ahead (+) or behind (-) your best is; Clear
-  // asks twice. The tools stay, hidden, in the other views, so the dialog is as tall in each.
+  // asks twice. The tools show only with friends saved, so the dialog stays short.
   let compare = false;
   let list = [];
   let picked = -1;
@@ -148,7 +148,7 @@ export function createFame({ dialog, table, caption, initials, board, order, lab
     if (e) memory.removeChallenger(e.board, e.initials, e.value);
     picked = -1;
     render();
-    compareButton.focus(); // the Delete button is disabled now
+    (list.length ? compareButton : buttons[2]).focus(); // Delete is disabled now; the row is gone with no friends
   });
   const clearButton = button('Clear', () => {
     if (!armed) {
@@ -160,6 +160,7 @@ export function createFame({ dialog, table, caption, initials, board, order, lab
     memory.clearChallengers(board());
     picked = -1;
     render();
+    buttons[2].focus(); // the row is gone
   });
   const tools = document.createElement('div');
   tools.className = 'board-tabs challenger-tools';
@@ -191,7 +192,7 @@ export function createFame({ dialog, table, caption, initials, board, order, lab
       picked = -1;
       renderFame(table, view === 'week' ? memory.weekScores(board(), order) : memory.scores(board(), order), { score, columns, fresh });
     }
-    tools.classList.toggle('off', view !== 'challengers');
+    tools.classList.toggle('off', view !== 'challengers' || list.length === 0);
     compareButton.setAttribute('aria-pressed', String(compare));
     deleteButton.disabled = picked < 0;
     clearButton.disabled = list.length === 0;
