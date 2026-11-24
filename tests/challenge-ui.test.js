@@ -111,7 +111,12 @@ test('the sharing note says what a link is, that nothing is sent and that scores
 function fakeHistory(referrer) {
   const log = [];
   const listeners = {};
-  globalThis.document = { referrer };
+  const dialogs = [];
+  globalThis.document = {
+    referrer,
+    body: { append: (d) => { d.isConnected = true; dialogs.push(d); } },
+    createElement: (tag) => ({ tag, listeners: {}, attrs: {}, append() {}, setAttribute(k, v) { this.attrs[k] = v; }, remove() { this.isConnected = false; }, addEventListener(name, fn) { this.listeners[name] = fn; }, showModal() { this.open = true; } }),
+  };
   globalThis.location = { origin: 'https://arcade.notchup.fi', href: 'https://arcade.notchup.fi/games/lob/#c=x', pathname: '/games/lob/', search: '?level=hard', };
   const back = { href: 'https://arcade.notchup.fi/', click: () => log.push(['click']) };
   globalThis.history = {
@@ -119,17 +124,25 @@ function fakeHistory(referrer) {
     pushState: (state, _t, url) => log.push(['pushState', state, url]),
   };
   globalThis.addEventListener = (name, fn) => { listeners[name] = fn; };
-  return { log, listeners, back };
+  return { log, listeners, back, dialogs };
 }
 
 test('a link opened from outside gets the hall put behind it, and Back goes to the hall', () => {
-  const { log, listeners, back } = fakeHistory('');
+  const { log, listeners, back, dialogs } = fakeHistory('');
   hallBehind(back);
   assert.deepEqual(log, [['replaceState', { hallEntry: true }, '/'], ['pushState', null, '/games/lob/?level=hard']]);
   listeners.popstate({ state: null });
   assert.equal(log.length, 2, 'a step within the game does nothing');
+  assert.deepEqual(dialogs, [], 'no card for a step within the game');
   listeners.popstate({ state: { hallEntry: true } });
+  assert.equal(dialogs.filter((d) => d.tag === 'dialog' && d.open).length, 1, 'the waiting card shows');
+  assert.equal(dialogs[0].attrs['aria-labelledby'], 'back-title');
   assert.deepEqual(log.at(-1), ['click']);
+  listeners.popstate({ state: { hallEntry: true } });
+  assert.equal(dialogs.length, 1, 'a second Back does not stack a second card');
+  assert.equal(log.filter((l) => l[0] === 'click').length, 2, 'but still loads the hall');
+  dialogs[0].listeners.close();
+  assert.equal(dialogs[0].isConnected, false, 'closing the card removes it');
 });
 
 test('a page reached from the arcade already has the hall behind it', () => {

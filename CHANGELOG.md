@@ -12,6 +12,7 @@ All notable changes to this project are listed here, newest first. The format fo
 
 ### Changed
 
+- Back from a shared link opened in a chat app shows a "Back to the arcade…" card while the hall loads.
 - Pair Up's counters read Score, Chances, Round and Pairs, each with its own label (the round used to share a line with the pairs found).
 - Opening a shared challenge link from a chat app leaves the hall behind the game, so Back goes to the arcade instead of straight out of it.
 - The hall of fame explains sharing: a folded "How does sharing work?" note covers Challenge a friend, Show QR and the Friends tab, and says scores stay in this browser and are not verified.

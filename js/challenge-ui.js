@@ -41,7 +41,7 @@ export const shareText = (entry, shown, gameName, board) =>
  * A native modal for a heading, a body (a paragraph or a picture), the small print and its buttons, built
  * when it is needed: there is nothing to keep in every page.
  */
-function sheet({ id, title, body, buttons }) {
+function sheet({ id, title, body, buttons, credit = 'Challengers are not verified.' }) {
   const dialog = document.createElement('dialog');
   dialog.className = 'sheet challenge';
   dialog.setAttribute('aria-labelledby', id);
@@ -52,13 +52,13 @@ function sheet({ id, title, body, buttons }) {
   heading.tabIndex = -1;
   heading.autofocus = true;
   heading.textContent = title;
-  const credit = document.createElement('p');
-  credit.className = 'credit';
-  credit.textContent = 'Challengers are not verified.';
+  const small = document.createElement('p');
+  small.className = 'credit';
+  small.textContent = credit;
   const actions = document.createElement('div');
   actions.className = 'actions';
   actions.append(...buttons);
-  form.append(heading, body, credit, actions);
+  form.append(heading, body, small, actions);
   dialog.append(form);
   return dialog;
 }
@@ -101,7 +101,8 @@ function card(line, canSave) {
  * Put the hall behind the game: this entry takes the hall's address and the game is pushed on top.
  * Back then lands on that entry, still showing the game, so a click on the Arcade link `back` loads
  * the hall for real; the link goes to the address the entry already has, which the browser treats as
- * a replace, so Back from the hall leaves cleanly instead of coming round again. A page reached from
+ * a replace, so Back from the hall leaves cleanly instead of coming round again. A small card says
+ * "Back to the arcade…" meanwhile. A page reached from
  * the arcade itself (same-origin referrer) already has the hall behind it and is left alone.
  */
 export function hallBehind(back) {
@@ -111,8 +112,20 @@ export function hallBehind(back) {
   const here = location.pathname + location.search;
   history.replaceState({ hallEntry: true }, '', hall.pathname);
   history.pushState(null, '', here);
+  let wait = null;
   addEventListener('popstate', (e) => {
-    if (e.state?.hallEntry) back.click();
+    if (!e.state?.hallEntry) return;
+    // The hall may never have been loaded in this browser (a chat app's own), so it can take seconds:
+    // say so, rather than leave the game looking stuck, and let the visitor dismiss it if it never comes.
+    if (!wait?.isConnected) {
+      const text = document.createElement('p');
+      text.textContent = 'One moment, the hall is loading.';
+      wait = sheet({ id: 'back-title', title: 'Back to the arcade…', body: text, buttons: [submit('Close')], credit: '' });
+      document.body.append(wait);
+      wait.addEventListener('close', () => wait.remove());
+    }
+    if (!wait.open) wait.showModal();
+    back.click();
   });
 }
 
