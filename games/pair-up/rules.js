@@ -5,6 +5,7 @@
 // The deal is seeded, so tests and the hall's demo replay.
 
 import { pickLine, seeded } from '../../js/random.js';
+import { shuffled } from '../../js/shuffle.js';
 
 export { seeded };
 
@@ -42,15 +43,6 @@ export const QUIPS = {
 
 /** [columns, rows] of a level's deck: tall on a portrait screen, wide on a landscape one. */
 export const shape = (level, portrait) => LEVELS[level][portrait ? 'tall' : 'wide'];
-
-const shuffled = (list, rand) => {
-  const out = [...list];
-  for (let i = out.length - 1; i > 0; i--) {
-    const j = Math.floor(rand() * (i + 1));
-    [out[i], out[j]] = [out[j], out[i]];
-  }
-  return out;
-};
 
 /** The faces of a level's deck, one each: its share of sprites (of them as many bugs as the level says), the rest letters. */
 export function facesFor(level, rand) {
