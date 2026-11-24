@@ -8,6 +8,12 @@ All notable changes to this project are listed here, newest first. The format fo
 
 - Night Deal, a calm card game: build four stacks from ace to king by moving cards between seven columns. Tap a card to send it where it fits, or drag it; undo is free. Every deal can be won, and when nothing useful is left the game says so. The time is counted but only shown when you win, and your best time is your score (Draw 1 and Draw 3 are two levels; moves ride beside it). Behind the scenes: Pair Up's deck shuffle moved to a shared `js/shuffle.js`.
 
+### Changed
+
+- The hall of fame explains sharing: a folded "How does sharing work?" note covers Challenge a friend, Show QR and the Friends tab, and says scores stay in this browser and are not verified.
+- Night Deal's card back is the Notchup logo instead of a plain ring of notches.
+- Night Deal's cabinet plays its demo at a calmer pace, about a move every half second instead of ten a second.
+
 ### Fixed
 
 - A button that cannot be used now looks it: Challenge a friend and Show QR looked ready with no score to share, and Delete and Clear in Friends looked ready with nothing to remove. They are dimmed.

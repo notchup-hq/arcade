@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { packChallenge } from '../js/challenge.js';
-import { challengeLine, greetChallenger, readChallenge, shareText, showChallengeQr, whereWords } from '../js/challenge-ui.js';
+import { challengeLine, explainSharing, greetChallenger, readChallenge, shareText, showChallengeQr, whereWords } from '../js/challenge-ui.js';
 
 const code = packChallenge({ board: 'lob:solo', value: 1840, initials: 'PEK', date: Date.now() });
 const args = (extra) => ({ hash: `#c=${code}`, game: 'lob', board: 'lob:solo', gameName: 'Lob', score: String, rand: () => 0, ...extra });
@@ -86,4 +86,19 @@ test('Show QR builds a dialog with a code of the link, and nothing is stored or 
   assert.equal(await showChallengeQr('lob:solo', { initials: 'PEK', value: 1840, date: Date.now() }), 'shown');
   assert.equal(dialogs[0].open, true);
   assert.equal(await showChallengeQr('nope:solo', { initials: 'PEK', value: 1840, date: Date.now() }), 'failed');
+});
+
+test('the sharing note says what a link is, that nothing is sent and that scores are not verified', () => {
+  globalThis.document = {
+    createElement: (tag) => ({ tag, children: [], append(...c) { this.children.push(...c); } }),
+  };
+  try {
+    const note = explainSharing();
+    const [summary, text] = note.children;
+    assert.equal(summary.textContent, 'How does sharing work?');
+    assert.match(text.textContent, /Nothing is sent to a server/);
+    assert.match(text.textContent, /not verified/);
+  } finally {
+    delete globalThis.document;
+  }
 });

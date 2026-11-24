@@ -27,6 +27,7 @@ export function wireDialogs({ help, fame, pause = () => {}, resume }) {
   document.getElementById('help-open').addEventListener('click', () => open(help));
   document.getElementById('fame-open').addEventListener('click', () => {
     fame.render();
+    fame.explain();
     open(fame.dialog);
   });
   if (resume) for (const dialog of document.querySelectorAll('dialog')) dialog.addEventListener('close', resume);

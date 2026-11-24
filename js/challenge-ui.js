@@ -63,6 +63,21 @@ function sheet({ id, title, body, buttons }) {
   return dialog;
 }
 
+/** The folded note in the hall of fame that says what sharing is, for someone who has not met it. */
+export function explainSharing() {
+  const details = document.createElement('details');
+  details.className = 'how-sharing';
+  const summary = document.createElement('summary');
+  summary.textContent = 'How does sharing work?';
+  const text = document.createElement('p');
+  text.textContent = 'Challenge a friend makes a link to your best score, and Show QR makes a code to scan. '
+    + 'Whoever opens it can try to beat you, and can save you in their Friends tab for four weeks. '
+    + 'Nothing is sent to a server: scores stay in each browser, so a score from a link is not verified, '
+    + 'and anyone could make one up. Keep it friendly.';
+  details.append(summary, text);
+  return details;
+}
+
 function submit(text, { value, primary } = {}) {
   const b = document.createElement('button');
   b.type = 'submit';
