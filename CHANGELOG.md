@@ -12,6 +12,7 @@ All notable changes to this project are listed here, newest first. The format fo
 
 ### Changed
 
+- The hall of fame fits a phone without scrolling (until friends are saved, which adds a row of buttons): the Friends buttons (Compare, Delete, Clear) show only while friends are saved, and the Friends note is shorter.
 - Back from a shared link opened in a chat app shows a "Back to the arcade…" card while the hall loads.
 - Pair Up's counters read Score, Chances, Round and Pairs, each with its own label (the round used to share a line with the pairs found).
 - Opening a shared challenge link from a chat app leaves the hall behind the game, so Back goes to the arcade (on that game's cabinet, with the zoom back) instead of straight out of it.
