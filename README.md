@@ -17,6 +17,7 @@ Alpha (v0.1). Five games so far, more on the way.
 | **Patch Night** | A times-table bug zapper. Bugs crawl in with answers on their backs; zap the one that is right before it reaches the logo. Three levels, and the facts you miss come back until you know them. |
 | **Notch Up** | A tower stacker. Drop each floor on the one below; whatever hangs over is cut off, so the tower gets narrower unless your drops are perfect. 10, 50 and 100 floors get a cheer. |
 | **Pair Up** | A memory game. Turn the cards and find every pair; the level gives you 4, 5 or 6 chances, a pair found lights one back, and a cleared deck deals the next round until the chances run out. Faces are letters and little pictures from the other games, and every cleared deck gets a cheer. Three levels. |
+| **Night Deal** | A calm card game. Build four stacks from ace to king, one suit each, by moving cards between seven columns. Tap a card and it goes where it fits, or drag it; undo is free. Every deal can be won. The clock runs but never shows until you win, and your best time is your score. Draw 1 or Draw 3. |
 
 Inspired by the great arcade classics, every game here is our own take: the code, art and sounds are written from scratch, and the names, rules and levels are ours. The hall shows each game playing itself on its cabinet's screen, and each game keeps a top 5 with three-letter initials, in your browser only.
 
