@@ -6,7 +6,7 @@ Neon arcade of tiny classic arcade games by Notchup. Plain HTML, CSS and JS: no 
 
 **Made by Notchup:** this arcade is a free side project of [Notchup](https://www.notchup.fi), a small Finnish software company. Come and see what else we make at **[www.notchup.fi](https://www.notchup.fi)**.
 
-Alpha (v0.1). Five games so far, more on the way.
+Alpha (v0.1). Seven games so far, more on the way.
 
 ## The games
 
@@ -18,6 +18,7 @@ Alpha (v0.1). Five games so far, more on the way.
 | **Notch Up** | A tower stacker. Drop each floor on the one below; whatever hangs over is cut off, so the tower gets narrower unless your drops are perfect. 10, 50 and 100 floors get a cheer. |
 | **Pair Up** | A memory game. Turn the cards and find every pair; the level gives you 4, 5 or 6 chances, a pair found lights one back, and a cleared deck deals the next round until the chances run out. Faces are letters and little pictures from the other games, and every cleared deck gets a cheer. Three levels. |
 | **Night Deal** | A calm card game. Build four stacks from ace to king, one suit each, by moving cards between seven columns. Tap a card and it goes where it fits, or drag it; undo is free. Every deal can be won. The clock runs but never shows until you win, and your best time is your score. Draw 1 or Draw 3. |
+| **Bent Beam** | A mirror puzzle. A beam leaves the lamp housing; turn the mirrors until it passes through every lamp. Some mirrors are bolted down and walls stop the beam. You play a run with a few bulbs: a short circuit burns one out, every board fixed lights one back, and the boards fixed are your score. Three levels. |
 
 Inspired by the great arcade classics, every game here is our own take: the code, art and sounds are written from scratch, and the names, rules and levels are ours. The hall shows each game playing itself on its cabinet's screen, and each game keeps a top 5 with three-letter initials, in your browser only.
 

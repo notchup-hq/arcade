@@ -12,7 +12,7 @@ const NAMES = [
   'galaga', 'galaxian', 'pac-man', 'pacman', 'tetris', 'breakout', 'arkanoid', 'asteroids', 'pong',
   'frogger', 'donkey kong', 'mario', 'sonic', 'zelda', 'pokemon', 'pokémon', 'snake ii', 'bomberman',
   'lemmings', 'tank wars', 'bowmasters', 'pocket tanks', 'angry birds', 'flappy', 'candy crush', 'sokoban', 'night shift',
-  'tower bloxx', 'tricky towers',
+  'tower bloxx', 'tricky towers', 'deflektor', 'mirror magic', 'laser maze',
 ];
 
 const checked = () => [

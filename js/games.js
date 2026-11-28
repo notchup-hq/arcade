@@ -13,4 +13,5 @@ export const GAMES = [
   { id: 'notch-up', demo: () => import('../games/notch-up/demo.js'), boards: [{ id: 'notch-up:tower', label: '' }], order: 'high' },
   { id: 'pair-up', demo: () => import('../games/pair-up/demo.js'), boards: levels('pair-up', ['easy', 'medium', 'hard']), order: 'high' },
   { id: 'night-deal', demo: () => import('../games/night-deal/demo.js'), boards: levels('night-deal', ['draw-1', 'draw-3']), order: 'low' },
+  { id: 'bent-beam', demo: () => import('../games/bent-beam/demo.js'), boards: levels('bent-beam', ['easy', 'medium', 'hard']), order: 'high' },
 ];
