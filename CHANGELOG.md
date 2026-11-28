@@ -24,8 +24,8 @@ All notable changes to this project are listed here, newest first. The format fo
 
 - A long game title (Night Deal on a phone) no longer runs under the Arcade link: on phones the link is just the arrow, and the title shrinks to fit.
 - A button that cannot be used now looks it: Challenge a friend and Show QR looked ready with no score to share, and Delete and Clear in Friends looked ready with nothing to remove. They are dimmed.
-- Fuse Box: in Tag mode, tapping a number whose blown fuses are all tagged now tests the rest around it, as it already did in Test mode. (PR TBD)
-- The hall of fame table keeps its column widths when you switch between All time, This week and Friends, so it no longer stretches on a phone.
+- Fuse Box: in Tag mode, tapping a number whose blown fuses are all tagged now tests the rest around it, as it already did in Test mode. (#50)
+- The hall of fame table keeps its column widths when you switch between All time, This week and Friends, so it no longer stretches on a phone. (#50)
 
 ## 0.3.0 – 2026-11-24
 
