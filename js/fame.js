@@ -136,8 +136,7 @@ export function createFame({ dialog, table, caption, initials, board, order, lab
     });
   }
 
-  // Friends: tap a row, then Delete; Compare adds how far ahead (+) or behind (-) your best is; Clear
-  // asks twice. The tools show only with friends saved, so the dialog stays short.
+  // Friends: tap a row, then Delete; Compare adds how far ahead (+) or behind (-) you are; Clear asks twice.
   let compare = false;
   let list = [];
   let picked = -1;
@@ -187,7 +186,7 @@ export function createFame({ dialog, table, caption, initials, board, order, lab
       const shown = list.map((e) => ({ ...e, extra: { you: lead(order, mine, e.value) } }));
       const you = { key: 'you', head: 'You', cell: (v) => `${v < 0 ? '\u2212' : '+'}${score.cell(Math.abs(v))}` };
       picked = Math.min(picked, list.length - 1);
-      renderFame(table, shown, { score, columns: compare ? [you] : [], fresh, pick: true, picked });
+      renderFame(table, shown, { score, columns: compare ? [...columns, you] : columns, fresh, pick: true, picked });
     } else {
       picked = -1;
       renderFame(table, view === 'week' ? memory.weekScores(board(), order) : memory.scores(board(), order), { score, columns, fresh });
