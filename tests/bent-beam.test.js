@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  BACK, EMPTY, LEVELS, SLASH, WALL, BRONZE, CHEERS, GOLD, MEDALS, SILVER, burnBulb, fixedBoard, isLit, lampsLeft, newBoard, newRun, nextAnswer, praiseFor, seeded, shortsCrossed, trace, turnMirror, undoTurn,
+  BACK, EMPTY, LEVELS, SLASH, WALL, BRONZE, CHEERS, GOLD, MEDALS, SILVER, burnBulb, fixedBoard, isLit, lampsLeft, newBoard, newRun, nextAnswer, outOfTurns, praiseFor, resetBoard, seeded, shortsCrossed, SLACK, trace, turnMirror, turnsLeft, undoTurn,
 } from '../games/bent-beam/rules.js';
 
 const SEEDS = Array.from({ length: 60 }, (_, k) => k + 1);
@@ -192,4 +192,38 @@ test('a win is cheered gold, silver or bronze by the turns over the fewest, and 
 test('each medal tier has an emoji for the card title', () => {
   assert.equal(MEDALS.length, 3);
   assert.ok(MEDALS.every((m) => m.length > 0));
+});
+
+test('a board allows its fewest turns plus the slack', () => {
+  for (const g of boards('hard').slice(0, 20)) assert.equal(g.budget, g.par + SLACK);
+});
+
+test('every turn, undo included, uses one of the budget, and the last one without a win is out of turns', () => {
+  const g = newBoard(LEVELS.easy, seeded(3));
+  const turning = [...g.cells.keys()].filter((i) => (g.cells[i] === SLASH || g.cells[i] === BACK) && !g.fixed[i]);
+  g.budget = 3;
+  turnMirror(g, turning[0]);
+  undoTurn(g);
+  assert.equal(turnsLeft(g), 1);
+  assert.equal(outOfTurns(g), false);
+  g.status = 'playing';
+  g.taps = 3;
+  assert.equal(outOfTurns(g), true);
+  g.status = 'won';
+  assert.equal(outOfTurns(g), false);
+});
+
+test('a board reset has its mirrors as they began and a fresh budget', () => {
+  const g = newBoard(LEVELS.medium, seeded(5));
+  const start = Uint8Array.from(g.cells);
+  const lit = lampsLeft(g);
+  const turning = [...g.cells.keys()].filter((i) => (g.cells[i] === SLASH || g.cells[i] === BACK) && !g.fixed[i]);
+  turnMirror(g, turning[0]);
+  turnMirror(g, turning[1]);
+  resetBoard(g);
+  assert.deepEqual(g.cells, start);
+  assert.equal(turnsLeft(g), g.budget);
+  assert.equal(g.history.length, 0);
+  assert.equal(lampsLeft(g), lit);
+  assert.equal(g.status, 'ready');
 });

@@ -14,8 +14,9 @@ import { pickLevel } from '../../js/levels.js';
 import { consoleLogo } from '../../js/logo.js';
 import { initSettings } from '../../js/settings.js';
 import { sfx } from '../../js/sound.js';
+import { replay } from '../../js/replay.js';
 import { pickLine } from '../../js/random.js';
-import { LEVELS, MEDALS, BACK, SLASH, WALL, burnBulb, fixedBoard, isLit, lampsLeft, newBoard, newRun, praiseFor, seeded, shortsCrossed, turnMirror, undoTurn } from './rules.js';
+import { LEVELS, MEDALS, BACK, SLASH, WALL, burnBulb, fixedBoard, isLit, lampsLeft, newBoard, newRun, outOfTurns, praiseFor, resetBoard, seeded, shortsCrossed, turnMirror, turnsLeft, undoTurn } from './rules.js';
 import { beamLength, drawBoard, reach } from './scene.js';
 
 const GAME = 'bent-beam';
@@ -26,6 +27,7 @@ const SWEEP_CELLS_PER_S = 9; // the winning beam travels this fast, so a long pa
 const SWEEP_MIN_MS = 1200;
 const BEAT_MS = 700;         // the lit board rests this long before the score dialog
 const REDUCED = '(prefers-reduced-motion: reduce)';
+const LOW_TURNS = 3; // the status line counts the turns down from here
 const BORDER = 32;   // the board's border (4) and the room its glow needs (14) on both sides
 
 const $ = (id) => document.getElementById(id);
@@ -92,11 +94,14 @@ function labelOf(i) {
   return where;
 }
 
+/** The border glows soft red once (styles.css; none with reduced motion). */
+const hurt = () => replay(ui.board, 'hurt');
+
 function paintCounters() {
   [...ui.lamps.children].forEach((b, k) => b.classList.toggle('on', k < run.bulbs));
   ui.lamps.setAttribute('aria-label', `${run.bulbs} of ${run.max} bulbs left`);
   ui.fixed.textContent = String(run.fixed);
-  ui.turns.textContent = String(g.taps);
+  ui.turns.textContent = `${g.taps} / ${g.budget}`;
 }
 
 function draw(head = Infinity) {
@@ -153,7 +158,7 @@ function build() {
   ui.cells.replaceChildren(...buttons);
   cell = 0;
   fit();
-  say('Tap a mirror to turn it. Light every lamp.');
+  say(`Tap a mirror to turn it. Light every lamp in ${g.budget} turns.`);
   fame.render();
 }
 
@@ -228,6 +233,38 @@ async function end() {
   if (g === board) ui.go.focus();
 }
 
+/**
+ * A turn that sends the beam into a short circuit, or uses the board's last turn without fixing it, burns
+ * one bulb (one, even when both happen). A board out of turns starts over as it was, with a fresh budget,
+ * so one stuck board cannot drain the run. True when the turn cost a bulb.
+ */
+function punish(shorted) {
+  const spent = outOfTurns(g);
+  if (!shorted && !spent) return false;
+  const out = burnBulb(run);
+  hurt();
+  if (out) { paintCounters(); end(); return true; }
+  sfx.buzz();
+  if (spent) {
+    resetBoard(g);
+    paint();
+    say(`Out of turns. A bulb burnt out and the mirrors are back as they were. ${run.bulbs} left.`);
+  } else {
+    paintCounters();
+    say(`A short circuit burnt out a bulb. ${run.bulbs} left.`);
+  }
+  return true;
+}
+
+/** The status line after a turn that cost nothing: the lamps still dark, and the turns once they run low. */
+function report() {
+  const lamps = lampsLeft(g);
+  const turns = turnsLeft(g);
+  const warn = turns <= LOW_TURNS ? ` ${turns} ${turns === 1 ? 'turn' : 'turns'} left.` : '';
+  if (shortsCrossed(g)) say(`The beam still crosses a short circuit. Steer it clear.${warn}`);
+  else say(`${lamps === 1 ? '1 lamp left.' : `${lamps} lamps left.`}${warn}`);
+}
+
 function act(i) {
   const before = shortsCrossed(g);
   const result = turnMirror(g, i);
@@ -239,21 +276,9 @@ function act(i) {
   if (result === 'ignored') return;
   paint();
   if (result === 'won') { win(); return; }
-  const left = lampsLeft(g);
-  if (shortsCrossed(g) > before) {
-    const out = burnBulb(run);
-    paintCounters();
-    if (out) { end(); return; }
-    sfx.buzz();
-    say(`A short circuit burnt out a bulb. ${run.bulbs} left.`);
-    return;
-  }
-  if (shortsCrossed(g)) {
-    say('The beam still crosses a short circuit. Steer it clear.');
-    return;
-  }
-  sfx.blip();
-  say(left === 1 ? '1 lamp left.' : `${left} lamps left.`);
+  if (punish(shortsCrossed(g) > before)) return;
+  if (!shortsCrossed(g)) sfx.blip();
+  report();
 }
 
 ui.cells.addEventListener('click', (e) => {
@@ -267,8 +292,9 @@ gridKeys(ui.cells, () => g.size);
 ui.undo.addEventListener('click', () => {
   const i = undoTurn(g);
   if (i < 0) return;
-  sfx.blip();
   paint();
+  if (punish(false)) { buttons[i].focus(); return; }
+  sfx.blip();
   say(`${cellName(i, g.size)} turned back. ${lampsLeft(g)} lamps left.`);
   buttons[i].focus();
 });
