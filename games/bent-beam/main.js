@@ -361,5 +361,5 @@ ui.go.addEventListener('click', () => (over ? restart() : next()));
 new ResizeObserver(fit).observe(ui.frame);
 wireDialogs({ help: ui.help, fame });
 
-initSettings();
+initSettings(() => !over && (g.status === 'playing' || run.fixed > 0));
 start();

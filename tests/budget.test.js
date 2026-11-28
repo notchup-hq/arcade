@@ -20,7 +20,7 @@ const loadOf = (page) => [page, 'styles.css', 'assets/mark.svg', entryOf(page), 
 const kb = (n) => `${(n / 1024).toFixed(1)} KB`;
 
 const hallFirst = new Set(loadOf('index.html'));
-const demos = [entryOf('index.html'), ...moduleGraph(entryOf('index.html'))].flatMap(lazyImportsOf);
+const demos = [entryOf('index.html'), ...moduleGraph(entryOf('index.html'))].flatMap(lazyImportsOf).filter((f) => f.startsWith('games/'));
 const demoLoad = (demo) => [demo, ...moduleGraph(demo)].filter((f) => !hallFirst.has(f));
 const hallAll = new Set([...hallFirst, ...demos.flatMap(demoLoad)]);
 

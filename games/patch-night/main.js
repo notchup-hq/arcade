@@ -384,6 +384,6 @@ wireDialogs({ help: ui.help, fame, pause: () => loop.stop(), resume: () => { if 
 still.addEventListener('change', () => { frames.forget(); frames.draw(); });
 addEventListener('pagehide', saveWeak);
 
-initSettings();
+initSettings(() => Boolean(g) && g.status !== 'over');
 fame.render();
 toStart();

@@ -410,6 +410,6 @@ const fame = createFame({
 
 wireDialogs({ help: ui.help, fame });
 
-initSettings();
+initSettings(() => phase !== 'over' && Boolean(run?.score));
 fame.render();
 startFresh();

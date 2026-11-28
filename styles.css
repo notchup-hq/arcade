@@ -1,6 +1,4 @@
-/* Notchup Arcade: one stylesheet for the hall and every game page. A dark neon hall in Notchup's navy
-   and gold, with cyan and magenta tubes. Mobile first, every page fits the screen. Colours live here as tokens only; canvas code reads the --neon-* ones (js/attract.js). Every
-   animation sits inside prefers-reduced-motion: no-preference and moves only transform or opacity. */
+/* Notchup Arcade: one stylesheet for the hall and every game page, mobile first. Colours are tokens here only (canvas code reads --neon-*, js/attract.js). Animation stays in prefers-reduced-motion: no-preference and moves only transform or opacity. */
 
 :root {
   --neon-bg: #060b16;        /* the hall at night, a deeper Notchup navy */
@@ -364,10 +362,10 @@ html:has(body.game), body.game { overflow: hidden; overscroll-behavior: none; }
   width: 100%;
   margin: 0 auto;
 }
-.back { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; font-family: var(--mono); white-space: nowrap; }
+.back { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; font: 1.5rem var(--mono); white-space: nowrap; }
 
-.back-text { margin-left: 0.3em; }
-/* Phones: the back link is just the arrow (the word stays for screen readers), so long titles fit. */
+.back-text { margin-left: 0.3em; font-size: 1rem; }
+/* Phones: just the arrow, the word stays for screen readers. */
 @media (max-width: 30rem) {
   .back-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 }

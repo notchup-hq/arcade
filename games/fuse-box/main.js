@@ -265,5 +265,5 @@ new ResizeObserver(fit).observe(ui.frame);
 
 wireDialogs({ help: ui.help, fame });
 
-initSettings();
+initSettings(() => p.status === 'playing');
 build();
