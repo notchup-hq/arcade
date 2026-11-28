@@ -142,7 +142,8 @@ function build() {
 
 function act(i, tag) {
   if (p.status === 'won' || p.status === 'lost') return;
-  if (tag) {
+  // A lit number is never tagged, so in tag mode a tap on one still tests the rest around it.
+  if (tag && p.cells[i] !== TESTED) {
     if (toggleTag(p, i)) {
       (p.cells[i] === TAGGED ? sfx.tag : sfx.untag)();
       paint(i);
