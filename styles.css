@@ -758,10 +758,10 @@ html:has(body.game), body.game { overflow: hidden; overscroll-behavior: none; }
   cursor: pointer;
 }
 .board-tabs button[aria-pressed="true"] { border-color: var(--neon-cyan); box-shadow: var(--glow-cyan); }
-.sheet table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.sheet table { width: 100%; table-layout: fixed; border-collapse: collapse; font-family: var(--mono); font-variant-numeric: tabular-nums; }
 .sheet caption { color: var(--neon-muted); padding-bottom: 0.25rem; }
 .sheet th, .sheet td { padding: 0.3rem 0.2rem; text-align: left; border-bottom: 1px solid var(--line); }
-.sheet :is(th, td):first-child { padding-left: 0; }
+.sheet :is(th, td):first-child { width: 2rem; padding-left: 0; }
 .sheet :is(th, td):last-child { padding-right: 0; }
 .sheet th { color: var(--neon-muted); font-weight: 400; }
 /* On a narrow phone the date goes, so a long score or Patch Night's extra columns never wrap a row
