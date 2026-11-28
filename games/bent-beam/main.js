@@ -28,6 +28,7 @@ const SWEEP_CELLS_PER_S = 9; // the winning beam travels this fast, so a long pa
 const SWEEP_MIN_MS = 1200;
 const BEAT_MS = 700;         // the lit board rests this long before the score dialog
 const REDUCED = '(prefers-reduced-motion: reduce)';
+const LINGER_MS = 3500; // the line stays this long unless a tap or the next turn fades it first
 const PAUSE_MS = 1300; // after a reset the board ignores taps this long, so no turn is spent on a board still being read
 const LOW_TURNS = 3; // the status line counts the turns down from here
 const BORDER = 32;   // the board's border (4) and the room its glow needs (14) on both sides
@@ -115,6 +116,7 @@ async function burnCue(text, ms) {
   if (!burn) {
     burn = Object.assign(document.createElement('p'), { className: 'burn' });
     burn.setAttribute('aria-hidden', 'true'); // the status line says the same
+    burn.addEventListener('click', () => burn.classList.remove('show'));
     ui.board.append(burn);
     await loadSheet(new URL('burn.css', import.meta.url).href);
     if (g !== board) return;
@@ -276,7 +278,7 @@ function punish(shorted) {
   const out = burnBulb(run);
   if (out) { paintCounters(); end(); return true; }
   const line = burnLine(spent ? SPENT_LINES : SHORT_LINES);
-  burnCue(line, spent ? PAUSE_MS : PAUSE_MS / 2);
+  burnCue(line, LINGER_MS);
   if (spent) {
     resetBoard(g);
     paint();
@@ -307,6 +309,7 @@ function report() {
 
 function act(i) {
   if (paused) return;
+  burn?.classList.remove('show');
   const before = shortsCrossed(g);
   const result = turnMirror(g, i);
   if (result === 'fixed') {
