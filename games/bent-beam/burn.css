@@ -1,7 +1,7 @@
 /* games/bent-beam/main.js: when a bulb burns, the board's border glows soft red and a short line shows.
    Loaded on the first burn, so no page pays for it up front (Night Deal's first load is near its budget). */
 .beam .burn { position: absolute; inset: 0.5rem 0.5rem auto; margin: 0; padding: 0.4rem 0.6rem; border: 1px solid var(--neon-red); border-radius: 6px; background: rgb(2 5 11 / 0.9); color: var(--neon-red); font: 800 1rem/1.3 var(--mono); text-align: center; pointer-events: none; opacity: 0; }
-.beam .burn.show { opacity: 1; }
+.beam .burn.show { opacity: 1; pointer-events: auto; cursor: pointer; } /* a tap fades it early */
 @media (prefers-reduced-motion: no-preference) {
   .beam .burn { transition: opacity 0.3s; }
   .beam.hurt::after { border-color: var(--neon-red); box-shadow: 0 0 14px var(--neon-red); animation: hurt-glow 1s ease-out 1; }
