@@ -141,7 +141,7 @@ function smoke(ctx, stage, wind, t) {
     const u = (t / SMOKE_PERIOD + k / SMOKE_PUFFS) % 1;
     ctx.fillStyle = `rgb(205 220 240 / ${0.34 * (1 - u) * Math.min(1, u * 8)})`;
     ctx.beginPath();
-    ctx.arc(x + wind * 0.5 * u * u * 9, top + 1.5 + u * 20, 1.2 + u * 2.6, 0, Math.PI * 2);
+    ctx.arc(x + wind * 3.2 * u * u, top + 1.5 + u * 20, 1.2 + u * 2.6, 0, Math.PI * 2);
     ctx.fill();
   }
 }
