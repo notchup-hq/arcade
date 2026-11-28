@@ -16,6 +16,7 @@ const OWNED = [
   { re: /history\.replaceState|searchParams\.(get|set)\(['"]level['"]/, use: 'pickLevel in js/levels.js', owner: 'js/levels.js', also: ['js/hall.js', 'js/challenge-ui.js'] },
   { re: /dialog\[open\]|help-open|fame-open/, use: 'js/dialogs.js', owner: 'js/dialogs.js', also: ['js/grace.js'] },
   { re: /badge-logo/, use: 'consoleLogo in js/logo.js', owner: 'js/logo.js' },
+  { re: /classList\.toggle\('scrolls'/, use: 'fitCell in js/cells.js', owner: 'js/cells.js' },
   // Grid moves: Home and End go with the arrows only on a board of buttons. Patch Night's arrows aim
   // its turret, but it has no Home or End.
   { re: /['"](Home|End)['"]/, use: 'gridKeys in js/grid.js', owner: 'js/grid.js' },

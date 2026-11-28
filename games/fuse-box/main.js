@@ -3,6 +3,7 @@
 // room the panel has, and help and the hall of fame open in dialogs. Tap or click to test a fuse; tag one with a right click, a long press,
 // the T key, or the Tag button. The level lives in the link (?level=medium).
 
+import { cellName, fitCell } from '../../js/cells.js';
 import { confirmLeave, wireDialogs } from '../../js/dialogs.js';
 import { createFame } from '../../js/fame.js';
 import { gridKeys } from '../../js/grid.js';
@@ -18,6 +19,7 @@ const ORDER = 'low'; // a faster time is better
 const LONG_PRESS_MS = 450;
 const MIN_CELL = 24; // WCAG's smallest target; below it the panel scrolls inside its frame
 const MAX_CELL = 52;
+const PAD = 20; // the panel's padding and border
 
 const $ = (id) => document.getElementById(id);
 const ui = {
@@ -64,16 +66,16 @@ const elapsed = () => (started ? (finished || performance.now()) - started : 0);
 
 /** The text a screen reader hears for fuse `i`. */
 function labelOf(i) {
-  const where = { row: Math.floor(i / p.cols) + 1, col: (i % p.cols) + 1 };
+  const where = cellName(i, p.cols);
   const s = p.cells[i];
-  if (p.status === 'lost' && p.isBlown[i]) return `Row ${where.row}, column ${where.col}: blown`;
-  if (p.status === 'lost' && s === TAGGED) return `Row ${where.row}, column ${where.col}: tagged, but good`;
-  if (s === TAGGED) return `Row ${where.row}, column ${where.col}: tagged`;
-  if (s !== TESTED) return `Row ${where.row}, column ${where.col}`;
+  if (p.status === 'lost' && p.isBlown[i]) return `${where}: blown`;
+  if (p.status === 'lost' && s === TAGGED) return `${where}: tagged, but good`;
+  if (s === TAGGED) return `${where}: tagged`;
+  if (s !== TESTED) return where;
   const n = p.count[i];
-  if (n === 0) return `Row ${where.row}, column ${where.col}: good, none blown next to it`;
-  if (n === 1) return `Row ${where.row}, column ${where.col}: good, 1 blown next to it`;
-  return `Row ${where.row}, column ${where.col}: good, ${n} blown next to it`;
+  if (n === 0) return `${where}: good, none blown next to it`;
+  if (n === 1) return `${where}: good, 1 blown next to it`;
+  return `${where}: good, ${n} blown next to it`;
 }
 
 function paint(i) {
@@ -252,18 +254,12 @@ ui.again.addEventListener('click', async () => {
 
 /** The room the panel's cells have: its frame less the panel's padding and border. */
 function room() {
-  const pad = 20;
-  return { width: ui.frame.clientWidth - pad, height: ui.frame.clientHeight - pad };
+  return { width: ui.frame.clientWidth - PAD, height: ui.frame.clientHeight - PAD };
 }
 
 /** Size the cells to the room the panel has: as big as fits, between MIN_CELL and MAX_CELL. */
 function fit() {
-  if (!p) return;
-  const { width, height } = room();
-  const cell = Math.floor(Math.max(MIN_CELL, Math.min(MAX_CELL, width / p.cols, height / p.rows)));
-  ui.board.style.setProperty('--cell', `${cell}px`);
-  const { frame } = ui; // the browser's own verdict, so padding and borders cannot drift from it
-  ui.frame.classList.toggle('scrolls', frame.scrollWidth > frame.clientWidth || frame.scrollHeight > frame.clientHeight);
+  if (p) fitCell(ui.frame, ui.board, { cols: p.cols, rows: p.rows, pad: PAD, min: MIN_CELL, max: MAX_CELL });
 }
 new ResizeObserver(fit).observe(ui.frame);
 
