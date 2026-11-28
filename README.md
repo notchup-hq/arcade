@@ -6,7 +6,7 @@ Neon arcade of tiny classic arcade games by Notchup. Plain HTML, CSS and JS: no 
 
 **Made by Notchup:** this arcade is a free side project of [Notchup](https://www.notchup.fi), a small Finnish software company. Come and see what else we make at **[www.notchup.fi](https://www.notchup.fi)**.
 
-Alpha (v0.1). Seven games so far, more on the way.
+Beta. Seven games so far, more on the way.
 
 ## The games
 
