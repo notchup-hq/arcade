@@ -81,6 +81,20 @@ test('a lob always gets over the chimney and onto the billboard, from every roof
   }
 });
 
+test('a hit exists in the strongest wind, both ways, on every street and shape', () => {
+  for (const { stage, level } of stages()) {
+    for (const side of ['left', 'right']) {
+      for (const wind of [-MAX_WIND, MAX_WIND]) {
+        const found = [...Array(MAX_ANGLE - MIN_ANGLE + 1)].some((_, i) => {
+          const angle = MIN_ANGLE + i;
+          return fly(stage, side, angle, solvePower(stage, side, angle, wind), wind).hit;
+        });
+        assert.ok(found, `${stage.street.name} ${stage.portrait ? 'upright' : 'wide'} level ${level} ${side} wind ${wind}`);
+      }
+    }
+  }
+});
+
 test('the chimney stands between the roofs and grows with the rivals up to a limit', () => {
   for (const { stage } of stages()) {
     assert.ok(stage.chimney.x0 > stage.sides.left.x1 && stage.chimney.x1 < stage.sides.right.x0);
@@ -143,7 +157,8 @@ test('rivals get better one after another, with more wind, up to a limit', () =>
     assert.ok(rivals[i].windMax >= rivals[i - 1].windMax);
   }
   assert.ok(rivals[0].skill < rivals[5].skill);
-  assert.ok(rivals[13].skill <= 0.9 && rivals[13].windMax <= 9);
+  assert.ok(rivals[13].skill <= 0.9 && rivals[13].windMax <= MAX_WIND);
+  assert.ok(rivals[0].windMax >= 4 && rivals[13].windMax === MAX_WIND);
   assert.notEqual(rivals[0].sign, rivals[1].sign);
   assert.notEqual(rivals[0].street, rivals[1].street);
 });
@@ -166,6 +181,25 @@ function throwsToHit(level, seed, { portrait = false } = {}) {
   return 13;
 }
 
+/** Throws the computer needs to put three bulbs on the billboard, the match's end. */
+function throwsToWin(level, seed, { portrait = false } = {}) {
+  const rival = rivalFor(level);
+  const rand = seeded(seed);
+  const stage = stageFor(rival.street, portrait, rival.stack);
+  const match = createMatch({ stage, windMax: rival.windMax, rand });
+  match.turn = 'right';
+  const memory = newMemory();
+  let n = 0;
+  while (!match.winner && n < 40) {
+    const shot = aimComputer({ stage, side: 'right', wind: match.wind, skill: rival.skill, memory, rand });
+    const flight = takeTurn(match, shot.angle, shot.power);
+    learn(memory, stage, 'right', { ...shot, wind: flight.wind }, flight);
+    match.turn = 'right';
+    n++;
+  }
+  return n;
+}
+
 const average = (level, opts) => {
   let sum = 0;
   for (let seed = 1; seed <= 60; seed++) sum += throwsToHit(level, seed, opts);
@@ -177,6 +211,32 @@ test('the computer usually misses with its first throw, then closes in', () => {
   for (let seed = 1; seed <= 60; seed++) if (throwsToHit(0, seed) === 1) firstHits++;
   assert.ok(firstHits < 30, `${firstHits} of 60 first throws hit`);
   assert.ok(average(0) < 6, `average ${average(0)}`);
+});
+
+test('the computer wins a match in under 7 throws on average, and a late rival in fewer', () => {
+  const matchThrows = (level, opts) => {
+    let sum = 0;
+    for (let seed = 1; seed <= 60; seed++) sum += throwsToWin(level, seed, opts);
+    return sum / 60;
+  };
+  for (const opts of [{}, { portrait: true }]) {
+    assert.ok(matchThrows(0, opts) < 8, `first rival ${matchThrows(0, opts)} ${JSON.stringify(opts)}`);
+    assert.ok(matchThrows(12, opts) <= matchThrows(0, opts), JSON.stringify(opts));
+  }
+});
+
+test('the computer steadies its hand and reads the wind better with each throw', () => {
+  const rand = seeded(5);
+  const spread = (throws) => {
+    const powers = [];
+    for (let i = 0; i < 80; i++) {
+      const memory = { last: null, throws };
+      powers.push(aimComputer({ stage: wide, side: 'right', wind: 0, skill: 0.3, memory, rand }).power);
+    }
+    const mean = powers.reduce((a, b) => a + b, 0) / powers.length;
+    return Math.sqrt(powers.reduce((a, b) => a + (b - mean) ** 2, 0) / powers.length);
+  };
+  assert.ok(spread(4) < spread(0) / 2, `${spread(4)} against ${spread(0)}`);
 });
 
 test('a later rival hits sooner than the first, on a wide and on an upright stage', () => {
