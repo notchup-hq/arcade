@@ -227,3 +227,10 @@ test('a board reset has its mirrors as they began and a fresh budget', () => {
   assert.equal(lampsLeft(g), lit);
   assert.equal(g.status, 'ready');
 });
+
+test('fixing the board with its last turn is a win, not out of turns', () => {
+  const g = drawn(['...', '.\\.', '...'], 1, [1], [], [7]);
+  g.budget = 1;
+  assert.equal(turnMirror(g, 4), 'won');
+  assert.equal(outOfTurns(g), false);
+});

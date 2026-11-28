@@ -101,7 +101,7 @@ function paintCounters() {
   [...ui.lamps.children].forEach((b, k) => b.classList.toggle('on', k < run.bulbs));
   ui.lamps.setAttribute('aria-label', `${run.bulbs} of ${run.max} bulbs left`);
   ui.fixed.textContent = String(run.fixed);
-  ui.turns.textContent = `${g.taps} / ${g.budget}`;
+  ui.turns.textContent = `${g.taps}/${g.budget}`;
 }
 
 function draw(head = Infinity) {
@@ -142,7 +142,7 @@ function build() {
   g = newBoard(LEVELS[level], seeded(Math.floor(Math.random() * 2 ** 32)));
   ui.board.style.setProperty('--n', g.size);
   ui.board.style.setProperty('--row', g.row);
-  ui.board.classList.remove('won', 'dark');
+  ui.board.classList.remove('won', 'dark', 'hurt');
   ui.board.style.removeProperty('--glow');
   ui.card.hidden = true;
   ui.cells.inert = false;
@@ -194,6 +194,7 @@ function sweep(board) {
 async function win() {
   const board = g;
   fixedBoard(run);
+  ui.board.classList.remove('hurt'); // the gold glow shares the border
   ui.board.classList.add('won');
   say('The beam is through.');
   await sweep(board);
