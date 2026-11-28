@@ -132,10 +132,9 @@ a.marquee-logo:hover, a.marquee-logo:focus-visible { background: radial-gradient
   letter-spacing: 0.1em;
 }
 
-/* Cabinets: each game is an arcade machine drawn in CSS, with no images. From the top: a lit marquee
-   with the name, the screen in its bezel (the attract-mode demo plays here), the control panel with a
-   stick and buttons, and the base with the pitch and a lit Play plate. A game still coming has its
-   marquee unlit and its screen off. Nothing here moves on its own. */
+/* Cabinets: each game is an arcade machine drawn in CSS: a lit marquee with the name, the screen in its bezel
+   (the attract-mode demo plays here), a control panel, and a base with the pitch and a Play plate. A game
+   still coming has its marquee unlit and its screen off. Nothing here moves on its own. */
 
 /* Phone: the ready game is a big cabinet, the ones still coming share a row below it. */
 .cabinets {
@@ -217,9 +216,8 @@ a.marquee-logo:hover, a.marquee-logo:focus-visible { background: radial-gradient
 .soon .screen { aspect-ratio: 16 / 9; }
 .soon .screen::before { content: ""; position: absolute; inset: 0; background: rgb(6 11 22 / 0.88); }
 
-/* The teaser on a ready screen is always on, whatever the demo shows: a solid plate at the foot of the
-   picture, like a sticker on the glass. Its border takes the cabinet's colour (--plate) and it breathes
-   slowly (motion block below). Touch screens say tap. */
+/* The teaser on a ready screen is always on: a plate at the foot of the picture, like a sticker on the glass,
+   in the cabinet's colour (--plate). It breathes slowly (motion block below). Touch screens say tap. */
 .cabinet[data-game] { --plate: var(--neon-gold); }
 .cabinet[data-game="fuse-box"] { --plate: var(--neon-red); }
 .cabinet[data-game="lob"] { --plate: var(--neon-cyan); }
@@ -353,8 +351,7 @@ a.marquee-logo:hover, a.marquee-logo:focus-visible { background: radial-gradient
 
 body.game { height: 100vh; height: 100dvh; min-height: 0; } /* vh first for in-app browsers that predate dvh */
 
-/* A game never moves under a finger: the page does not scroll, rubber-band or pull to refresh, and a
-   drag on a play area is the game's own (a frame that must scroll, see .panel-frame, says so). */
+/* A game never moves under a finger: no scrolling, rubber-banding or pull to refresh. */
 html:has(body.game), body.game { overflow: hidden; overscroll-behavior: none; }
 [data-play] { touch-action: none; }
 
@@ -439,8 +436,7 @@ html:has(body.game), body.game { overflow: hidden; overscroll-behavior: none; }
 .badge-logo { width: 3.25rem; height: 3.25rem; }
 .badge-logo.sparked .logo { filter: grayscale(1) brightness(0.6); }
 
-/* The panel takes whatever room is left; js sets --cell to the biggest size that fits. Below 24 px
-   cells it scrolls inside this frame, never the page. */
+/* The panel takes the room left; js sets --cell to what fits, and below 24 px the frame scrolls. */
 .panel-frame {
   flex: 1;
   min-height: 0;
@@ -450,8 +446,7 @@ html:has(body.game), body.game { overflow: hidden; overscroll-behavior: none; }
   overflow: auto;
   overscroll-behavior: contain;
 }
-/* Cells never go under 24 px, so a Hard panel on the smallest phones is bigger than its frame: there a
-   drag scrolls the frame (and only the frame). */
+/* Cells stay 24 px or more, so on the smallest phones a drag scrolls the frame, and only it. */
 .panel-frame.scrolls [data-play] { touch-action: pan-x pan-y; }
 .panel {
   --cell: 32px;
@@ -505,6 +500,18 @@ html:has(body.game), body.game { overflow: hidden; overscroll-behavior: none; }
   inset: 14%;
   background: linear-gradient(45deg, transparent 44%, var(--neon-red) 44% 56%, transparent 56%);
 }
+
+/* Bent Beam: a canvas under --n by --n buttons, with a gutter for the lamp housing. */
+.beam { display: block; position: relative; box-sizing: content-box; width: calc((var(--n) + 1) * var(--cell)); height: calc(var(--n) * var(--cell)); padding: 0; }
+.beam-frame { padding: 14px; }
+.beam.won { border-color: var(--neon-green); box-shadow: 0 0 14px rgb(125 255 154 / 0.5); }
+.beam canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.beam canvas, .beam .card { border-radius: calc(var(--radius) - 2px); }
+.beam::after { content: ''; position: absolute; inset: -2px; border: 2px solid var(--neon-gold); border-radius: var(--radius); box-shadow: var(--glow-gold); opacity: var(--glow, 0); pointer-events: none; }
+.beam-cells { position: absolute; inset: 0 0 0 var(--cell); display: grid; grid-template-columns: repeat(var(--n), var(--cell)); }
+.beam-cells button { width: var(--cell); height: var(--cell); min-width: 0; min-height: 0; padding: 0; border: 0; background: none; cursor: default; }
+.beam-cells .turns { cursor: pointer; }
+.beam-cells .turns:hover { background: rgb(242 201 76 / 0.12); }
 
 /* Patch Night: the question, the lights, and the board with its ring of lane buttons over a canvas. */
 .readout-value.gold { color: var(--neon-gold); text-shadow: 0 0 8px rgb(242 201 76 / 0.6); }
@@ -666,7 +673,7 @@ html:has(body.game), body.game { overflow: hidden; overscroll-behavior: none; }
   overflow: hidden;
 }
 .scene { display: block; width: 100%; height: 100%; cursor: crosshair; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
-.game[data-game="lob"] .status { height: 3em; overflow: hidden; } /* two lines always, so the street never resizes when the words change */
+.game[data-game="lob"] .status, .game[data-game="bent-beam"] .status { height: 3em; overflow: hidden; } /* two lines always, so the street never resizes when the words change */
 .aim { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem 1rem; }
 .stepper { display: flex; align-items: center; gap: 0.25rem; }
 .stepper button { font-size: 1.5rem; line-height: 1; padding: 0; touch-action: manipulation; }
@@ -720,11 +727,11 @@ html:has(body.game), body.game { overflow: hidden; overscroll-behavior: none; }
 .pair.matched, .pair.shown { cursor: default; }
 .deck.won .pair-front { border-color: var(--neon-gold); box-shadow: var(--glow-gold); }
 
-/* Narrow phone: four readouts and six lamps still fit. */
+/* Narrow phone: four readouts and lamps fit. */
 @media (max-width: 24rem) {
-  [data-game="pair-up"] .console { gap: 0.5rem; }
-  [data-game="pair-up"] .readout { min-width: 3.5rem; }
-  [data-game="pair-up"] .lamps { gap: 0.3rem; }
+  .console { gap: 0.5rem; }
+  .readout { min-width: 3.5rem; }
+  .lamps { gap: 0.3rem; }
 }
 
 /* Dialogs: help, hall of fame, initials. */
@@ -764,8 +771,7 @@ html:has(body.game), body.game { overflow: hidden; overscroll-behavior: none; }
 .sheet :is(th, td):first-child { width: 2rem; padding-left: 0; }
 .sheet :is(th, td):last-child { padding-right: 0; }
 .sheet th { color: var(--neon-muted); font-weight: 400; }
-/* On a narrow phone the date goes, so a long score or Patch Night's extra columns never wrap a row
-   (the dialog keeps its height) or push the table wider than the dialog. */
+/* On a narrow phone the date goes, so a row never wraps or widens the dialog. */
 @media (max-width: 24.99rem) {
   .sheet table :is(th, td):last-child { display: none; }
 }
@@ -794,9 +800,8 @@ html:has(body.game), body.game { overflow: hidden; overscroll-behavior: none; }
 
 /* ---------- From the hall into a game ---------- */
 
-/* Opening a game, the cabinet's screen grows into the game's play area in 0.3 s, and shrinks back on
-   the way out (a cross-document view transition). A screen and its play area share a name, one per
-   game since a name is used once per page. Without view transitions, or with less motion: a normal load. */
+/* Opening a game, the cabinet's screen grows into its play area in 0.3 s and shrinks back on the way out (a
+   cross-document view transition; a name is used once per page, so one per game). Else a normal load. */
 .cabinet[data-game] .screen, .game .game-main { view-transition-class: game-screen; }
 .cabinet[data-game="fuse-box"] .screen, .game[data-game="fuse-box"] .game-main { view-transition-name: fuse-box; }
 .cabinet[data-game="lob"] .screen, .game[data-game="lob"] .game-main { view-transition-name: lob; }
@@ -804,6 +809,7 @@ html:has(body.game), body.game { overflow: hidden; overscroll-behavior: none; }
 .cabinet[data-game="notch-up"] .screen, .game[data-game="notch-up"] .game-main { view-transition-name: notch-up; }
 .cabinet[data-game="pair-up"] .screen, .game[data-game="pair-up"] .game-main { view-transition-name: pair-up; }
 .cabinet[data-game="night-deal"] .screen, .game[data-game="night-deal"] .game-main { view-transition-name: night-deal; }
+.cabinet[data-game="bent-beam"] .screen, .game[data-game="bent-beam"] .game-main { view-transition-name: bent-beam; }
 
 /* A slow connection leaves the hall looking frozen between the tap and the game's first frame, so
    after a moment the tapped screen dims and shows the logo, which notches round in the motion block. */
@@ -842,8 +848,7 @@ html:has(body.game), body.game { overflow: hidden; overscroll-behavior: none; }
   .cabinet[data-game]:not(.opening) .screen::before { animation: breathe 2.4s ease-in-out infinite; }
   .cabinet.opening .screen::after { animation: spin-notches 1.2s steps(4, end) infinite; }
   ::view-transition-group(*) { animation-duration: 0.3s; animation-timing-function: ease-in-out; }
-  /* The page being left stays put while the next one fades in over it, and the screen grows as a
-     solid, lit screen, so the two pages never show through each other. */
+  /* The page being left stays put while the next fades in over it, so the two never show through each other. */
   ::view-transition-old(root) { animation: none; }
   ::view-transition-group(*.game-screen) {
     border-radius: 10px;
@@ -881,7 +886,7 @@ html:has(body.game), body.game { overflow: hidden; overscroll-behavior: none; }
 .how-sharing p { margin: 0 0 0.5rem; }
 .challenger-tools { margin: 0.5rem 0 0; }
 .challenger-tools.off { display: none; }
-/* A row of a table you can pick: its initials are the button, as tall as the row (44 px, in every table, so the dialog is as tall in all of them). */
+/* A row of a table you can pick: its initials are the button, 44 px tall in every table. */
 .sheet tbody tr { height: 2.75rem; }
 .sheet .pick { display: block; width: 100%; min-height: 2.75rem; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; box-shadow: none; cursor: pointer; }
 .sheet tbody tr.picked td { background: rgb(94 242 255 / 0.12); }
