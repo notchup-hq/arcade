@@ -108,3 +108,7 @@ test('a touch screen held sideways is asked to turn upright, and a long title ne
   assert.match(css, /@media \(max-width: 30rem\) \{\s*\.back-text \{ position: absolute/);
   assert.match(css, /\.game-bar h1 \{[^}]*min-width: 0;[^}]*text-overflow: ellipsis;[^}]*font: 800 clamp\(1rem/);
 });
+
+test('the hall of fame table has fixed columns, so switching tabs never moves them', () => {
+  assert.match(read('styles.css'), /\.sheet table \{[^}]*table-layout: fixed/);
+});
