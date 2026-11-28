@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  BACK, EMPTY, LEVELS, SLASH, WALL, BRONZE, CHEERS, GOLD, MEDALS, SILVER, burnBulb, fixedBoard, isLit, lampsLeft, newBoard, newRun, nextAnswer, outOfTurns, praiseFor, resetBoard, seeded, shortsCrossed, SLACK, trace, turnMirror, turnsLeft, undoTurn,
+  BACK, EMPTY, LEVELS, SLASH, WALL, BRONZE, CHEERS, GOLD, MEDALS, SILVER, burnBulb, fixedBoard, isLit, lampsLeft, newBoard, newRun, nextAnswer, SHORT_LINES, SPENT_LINES, outOfTurns, praiseFor, resetBoard, seeded, shortsCrossed, SLACK, trace, turnMirror, turnsLeft, undoTurn,
 } from '../games/bent-beam/rules.js';
 
 const SEEDS = Array.from({ length: 60 }, (_, k) => k + 1);
@@ -233,4 +233,20 @@ test('fixing the board with its last turn is a win, not out of turns', () => {
   g.budget = 1;
   assert.equal(turnMirror(g, 4), 'won');
   assert.equal(outOfTurns(g), false);
+});
+
+test('a burnt bulb has several lines for each cause, so pickLine can keep them fresh', () => {
+  for (const lines of [SHORT_LINES, SPENT_LINES]) {
+    assert.ok(lines.length >= 3);
+    assert.equal(new Set(lines).size, lines.length);
+    assert.ok(lines.every((l) => l.length > 0 && l.length <= 48));
+  }
+});
+
+test('fixing a board lights a bulb back, so a run that keeps solving never runs dry', () => {
+  const run = newRun(LEVELS.hard);
+  burnBulb(run);
+  burnBulb(run);
+  fixedBoard(run);
+  assert.equal(run.bulbs, LEVELS.hard.bulbs - 1);
 });

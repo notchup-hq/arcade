@@ -30,6 +30,10 @@ export const GOLD = ['Gold: the fewest turns possible.', 'Gold: not a turn waste
 export const SILVER = ['Silver: one turn over the fewest.', 'Silver: just one turn from perfect.', 'Silver: close to perfect, and it shows.'];
 export const BRONZE = ['Bronze: two turns over the fewest.', 'Bronze: two extra turns, still a clean fix.', 'Bronze: a little detour, a good finish.'];
 
+// A dry line when a bulb burns out, one is picked at random: from a short circuit, or from running out of turns.
+export const SHORT_LINES = ['Zzzt! That bulb gave its all.', 'Short circuit. The bulb took it personally.', 'Pop. One bulb fewer.', 'The beam met a short. The bulb did not enjoy it.'];
+export const SPENT_LINES = ['Out of turns. A bulb called it a night.', 'Too many turns. A bulb retired early.', 'No turns left. A bulb dimmed itself.', 'Time is up. A bulb has seen enough.'];
+
 /** The medal for each tier, shown on the win card's title line. */
 export const MEDALS = ['🥇', '🥈', '🥉'];
 
