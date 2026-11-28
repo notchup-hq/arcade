@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  BACK, EMPTY, LEVELS, SLASH, WALL, BRONZE, CHEERS, GOLD, SILVER, burnBulb, fixedBoard, isLit, lampsLeft, newBoard, newRun, nextAnswer, praiseFor, seeded, shortsCrossed, trace, turnMirror, undoTurn,
+  BACK, EMPTY, LEVELS, SLASH, WALL, BRONZE, CHEERS, GOLD, MEDALS, SILVER, burnBulb, fixedBoard, isLit, lampsLeft, newBoard, newRun, nextAnswer, praiseFor, seeded, shortsCrossed, trace, turnMirror, undoTurn,
 } from '../games/bent-beam/rules.js';
 
 const SEEDS = Array.from({ length: 60 }, (_, k) => k + 1);
@@ -187,4 +187,9 @@ test('par is the fewest turns that win the board', () => {
 test('a win is cheered gold, silver or bronze by the turns over the fewest, and plainly after that', () => {
   const lines = (over) => praiseFor({ par: 3, taps: 3 + over });
   assert.deepEqual([lines(0), lines(1), lines(2), lines(3), lines(9)], [GOLD, SILVER, BRONZE, CHEERS, CHEERS]);
+});
+
+test('each medal tier has an emoji for the card title', () => {
+  assert.equal(MEDALS.length, 3);
+  assert.ok(MEDALS.every((m) => m.length > 0));
 });

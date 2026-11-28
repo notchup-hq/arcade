@@ -29,6 +29,9 @@ export const GOLD = ['Gold: the fewest turns possible.', 'Gold: not a turn waste
 export const SILVER = ['Silver: one turn over the fewest.', 'Silver: just one turn from perfect.', 'Silver: close to perfect, and it shows.'];
 export const BRONZE = ['Bronze: two turns over the fewest.', 'Bronze: two extra turns, still a clean fix.', 'Bronze: a little detour, a good finish.'];
 
+/** The medal for each tier, shown on the win card's title line. */
+export const MEDALS = ['🥇', '🥈', '🥉'];
+
 /** The lines to cheer a board `g` won in `g.taps` turns from. */
 export function praiseFor(g) {
   return [GOLD, SILVER, BRONZE][g.taps - g.par] ?? CHEERS;

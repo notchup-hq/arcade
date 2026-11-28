@@ -15,7 +15,7 @@ import { consoleLogo } from '../../js/logo.js';
 import { initSettings } from '../../js/settings.js';
 import { sfx } from '../../js/sound.js';
 import { pickLine } from '../../js/random.js';
-import { LEVELS, BACK, SLASH, WALL, burnBulb, fixedBoard, isLit, lampsLeft, newBoard, newRun, praiseFor, seeded, shortsCrossed, turnMirror, undoTurn } from './rules.js';
+import { LEVELS, MEDALS, BACK, SLASH, WALL, burnBulb, fixedBoard, isLit, lampsLeft, newBoard, newRun, praiseFor, seeded, shortsCrossed, turnMirror, undoTurn } from './rules.js';
 import { beamLength, drawBoard, reach } from './scene.js';
 
 const GAME = 'bent-beam';
@@ -200,7 +200,7 @@ async function win() {
   fame.passing(run.fixed);
   await new Promise((resolve) => setTimeout(resolve, BEAT_MS));
   if (g !== board) return;
-  ui.cardTitle.textContent = 'Board fixed';
+  ui.cardTitle.textContent = `${MEDALS[g.taps - g.par] ?? ''} Board fixed`.trim();
   ui.cardText.textContent = `${pickLine(praiseFor(g), Math.random)} ${g.taps} turns, ${run.fixed} fixed.`;
   ui.go.textContent = 'Next board';
   ui.cells.inert = true;
