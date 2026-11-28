@@ -1,8 +1,7 @@
 // Lob's rules: no DOM, so the page, the hall's demo and the tests share them. Two rooftops face each
 // other across a street. A bulb is thrown with an angle and a power, pulled by gravity and pushed by
-// the wind, and a billboard that takes three hits is out. A chimney stands in the middle of the street, so a
-// flat throw at full power hits it and the bulb has to be lobbed. Coordinates are in world units with y up;
-// the left rooftop belongs to the first player (the visitor in a solo run), the right one to the rival.
+// the wind; a billboard that takes three hits is out. A chimney in the middle forces a lob. Coordinates
+// are in world units with y up; the left rooftop is the first player's (the visitor's), the right one the rival's.
 
 import { seeded } from '../../js/random.js';
 
@@ -15,20 +14,23 @@ export const MIN_POWER = 10;
 export const MAX_POWER = 100;
 export const DEFAULT_ANGLE = 50;
 export const DEFAULT_POWER = 60;
-export const MAX_WIND = 9;
+export const MAX_WIND = 12;
 export const FIRST_STACK = 18;         // how far the chimney first stands above the higher roof
 const STACK_PER_LEVEL = 1.5;           // and how much higher it gets with each rival
-const MAX_STACK = 26;                  // the chimney stops growing here, so the last rivals stay beatable
-const LIFT_STEP = 2;                   // degrees the computer tries higher, one by one, after a bulb hit the chimney
+const MAX_STACK = 26;                  // the chimney stops growing here
+const SENSE_PER_THROW = 0.09;          // more wind read per throw
+const STEADY = 0.78;                    // wobble kept after a throw
+const LIFT_STEP = 2;                   // degrees the computer tries higher after hitting the chimney
 
 const GRAVITY = 40;                    // units per s²
-const SPEED_PER_POWER = 0.8;           // units per s for each point of power
-const WIND_PUSH = 0.8;                 // sideways units per s² for each point of wind
+const SPEED_PER_POWER = 0.9;           // units per s for each point of power
+const WIND_PUSH = 0.8;                 // sideways units per s² for each point of wind, on the wide stage
 const STEP = 1 / 120;                  // physics step, s; the path keeps every second one (1/60 s)
-const MAX_STEPS = 1200;                // a throw that has not landed by then (10 s) is lost
-const GUIDE_SECONDS = 0.5;             // the dotted guide shows only the start of the arc
+const MAX_STEPS = 1200;                // a throw not landed by then (10 s) is lost
+const GUIDE_SECONDS = 0.5;             // the dotted guide shows only the start
 
 const other = (side) => (side === 'left' ? 'right' : 'left');
+const windPush = (stage) => WIND_PUSH * stage.w / 160;   // a narrower stage is pushed less
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 
 // ---------- Streets: each rival has a stretch of its own ----------
@@ -58,16 +60,15 @@ export function rivalFor(level) {
     colour: SIGN_COLOURS[level % SIGN_COLOURS.length],
     street: STREETS[level % STREETS.length],
     skill,
-    windMax: Math.min(MAX_WIND, 2 + level),
+    windMax: Math.min(MAX_WIND, 4 + level),
     stack: Math.min(MAX_STACK, FIRST_STACK + STACK_PER_LEVEL * level),
   };
 }
 
 /**
  * The stage for a street. `stack` is how far the chimney in the middle stands above the higher roof.
- * On an upright screen the rooftops are closer and taller, so the tall screen is
- * used for higher arcs. Each side has its building, the spot the thrower stands on, and the billboard
- * (`board`, a box a bulb can hit) on the outer end of the roof.
+ * An upright screen has closer, taller rooftops, for higher arcs. Each side has its building, the spot
+ * the thrower stands on, and the billboard (`board`, a box a bulb can hit) on the outer end of the roof.
  */
 export function stageFor(street, portrait, stack = FIRST_STACK) {
   const w = portrait ? 100 : 160;
@@ -126,7 +127,7 @@ export function fly(stage, side, angle, power, wind, seconds = Infinity) {
   const s = stage.sides[side];
   const rad = (angle * Math.PI) / 180;
   const speed = power * SPEED_PER_POWER;
-  const ax = wind * WIND_PUSH;
+  const ax = wind * windPush(stage);
   let { x, y } = s.stand;
   let vx = Math.cos(rad) * speed * s.dir;
   let vy = Math.sin(rad) * speed;
@@ -189,8 +190,8 @@ export function takeTurn(match, angle, power) {
 }
 
 /**
- * What the board shows while `flight` (the latest throw) is still being shown: its hit counts once it has
- * landed, and the wind is the one it was thrown in, not the one for the next turn. With no flight, the match as it is.
+ * What the board shows while `flight` (the latest throw) is still on screen: its hit counts once it has
+ * landed, and the wind is the one it was thrown in. With no flight, the match as it is.
  */
 export function shown(match, flight, landed) {
   if (!flight) return { hits: match.hits, wind: match.wind };
@@ -240,7 +241,7 @@ export function carry(stage, side, angle, power, wind) {
   let vx = Math.cos(rad) * power * SPEED_PER_POWER * s.dir;
   let vy = Math.sin(rad) * power * SPEED_PER_POWER;
   for (let i = 0; i < MAX_STEPS && !(vy < 0 && y <= mid); i++) {
-    vx += wind * WIND_PUSH * STEP;
+    vx += wind * windPush(stage) * STEP;
     vy -= GRAVITY * STEP;
     x += vx * STEP;
     y += vy * STEP;
@@ -265,18 +266,18 @@ export function solvePower(stage, side, angle, wind) {
 const gauss = (rand) => Math.sqrt(-2 * Math.log(1 - rand())) * Math.cos(2 * Math.PI * rand());
 
 /** What a computer player remembers: its last throw. Make one per match and side. */
-export const newMemory = () => ({ last: null });
+export const newMemory = () => ({ last: null, throws: 0 });
 
 /**
- * The computer's next throw as { angle, power }. The first guess is rough and only half notices the wind.
- * After a miss it scales its power by how far off the bulb landed, as a person would, and adds what it
- * thinks the change in wind is worth; a computer that reads the wind badly overcorrects when the wind
- * changes a lot. After a bulb hit the chimney it raises its angle until the throw it has worked out clears it.
- * Better rivals (higher `skill`) read the wind better and are steadier.
+ * The computer's next throw as { angle, power }. The first guess is rough and half notices the wind. After a
+ * miss it scales its power by how far off the bulb landed and adds what it thinks the change in wind is worth
+ * (so it overcorrects when the wind changes a lot); after hitting the chimney it raises its angle until its
+ * worked-out throw clears it. Better rivals (higher `skill`) read the wind better and are steadier, and every
+ * rival gets better with each throw.
  */
 export function aimComputer({ stage, side, wind, skill, memory, rand }) {
-  const sense = skill * 0.9;                    // how much of the wind it reads
-  const wobble = 30 * (1 - skill);              // how unsteady its hand is, in power points
+  const sense = Math.min(1, skill * 0.9 + SENSE_PER_THROW * memory.throws);
+  const wobble = 30 * (1 - skill) * STEADY ** memory.throws;
   const base = stage.portrait ? 64 : 45;
   const first = base + gauss(rand) * 6 * (1 - skill);
   let angle = Math.round(clamp(memory.last ? memory.last.angle : first, MIN_ANGLE, MAX_ANGLE));
@@ -295,5 +296,6 @@ export function aimComputer({ stage, side, wind, skill, memory, rand }) {
 
 /** Tell the computer how its throw turned out; `flight` is the result of the throw, if it has one. */
 export function learn(memory, stage, side, { angle, power, wind }, flight = null) {
+  memory.throws += 1;
   memory.last = { angle, power, wind, reach: carry(stage, side, angle, power, wind), blocked: flight?.where === 'chimney' };
 }
