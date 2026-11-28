@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  BACK, EMPTY, LEVELS, SLASH, WALL, BRONZE, CHEERS, GOLD, MEDALS, SILVER, burnBulb, fixedBoard, isLit, lampsLeft, newBoard, newRun, nextAnswer, SHORT_LINES, SPENT_LINES, outOfTurns, praiseFor, resetBoard, seeded, shortsCrossed, SLACK, trace, turnMirror, turnsLeft, undoTurn,
+  BACK, EMPTY, LEVELS, SLASH, WALL, BRONZE, CHEERS, GOLD, MEDALS, SILVER, burnBulb, fixedBoard, isLit, lampsLeft, newBoard, newRun, nextAnswer, SHORT_LINES, SPENT_LINES, outOfTurns, praiseFor, resetBoard, seeded, shortsCrossed, trace, turnMirror, turnsLeft, undoTurn,
 } from '../games/bent-beam/rules.js';
 
 const SEEDS = Array.from({ length: 60 }, (_, k) => k + 1);
@@ -194,8 +194,11 @@ test('each medal tier has an emoji for the card title', () => {
   assert.ok(MEDALS.every((m) => m.length > 0));
 });
 
-test('a board allows its fewest turns plus the slack', () => {
-  for (const g of boards('hard').slice(0, 20)) assert.equal(g.budget, g.par + SLACK);
+test('a board allows its fewest turns plus its level\'s slack, less on the harder levels', () => {
+  assert.deepEqual(Object.values(LEVELS).map((l) => l.slack), [4, 2, 1]);
+  for (const level of Object.keys(LEVELS)) {
+    for (const g of boards(level).slice(0, 20)) assert.equal(g.budget, g.par + LEVELS[level].slack);
+  }
 });
 
 test('every turn, undo included, uses one of the budget, and the last one without a win is out of turns', () => {
