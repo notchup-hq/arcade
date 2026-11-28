@@ -14,7 +14,7 @@ const VIEWS = [
   { id: 'challengers', name: 'Friends', note: 'Not verified. In Compare, + means you lead.' },
 ];
 
-// The year may wrap under the day and month when a long score leaves a small phone no room.
+// The year may wrap when a long score leaves a small phone no room.
 const dateCell = (ms) => formatDate(ms).replace(/\d+$/, '\u200b$&');
 
 function button(text, onClick) {
@@ -75,7 +75,7 @@ export function renderFame(table, entries, { score, columns = [], fresh = -1, pi
 export function createFame({ dialog, table, caption, initials, board, order, label, score, columns }) {
   const credit = dialog.querySelector('.credit');
   const kept = credit?.textContent ?? '';
-  // One line of small print per view, stacked, so the dialog is as tall whichever table shows.
+  // One line of small print per view, stacked: the dialog is as tall in every table.
   const prints = VIEWS.map(({ note }) => {
     const span = document.createElement('span');
     span.textContent = note ? `${kept} ${note}` : kept;
@@ -117,7 +117,7 @@ export function createFame({ dialog, table, caption, initials, board, order, lab
   dialog.querySelector('.actions')?.prepend(share, qr);
   dialog.querySelector('.credit')?.after(shared);
 
-  // A link to this level greets at load; nothing is saved until Save.
+  // A link to this level greets at load.
   if (location.hash.startsWith('#c=')) {
     import('./challenge-ui.js').then(({ greetChallenger }) => {
       greetChallenger({
@@ -231,8 +231,10 @@ export function createFame({ dialog, table, caption, initials, board, order, lab
      */
     async offer({ value, shown, extra, grace = 0 }) {
       const placed = (entries) => (value > 0 ? placeOf(entries, value, order) : -1);
+      const best = memory.scores(board(), order)[0];
       const made = whereMade(placed(memory.scores(board(), order)), placed(memory.weekScores(board(), order)));
       if (!made) return false;
+      import('./record.js').then((m) => m.cheerRecord(best, made, shown));
       const who = await askInitials(initials, { place: made.place, weekly: made.view === 'week', score: shown, last: memory.initials(), grace });
       if (!who) return false;
       memory.addScore(board(), order, { initials: who, value, extra });
