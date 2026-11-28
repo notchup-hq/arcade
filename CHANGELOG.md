@@ -16,6 +16,8 @@ All notable changes to this project are listed here, newest first. The format fo
 
 ### Changed
 
+- Bent Beam is harder where it was too easy: a board's spare turns are now 4 on Easy, 2 on Medium and 1 on Hard (they were 4 everywhere), and Hard boards have 6 short circuits instead of 5.
+
 - The hall of fame fits a phone without scrolling (until friends are saved, which adds a row of buttons): the Friends buttons (Compare, Delete, Clear) show only while friends are saved, and the Friends note is shorter.
 - Back from a shared link opened in a chat app shows a "Back to the arcade…" card while the hall loads.
 - Pair Up's counters read Score, Chances, Round and Pairs, each with its own label (the round used to share a line with the pairs found).

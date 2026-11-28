@@ -15,12 +15,13 @@ export { seeded };
 // bends: the least mirrors the answer's beam must hit, so a board is never a lamp straight ahead;
 // turns: the fewest turns that win, over every answer, so no board is won by a tap;
 // shorts: short-circuit cells the beam must keep clear of (the answer never crosses them);
+// slack: the turns a board allows above its fewest (`par`), so less room to guess on a harder level;
 // bulbs: the run's lives, one burnt out each time a turn sends the beam into a short circuit
 // or a board's turns run out.
 export const LEVELS = {
-  easy: { size: 5, mirrors: 7, fixed: 0, walls: 2, lamps: 2, shorts: 2, bends: 4, turns: 3, bulbs: 4 },
-  medium: { size: 6, mirrors: 11, fixed: 2, walls: 3, lamps: 3, shorts: 3, bends: 6, turns: 4, bulbs: 4 },
-  hard: { size: 7, mirrors: 15, fixed: 3, walls: 5, lamps: 4, shorts: 5, bends: 7, turns: 4, bulbs: 3 },
+  easy: { size: 5, mirrors: 7, fixed: 0, walls: 2, lamps: 2, shorts: 2, bends: 4, turns: 3, bulbs: 4, slack: 4 },
+  medium: { size: 6, mirrors: 11, fixed: 2, walls: 3, lamps: 3, shorts: 3, bends: 6, turns: 4, bulbs: 4, slack: 2 },
+  hard: { size: 7, mirrors: 15, fixed: 3, walls: 5, lamps: 4, shorts: 6, bends: 7, turns: 4, bulbs: 3, slack: 1 },
 };
 
 // A dry line on the win card; one is picked at random.
@@ -41,9 +42,6 @@ export const MEDALS = ['🥇', '🥈', '🥉'];
 export function praiseFor(g) {
   return [GOLD, SILVER, BRONZE][g.taps - g.par] ?? CHEERS;
 }
-
-/** Turns a board allows above its fewest (`par`): room for a wrong turn or two, not for turning at random. */
-export const SLACK = 4;
 
 export const EMPTY = 0;
 export const WALL = 1;
@@ -196,7 +194,7 @@ export function newBoard(level, rand) {
     if (!scramble(g, rand, level.turns)) continue;
     g.beam = trace(g);
     g.par = parTurns(g);
-    g.budget = g.par + SLACK;
+    g.budget = g.par + level.slack;
     g.start = Uint8Array.from(g.cells);
     return g;
   }
