@@ -1,9 +1,9 @@
-/* js/record.js: the big cheer for a new record, centred; it never takes a tap */
-.record-banner { position: fixed; inset: 30% 0 auto; display: grid; margin: 0; pointer-events: none; opacity: 0; z-index: 20; color: var(--neon-gold); text-shadow: var(--glow-gold); font: 800 clamp(2rem, 11vw, 4rem)/1.1 var(--mono); text-transform: uppercase; text-align: center; }
+/* js/record.js: the big cheer for a new record, centred; it never takes a tap. A popover (top layer),
+   so its UA box styles are reset. */
+.record-banner { position: fixed; inset: 30% 0 auto; width: auto; height: auto; padding: 0.5rem 0; border: 0; overflow: visible; background: rgb(2 5 11 / 0.85); pointer-events: none; color: var(--neon-gold); text-shadow: var(--glow-gold); font: 800 clamp(2rem, 11vw, 4rem)/1.1 var(--mono); text-transform: uppercase; text-align: center; }
+.record-banner:popover-open { display: grid; }
 .record-banner small { color: var(--neon-cyan); font-size: 0.4em; text-transform: none; }
-.record-banner.show { opacity: 1; }
 @media (prefers-reduced-motion: no-preference) {
-  .record-banner { transition: opacity 0.3s; }
-  .record-banner.show { animation: record-pop 0.5s ease-out 1; }
-  @keyframes record-pop { from { transform: scale(0.6); } to { transform: scale(1); } }
+  .record-banner:popover-open { animation: record-pop 0.5s ease-out 1; }
+  @keyframes record-pop { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: scale(1); } }
 }

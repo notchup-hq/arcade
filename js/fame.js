@@ -234,10 +234,10 @@ export function createFame({ dialog, table, caption, initials, board, order, lab
       const best = memory.scores(board(), order)[0];
       const made = whereMade(placed(memory.scores(board(), order)), placed(memory.weekScores(board(), order)));
       if (!made) return false;
-      import('./record.js').then((m) => m.cheerRecord(best, made, shown));
       const who = await askInitials(initials, { place: made.place, weekly: made.view === 'week', score: shown, last: memory.initials(), grace });
       if (!who) return false;
       memory.addScore(board(), order, { initials: who, value, extra });
+      import('./record.js').then((m) => m.cheerRecord(best, made, shown));
       render(made.place, made.view);
       dialog.showModal();
       return true;
