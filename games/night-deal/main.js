@@ -507,7 +507,7 @@ const resume = () => { if (count > 0 && !over && !dialogOpen() && !document.hidd
 document.addEventListener('visibilitychange', () => (document.hidden ? pause() : resume()));
 wireDialogs({ help: ui.help, fame, pause, resume });
 
-initSettings();
+initSettings(() => !over && count > 0);
 buildButtons();
 level = pickLevel(ui.levels, Object.keys(LEVELS), (next) => { level = next; build(); }, mayLeave);
 fit();

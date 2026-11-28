@@ -260,5 +260,5 @@ ui.go.addEventListener('click', () => (g.status === 'cleared' ? startNextRound()
 new ResizeObserver(fit).observe(ui.frame);
 wireDialogs({ help: ui.help, fame });
 
-initSettings();
+initSettings(() => g.status !== 'lost' && (g.total > 0 || g.misses > 0 || g.open.length > 0));
 build();

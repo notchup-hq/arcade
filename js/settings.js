@@ -23,12 +23,15 @@ function wireBack(link) {
   });
 }
 
-/** Wire the sound button (#sound, an icon whose aria-pressed says on or off), the Arcade link and every .version. */
-export function initSettings(doc = document) {
+/** Wire #sound, the back link (`busy()` true while a run is on: leaving asks, js/leave.js) and every .version. */
+export function initSettings(busy = () => false, doc = document) {
   const soundBtn = doc.getElementById('sound');
   for (const v of doc.querySelectorAll('.version')) v.textContent = `v${VERSION}`;
   const back = doc.querySelector('a.back');
-  if (back) wireBack(back);
+  if (back) {
+    wireBack(back);
+    import('./leave.js').then((leave) => leave.wireLeave(back, busy));
+  }
 
   function syncSound() {
     soundBtn.setAttribute('aria-pressed', String(soundOn()));

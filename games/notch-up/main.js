@@ -201,7 +201,7 @@ new ResizeObserver(fit).observe(ui.frame);
 wireDialogs({ help: ui.help, fame, pause: () => loop.stop(), resume: () => { if (g?.status === 'playing') loop.start(); } });
 still.addEventListener('change', () => { frames.forget(); frames.draw(); });
 
-initSettings();
+initSettings(() => g?.status === 'playing');
 fame.render();
 paintCounters();
 showCard('Notch Up', 'Drop each floor on the one below. Whatever hangs over is cut off.');

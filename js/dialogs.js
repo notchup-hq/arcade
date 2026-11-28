@@ -13,6 +13,10 @@ export function whenDialogsClosed(fn) {
   else open.addEventListener('close', () => whenDialogsClosed(fn), { once: true });
 }
 
+let stopGame = () => {};
+
+export const pauseGame = () => stopGame();
+
 /**
  * Wire the bar's #help-open and #fame-open buttons to the `help` dialog and to `fame` (from
  * js/fame.js, drawn fresh as it opens). A game that runs on its own passes `pause`, called when
@@ -20,6 +24,7 @@ export function whenDialogsClosed(fn) {
  * it should go on).
  */
 export function wireDialogs({ help, fame, pause = () => {}, resume }) {
+  stopGame = pause;
   const open = (dialog) => {
     pause();
     dialog.showModal();
@@ -30,7 +35,7 @@ export function wireDialogs({ help, fame, pause = () => {}, resume }) {
     fame.explain();
     open(fame.dialog);
   });
-  if (resume) for (const dialog of document.querySelectorAll('dialog')) dialog.addEventListener('close', resume);
+  if (resume) document.addEventListener('close', resume, true);
 }
 
 /**
