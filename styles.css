@@ -864,6 +864,7 @@ html:has(body.game), body.game { overflow: hidden; overscroll-behavior: none; }
   .badge-logo.sparked .logo { animation: shake 0.3s linear 1; }
   .fuse.lit { animation: light-up 0.25s ease-out 1; }
   .pair-inner { transition: transform 0.25s; }
+  .beam.hurt::after { border-color: var(--neon-red); box-shadow: 0 0 14px var(--neon-red); animation: frame-pulse 1s ease-out 1; }
   .stage.tower.pulse::after { animation: frame-pulse 0.45s ease-out 1; }
 }
 

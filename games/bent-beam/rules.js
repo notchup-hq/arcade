@@ -15,7 +15,8 @@ export { seeded };
 // bends: the least mirrors the answer's beam must hit, so a board is never a lamp straight ahead;
 // turns: the fewest turns that win, over every answer, so no board is won by a tap;
 // shorts: short-circuit cells the beam must keep clear of (the answer never crosses them);
-// bulbs: the run's lives, one burnt out each time a turn sends the beam into a short circuit.
+// bulbs: the run's lives, one burnt out each time a turn sends the beam into a short circuit
+// or a board's turns run out.
 export const LEVELS = {
   easy: { size: 5, mirrors: 7, fixed: 0, walls: 2, lamps: 2, shorts: 2, bends: 4, turns: 3, bulbs: 4 },
   medium: { size: 6, mirrors: 11, fixed: 2, walls: 3, lamps: 3, shorts: 3, bends: 6, turns: 4, bulbs: 4 },
@@ -36,6 +37,9 @@ export const MEDALS = ['🥇', '🥈', '🥉'];
 export function praiseFor(g) {
   return [GOLD, SILVER, BRONZE][g.taps - g.par] ?? CHEERS;
 }
+
+/** Turns a board allows above its fewest (`par`): room for a wrong turn or two, not for turning at random. */
+export const SLACK = 4;
 
 export const EMPTY = 0;
 export const WALL = 1;
@@ -188,6 +192,8 @@ export function newBoard(level, rand) {
     if (!scramble(g, rand, level.turns)) continue;
     g.beam = trace(g);
     g.par = parTurns(g);
+    g.budget = g.par + SLACK;
+    g.start = Uint8Array.from(g.cells);
     return g;
   }
   // A level this strict can leave a rare seed without a board: settle for one turn fewer rather than none.
@@ -216,6 +222,21 @@ export function turnMirror(g, i) {
   return g.status === 'won' ? 'won' : 'turn';
 }
 
+/** How many turns the board still allows (undo takes one too). */
+export const turnsLeft = (g) => g.budget - g.taps;
+
+/** The turns ran out before the board was fixed. */
+export const outOfTurns = (g) => g.status !== 'won' && turnsLeft(g) <= 0;
+
+/** Put every mirror back as the board began, with a fresh budget of turns. */
+export function resetBoard(g) {
+  g.cells.set(g.start);
+  g.taps = 0;
+  g.history = [];
+  g.beam = trace(g);
+  g.status = 'ready';
+}
+
 /** The next mirror a player who knows the answer would turn, or -1 once the board is fixed. */
 export function nextAnswer(g) {
   return g.mirrored.find((i) => !g.fixed[i] && g.cells[i] !== g.answer[i]) ?? -1;
@@ -234,7 +255,7 @@ export function undoTurn(g) {
 /** A run of boards: `bulbs` left of `max`, `fixed` boards so far. It ends when the last bulb burns out. */
 export const newRun = (level) => ({ bulbs: level.bulbs, max: level.bulbs, fixed: 0 });
 
-/** A turn sent the beam into a short circuit: one bulb burns out. True when that was the last one. */
+/** A turn sent the beam into a short circuit, or the turns ran out: one bulb burns out. True when that was the last one. */
 export function burnBulb(run) {
   run.bulbs = Math.max(0, run.bulbs - 1);
   return run.bulbs === 0;

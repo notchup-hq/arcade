@@ -13,6 +13,7 @@ import { createLoop } from '../../js/loop.js';
 import { consoleLogo } from '../../js/logo.js';
 import { memory } from '../../js/memory.js';
 import { initSettings } from '../../js/settings.js';
+import { replay } from '../../js/replay.js';
 import { sfx } from '../../js/sound.js';
 import { built, drop, moverX, moving, newGame, seeded, step } from './rules.js';
 import { cameraFor, drawScene, easeCamera } from './scene.js';
@@ -72,9 +73,7 @@ function paintCounters() {
 
 /** The frame lights up softly for a drop, gold when it was perfect (styles.css; none with reduced motion). */
 function pulse(perfect) {
-  ui.stage.classList.remove('pulse', 'perfect');
-  void ui.stage.offsetWidth; // so the animation starts over
-  ui.stage.classList.add('pulse');
+  replay(ui.stage, 'pulse');
   ui.stage.classList.toggle('perfect', perfect);
 }
 
