@@ -3,6 +3,8 @@
 // also read out politely. It is a popover, which sits in the top layer above the hall of fame
 // dialog that opens as the run is saved. Loaded only when a record falls; fame.js (offer) calls it.
 
+import { loadSheet } from './sheet.js';
+
 const SHOWN_MS = 3500;
 
 let banner = null;
@@ -20,11 +22,7 @@ export async function cheerRecord(best, made, shown) {
     banner.className = 'record-banner';
     banner.popover = 'manual';
     banner.setAttribute('role', 'status');
-    const sheet = document.createElement('link');
-    sheet.rel = 'stylesheet';
-    sheet.href = new URL('record.css', import.meta.url).href;
-    loaded = new Promise((done) => { sheet.addEventListener('load', done); sheet.addEventListener('error', done); });
-    document.head.append(sheet);
+    loaded = loadSheet(new URL('record.css', import.meta.url).href);
     document.body.append(banner);
   }
   await loaded;

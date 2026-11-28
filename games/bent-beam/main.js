@@ -15,8 +15,9 @@ import { consoleLogo } from '../../js/logo.js';
 import { initSettings } from '../../js/settings.js';
 import { sfx } from '../../js/sound.js';
 import { replay } from '../../js/replay.js';
+import { loadSheet } from '../../js/sheet.js';
 import { pickLine } from '../../js/random.js';
-import { LEVELS, MEDALS, BACK, SLASH, WALL, burnBulb, fixedBoard, isLit, lampsLeft, newBoard, newRun, outOfTurns, praiseFor, resetBoard, seeded, shortsCrossed, turnMirror, turnsLeft, undoTurn } from './rules.js';
+import { LEVELS, MEDALS, BACK, SHORT_LINES, SLASH, SPENT_LINES, WALL, burnBulb, fixedBoard, isLit, lampsLeft, newBoard, newRun, outOfTurns, praiseFor, resetBoard, seeded, shortsCrossed, turnMirror, turnsLeft, undoTurn } from './rules.js';
 import { beamLength, drawBoard, reach } from './scene.js';
 
 const GAME = 'bent-beam';
@@ -27,6 +28,7 @@ const SWEEP_CELLS_PER_S = 9; // the winning beam travels this fast, so a long pa
 const SWEEP_MIN_MS = 1200;
 const BEAT_MS = 700;         // the lit board rests this long before the score dialog
 const REDUCED = '(prefers-reduced-motion: reduce)';
+const PAUSE_MS = 1300; // after a reset the board ignores taps this long, so no turn is spent on a board still being read
 const LOW_TURNS = 3; // the status line counts the turns down from here
 const BORDER = 32;   // the board's border (4) and the room its glow needs (14) on both sides
 
@@ -64,6 +66,10 @@ let level = pickLevel(ui.levels, Object.keys(LEVELS), (chosen) => { level = chos
 let g;
 let run;
 let over = false; // the run's last bulb has burnt out
+let paused = false; // a burnt bulb's line is showing and the board takes no turns yet
+let burn = null; // the line over the board, made on the first burn
+let lastBurn = '';
+let burnTimer = 0;
 let buttons = [];
 let cell = 0;
 const bulb = () => Object.assign(document.createElement('span'), { className: 'lamp on' });
@@ -94,8 +100,31 @@ function labelOf(i) {
   return where;
 }
 
-/** The border glows soft red once (styles.css; none with reduced motion). */
-const hurt = () => replay(ui.board, 'hurt');
+/**
+ * A bulb burns: the border glows soft red once (burn.css, loaded now; no glow with less motion), a dry line
+ * shows over the board for `ms`, and the bulb's sound plays. Nothing flashes.
+ */
+function burnLine(lines) {
+  lastBurn = pickLine(lines, Math.random, lastBurn);
+  return lastBurn;
+}
+
+async function burnCue(text, ms) {
+  sfx.lampOut();
+  const board = g;
+  if (!burn) {
+    burn = Object.assign(document.createElement('p'), { className: 'burn' });
+    burn.setAttribute('aria-hidden', 'true'); // the status line says the same
+    ui.board.append(burn);
+    await loadSheet(new URL('burn.css', import.meta.url).href);
+    if (g !== board) return;
+  }
+  burn.textContent = text;
+  burn.classList.add('show');
+  replay(ui.board, 'hurt');
+  clearTimeout(burnTimer);
+  burnTimer = setTimeout(() => burn.classList.remove('show'), ms);
+}
 
 function paintCounters() {
   [...ui.lamps.children].forEach((b, k) => b.classList.toggle('on', k < run.bulbs));
@@ -143,6 +172,8 @@ function build() {
   ui.board.style.setProperty('--n', g.size);
   ui.board.style.setProperty('--row', g.row);
   ui.board.classList.remove('won', 'dark', 'hurt');
+  burn?.classList.remove('show');
+  paused = false;
   ui.board.style.removeProperty('--glow');
   ui.card.hidden = true;
   ui.cells.inert = false;
@@ -243,18 +274,26 @@ function punish(shorted) {
   const spent = outOfTurns(g);
   if (!shorted && !spent) return false;
   const out = burnBulb(run);
-  hurt();
   if (out) { paintCounters(); end(); return true; }
-  sfx.buzz();
+  const line = burnLine(spent ? SPENT_LINES : SHORT_LINES);
+  burnCue(line, spent ? PAUSE_MS : PAUSE_MS / 2);
   if (spent) {
     resetBoard(g);
     paint();
-    say(`Out of turns. A bulb burnt out and the mirrors are back as they were. ${run.bulbs} left.`);
+    pause(PAUSE_MS);
+    say(`${line} The mirrors are back as they were. ${run.bulbs} left.`);
   } else {
     paintCounters();
-    say(`A short circuit burnt out a bulb. ${run.bulbs} left.`);
+    say(`${line} ${run.bulbs} left.`);
   }
   return true;
+}
+
+/** The board takes no turns for `ms`, so a tap meant for the old board is not spent on the reset one. */
+function pause(ms) {
+  const board = g;
+  paused = true;
+  setTimeout(() => { if (g === board) paused = false; }, ms);
 }
 
 /** The status line after a turn that cost nothing: the lamps still dark, and the turns once they run low. */
@@ -267,6 +306,7 @@ function report() {
 }
 
 function act(i) {
+  if (paused) return;
   const before = shortsCrossed(g);
   const result = turnMirror(g, i);
   if (result === 'fixed') {
@@ -291,6 +331,7 @@ ui.cells.addEventListener('click', (e) => {
 gridKeys(ui.cells, () => g.size);
 
 ui.undo.addEventListener('click', () => {
+  if (paused) return;
   const i = undoTurn(g);
   if (i < 0) return;
   paint();
